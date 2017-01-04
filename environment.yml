@@ -1,0 +1,28 @@
+name: glance_api-env
+channels: !!python/tuple
+- defaults
+dependencies:
+- openssl=1.0.2j=0
+- pip=9.0.1=py36_1
+- python=3.6.0=0
+- readline=6.2=2
+- setuptools=27.2.0=py36_0
+- sqlite=3.13.0=0
+- tk=8.5.18=0
+- wheel=0.29.0=py36_0
+- xz=5.2.2=0
+- zlib=1.2.8=3
+- pip:
+  - click==6.6
+  - flask==0.12
+  - flask-sqlalchemy==2.1
+  - itsdangerous==0.24
+  - jinja2==2.8
+  - markupsafe==0.23
+  - psycopg2==2.6.2
+  - py==1.4.32
+  - pytest==3.0.5
+  - requests==2.12.4
+  - sqlalchemy==1.1.4
+  - werkzeug==0.11.11
+prefix: /home/deploy/miniconda3/envs/glance_api-env
