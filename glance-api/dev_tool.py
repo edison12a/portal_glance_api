@@ -13,7 +13,7 @@ def make_test_tables(con, meta):
         Column('author', String),
         Column('initdate', DateTime, default=datetime.datetime.utcnow()),
         Column('moddate', DateTime, default=datetime.datetime.utcnow()),
-        Column('assets', ARRAY(Integer)),
+        Column('assets', ARRAY(String)),
         extend_existing=True
     )
     dev_asset = Table('dev_asset', meta,

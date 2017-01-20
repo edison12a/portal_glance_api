@@ -56,36 +56,37 @@ def api():
 
 @app.route('{}/asset'.format(ROUTE), methods=['POST', 'GET'])
 def asset():
-    """Endpoint that accepts POST and GET"""
+    """Endpoint that returns asset objects
+        POST: AUG: name, image, tag, author, image_thumb, attached
+            Returns: Responce, location
+        GET:
+            Returns: All asset objects
+    """
     # TODO: IMP Aug dict build (patch_asset)
     if request.method=='POST':
-        # Collect user paramaters, is there a better way?
-        name = request.args.get('name')
-        image = request.args.get('image')
-        tag = request.args.get('tag')
-        author = request.args.get('author')
-        image_thumb = request.args.get('image_thumb')
-        attached = request.args.get('attached')
-
         try:
-            asset_info = (
-                name, image, tag, author, image_thumb, attached
-                )
+            # query dict collector
+            query = {}
+            # query dict padder (for empty values)
+            param_list = ['name', 'image', 'tag', 'author', 'image_thumb', 'attached']
+            for attri in request.args:
+                query[attri] = request.args[attri]
+                for param in param_list:
+                    if param not in query:
+                        query[param] = None
 
-            asset = POST_asset(con, meta, *asset_info,)
+            asset = POST_asset(con, meta, **query)
             result = {
-                'Action': 'successful',
-                'asset id': asset[0]
+                'responce': 'successful',
+                'location': ROUTE + '/asset/' + str(asset[0])
             }
             return jsonify({'POST: /asset': result})
         except:
             fail = {'Action': 'failed'}
-            return jsonify({'POST: /asset': fail})
+            return jsonify({'POST /asset': fail})
 
     elif request.method=='GET':
         assets = GET_asset(con, meta)
-        print(assets)
-
         return jsonify({'assets': assets})
     else:
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
@@ -93,27 +94,26 @@ def asset():
 
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
 def collection():
+    # TODO: POST collections isnt working? Something todo with assets.
     # TODO: IMP Aug dict build (patch_asset)
     if request.method=='POST':
-        # Collect user paramaters, is there a better way?
-        name = request.args.get('name')
-        image = request.args.get('image')
-        tag = request.args.get('tag')
-        author = request.args.get('author')
-        image_thumb = request.args.get('image_thumb')
-        assets = request.args.get('assets')
-
         try:
-            collection_info = (
-                name, image, tag, author, image_thumb, assets
-                )
-
-            collection = POST_collection(con, meta, *collection_info, 'dev_collection',)
+            # query dict collector
+            query = {}
+            # query dict padder (for empty values)
+            param_list = ['name', 'image', 'tag', 'author', 'image_thumb', 'assets']
+            for attri in request.args:
+                query[attri] = request.args[attri]
+                for param in param_list:
+                    if param not in query:
+                        query[param] = None
+            print(query)
+            collection = POST_collection(con, meta, **query,)
             result = {
-                'Action': 'successful',
-                'asset id': collection[0]
+                'responce': 'successful',
+                'location': ROUTE + '/collection/' + str(collection[0])
             }
-            return jsonify({'Collection': result})
+            return jsonify({'POST /Collection': result})
 
         except:
             fail = {'Action': 'failed'}
@@ -310,6 +310,7 @@ def POP_DB(con, meta):
     POST_asset(con, meta)
     POST_collection(con, meta)
     POST_asset(con, meta)
+
 
 # RESET_DB(con, meta)
 # POP_DB(con, meta)

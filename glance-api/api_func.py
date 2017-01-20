@@ -28,7 +28,8 @@ def connect(user, password, db, host='localhost', port=5432):
     return con, meta
 
 
-def POST_asset(con, meta, *asset_info, tablename='dev_asset'):
+def POST_asset(con, meta, **kwargs):
+    tablename='dev_asset'
     """
     Create a new asset in the database
     :param conn: Connection object
@@ -38,24 +39,26 @@ def POST_asset(con, meta, *asset_info, tablename='dev_asset'):
     # TODO: Format initdate and moddate
 
     # Process tags
-    if asset_info[2]:
-        tags_in_list = asset_info[2].split(',')
+    if kwargs['tag']:
+        tags_in_list = kwargs['tag'].split(',')
     else:
         tags_in_list = None
 
     asset = meta.tables[tablename]
     clause = asset.insert().values(
-        name=asset_info[0], image=asset_info[1], attached=asset_info[5],
-        tag=tags_in_list, flag=0, author=asset_info[3],
+        name=kwargs['name'], image=kwargs['image'], attached=kwargs['attached'],
+        tag=tags_in_list, flag=0, author=kwargs['author'],
         initdate=datetime.datetime.utcnow(), moddate=datetime.datetime.utcnow(),
-        image_thumb=asset_info[4]
+        image_thumb=kwargs['image_thumb']
         )
     result = con.execute(clause)
 
     return result.inserted_primary_key
 
 
-def POST_collection(con, meta, *collection_info, tablename='dev_collection'):
+def POST_collection(con, meta, **kwargs):
+    print(kwargs)
+    tablename='dev_collection'
     """
     Craete a new collection in the database
     :param conn: Connection object
@@ -65,16 +68,22 @@ def POST_collection(con, meta, *collection_info, tablename='dev_collection'):
     # TODO: Format initdate and moddate
 
     # Process tags
-    if collection_info[2]:
-        tags_in_list = collection_info[2].split(',')
+    if kwargs['tag']:
+        tags_in_list = kwargs['tag'].split(',')
     else:
         tags_in_list = None
 
+    # process assets
+    if kwargs['assets']:
+        assets_in_list = kwargs['assets'].split(',')
+    else:
+        assets_in_list = None
+
     collection = meta.tables[tablename]
     clause = collection.insert().values(
-        name=collection_info[0], image=collection_info[1], tag=tags_in_list, flag=0,
-        author=collection_info[3], initdate=datetime.datetime.utcnow(), moddate=datetime.datetime.utcnow(),
-        image_thumb=collection_info[4], assets=collection_info[5]
+        name=kwargs['name'], image=kwargs['image'], tag=tags_in_list, flag=0,
+        author=kwargs['author'], initdate=datetime.datetime.utcnow(), moddate=datetime.datetime.utcnow(),
+        image_thumb=kwargs['image_thumb'], assets=assets_in_list
         )
     result = con.execute(clause)
 
