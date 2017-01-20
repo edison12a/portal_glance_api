@@ -39,9 +39,9 @@ def api():
                 '/collection/<int>': 'GET: Return collection by id',
                 '/query': 'GET: Return collections/assets based on query',
 
-            }, 'PUT': {
-                '/asset/put': 'PUT: Update asset',
-                '/collection/put': 'PUT: Update collection',
+            }, 'PATCH': {
+                '/asset/patch': 'PATCH: Update asset',
+                '/collection/patch': 'PATCH: Update collection',
             }, 'DELETE': {
                 '/asset/delete/<int>': 'DELETE: Remove asset via id',
                 '/collection/delete/<int>': 'DELETE: Remove collection via id',
@@ -166,39 +166,6 @@ def query():
     return jsonify({'query': found_ids})
 
 
-@app.route('{}/asset/put'.format(ROUTE), methods=['GET', 'PUT'])
-def put_asset_tag():
-    # TODO: IMP Aug dict build (patch_asset)
-    # TODO: the way taglist is built is a bit flakey
-    # TODO: re write with better names, consistantcy
-    if request.method=='PUT' or request.method=='GET':
-
-        asset_id = request.args.get('asset_id')
-        asset_n = request.args.get('asset_n')
-        # tags from querystring be separated with a comma -only- ','
-        # e.g. test_tag,test,another_tag
-        tag = request.args.get('tag')
-        asset_i = request.args.get('asset_i')
-        asset_a = request.args.get('asset_a')
-        image_thumb = request.args.get('image_thumb')
-
-        # Init structures
-        taglist=[]
-
-        if tag != None:
-            taglist = tag.split(',')
-
-        if asset_n != None:
-            pass
-
-        asset = PUT_asset_tag(
-            con, meta, asset_id,  asset_n, asset_i, asset_a, taglist, image_thumb
-            )
-        return jsonify({'asset': asset})
-    else:
-        return jsonify({'fail': 'POST or GET only'})
-
-
 @app.route(
     '{}/collection/delete/<int:collection_id>'.format(ROUTE), methods=['DELETE']
     )
@@ -245,6 +212,7 @@ def delete_asset(asset_id):
 def patch_asset():
     # TODO: Refactor to function
     # TODO: function should update moddate
+    # TODO: IMP tag process
     query = {}
     # collect user entered data
     for attri in request.args:
