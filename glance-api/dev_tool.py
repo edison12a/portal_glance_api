@@ -8,12 +8,12 @@ def make_test_tables(con, meta):
         Column('name', String),
         Column('image', String),
         Column('image_thumb', String),
-        Column('tag', JSON),
+        Column('tag', ARRAY(String)),
         Column('flag', Integer),
         Column('author', String),
         Column('initdate', DateTime, default=datetime.datetime.utcnow()),
         Column('moddate', DateTime, default=datetime.datetime.utcnow()),
-        Column('assets', JSON),
+        Column('assets', ARRAY(Integer)),
         extend_existing=True
     )
     dev_asset = Table('dev_asset', meta,
@@ -22,7 +22,7 @@ def make_test_tables(con, meta):
         Column('image', String),
         Column('image_thumb', String),
         Column('attached', String),
-        Column('tag', JSON),
+        Column('tag', ARRAY(String)),
         Column('flag', Integer),
         Column('author', String),
         Column('initdate', DateTime, default=datetime.datetime.utcnow()),

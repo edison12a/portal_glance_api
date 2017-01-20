@@ -28,59 +28,6 @@ def connect(user, password, db, host='localhost', port=5432):
     return con, meta
 
 
-def CREATE_asset_table(conn):
-    """
-    Creates Asset table in database
-    :param conn: Connection object
-    :return: None
-    """
-    try:
-        c = conn.cursor()
-        c.execute(
-            '''CREATE TABLE Asset(
-                id integer PRIMARY KEY,
-                asset_name text,
-                asset_image text,
-                asset_thumb text,
-                tag text,
-                attachment text,
-                flag text,
-                uploadedby text,
-                uploaddate text,
-                uploadmodified text
-            )'''
-        )
-        c.close()
-        return None
-    except: pass
-
-
-def CREATE_collection_table(conn):
-    """
-    Creates Collection table in database
-    :param conn: Connection object
-    :return: None
-    """
-    try:
-        c = conn.cursor()
-        c.execute(
-            '''CREATE TABLE Collection(
-                id integer PRIMARY KEY,
-                collection_name text,
-                collection_cover text,
-                collection_assets text,
-                tag text,
-                flag text,
-                uploadedby text,
-                uploaddate text,
-                uploadmodified text
-            )'''
-        )
-        c.close()
-        return None
-    except: pass
-
-
 def POST_asset(con, meta, *asset_info, tablename='dev_asset'):
     """
     Create a new asset in the database
@@ -88,19 +35,24 @@ def POST_asset(con, meta, *asset_info, tablename='dev_asset'):
     :param list_of_dict: A list containing a dict of new assets
     :return: Boolean
     """
-    print('-------------------------------')
-    print(asset_info)
     # TODO: Format initdate and moddate
+
+    # Process tags
+    if asset_info[2]:
+        tags_in_list = asset_info[2].split(',')
+    else:
+        tags_in_list = None
+
     asset = meta.tables[tablename]
     clause = asset.insert().values(
         name=asset_info[0], image=asset_info[1], attached=asset_info[5],
-        tag=asset_info[2], flag=0, author=asset_info[3],
+        tag=tags_in_list, flag=0, author=asset_info[3],
         initdate=datetime.datetime.utcnow(), moddate=datetime.datetime.utcnow(),
         image_thumb=asset_info[4]
         )
     result = con.execute(clause)
 
-    return result
+    return result.inserted_primary_key
 
 
 def POST_collection(con, meta, *collection_info, tablename='dev_collection'):
@@ -111,9 +63,16 @@ def POST_collection(con, meta, *collection_info, tablename='dev_collection'):
     :return: Boolean
     """
     # TODO: Format initdate and moddate
+
+    # Process tags
+    if collection_info[2]:
+        tags_in_list = collection_info[2].split(',')
+    else:
+        tags_in_list = None
+
     collection = meta.tables[tablename]
     clause = collection.insert().values(
-        name=collection_info[0], image=collection_info[1], tag=collection_info[2], flag=0,
+        name=collection_info[0], image=collection_info[1], tag=tags_in_list, flag=0,
         author=collection_info[3], initdate=datetime.datetime.utcnow(), moddate=datetime.datetime.utcnow(),
         image_thumb=collection_info[4], assets=collection_info[5]
         )
@@ -160,9 +119,6 @@ def GET_collection_id(con, meta, _id):
             'image_thumb': [8]
             }
 
-    print('------')
-    print('------')
-    print('------')
     print(result)
 
     return result
@@ -206,6 +162,10 @@ def GET_asset_id(con, meta, _id):
         }
 
     return result
+
+
+def GET_query(con, meta, *query):
+    pass
 
 
 def PUT_asset_tag(
@@ -292,8 +252,15 @@ def DELETE_collection(meta, collection_id):
     """
     # TODO: Return something useful. Success or not, etc.
     collection = meta.tables['dev_collection']
-    delete_collection = collection.delete().where(collection.c.id == collection_id)
-    delete_collection.execute()
+    try:
+        delete_collection = collection.delete().where(collection.c.id == collection_id)
+        delete_collection.execute()
+
+        # TODO: IMP if ID exists...
+
+        return True
+    except:
+        return False
 
 
 def DELETE_asset(meta, asset_id):
@@ -305,5 +272,12 @@ def DELETE_asset(meta, asset_id):
     """
     # TODO: Return something useful. Success or not, etc.
     asset = meta.tables['dev_asset']
-    delete_asset = asset.delete().where(asset.c.id == asset_id)
-    delete_asset.execute()
+    try:
+        delete_asset = asset.delete().where(asset.c.id == asset_id)
+        delete_asset.execute()
+
+        # TODO: IMP if ID exists...
+
+        return True
+    except:
+        return False
