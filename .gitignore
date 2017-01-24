@@ -1,1 +1,24 @@
-/cred.py
+# Credentials_Secrets
+cred.py
+config/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+
+# Flask stuff:
+instance/
+.webassets-cache
+
