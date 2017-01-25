@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 
 from dev_tool import make_test_tables, get_tables_db, get_columns_, drop_table
 from api_func import (
@@ -18,6 +18,7 @@ app = Flask(__name__)
 # TODO: research - Should connect() be getting closed at some onepoint? Is it?
 # TODO: Auth
 # TODO: api tests
+# TODO: Make_response, and http codes
 
 # config
 ROUTE = '/glance/api'
@@ -30,21 +31,30 @@ def api():
     info = {
         'End Points': {
             'POST': {
-                '/asset': 'POST: new asset',
-                '/collection': 'POST: new collection'
+                '/asset?[key]=[value]': 'Create a new asset object',
+                '/collection?[key]=[value]': 'Create a new collection object'
             }, 'GET': {
-                '/asset': 'GET: All assets',
-                '/asset/<int>': 'GET: Return asset by id',
-                '/collection': 'GET: All collections',
-                '/collection/<int>': 'GET: Return collection by id',
-                '/query': 'GET: Return collections/assets based on query',
+                '/asset': 'Retrieve list of assets',
+                '/asset/<int>': 'Retrieve single asset by ID',
+                '/collection': 'Retrieve list of collections',
+                '/collection/<int>': 'Retrieve single collection by ID',
+                '/query?query=<str>': 'Retrieve asset/collections that match query',
 
             }, 'PATCH': {
-                '/asset/patch': 'PATCH: Update asset',
-                '/collection/patch': 'PATCH: Update collection',
+                '/asset/patch?[key]=[value]': 'Update asset using key/value pairs',
+                '/collection/patch?[key]=[value]': 'Update collection using key/value pairs',
             }, 'DELETE': {
-                '/asset/delete/<int>': 'DELETE: Remove asset via id',
-                '/collection/delete/<int>': 'DELETE: Remove collection via id',
+                '/asset/delete/<int>': 'Remove asset via id',
+                '/collection/delete/<int>': 'Remove collection via id',
+            }, 'Parameters': {
+                'Asset': {
+                    'name': 'string', 'image': 'string', 'image_thumb': 'string',
+                    'attached': 'string', 'tag': 'string, separate with comma (,) only.'
+                },
+                'Collection': {
+                    'name': 'string', 'image': 'string', 'image_thumb': 'string',
+                    'attached': 'string', 'tag': 'string, separate with comma (,) only.}'
+                }
             }
         },
         'Maintainers': {
@@ -80,7 +90,8 @@ def asset():
                 'responce': 'successful',
                 'location': ROUTE + '/asset/' + str(asset[0])
             }
-            return jsonify({'POST: /asset': result})
+            return make_response(jsonify({'POST: /asset': result})), 200
+
         except:
             fail = {'Action': 'failed'}
             return jsonify({'POST /asset': fail})
