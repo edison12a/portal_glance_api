@@ -1,6 +1,13 @@
 from flask import Flask, jsonify, request, make_response
 
-from dev_tool import make_test_tables, get_tables_db, get_columns_, drop_table
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+
+# from dev_tool import get_tables_db, get_columns_, drop_table
+from models import (
+    reset_db, get_collections, get_assets, get_collection_by_id,
+    get_asset_by_id
+    )
 from api_func import (
     connect, POST_collection, POST_asset, GET_asset, GET_collection,
     GET_collection_id, GET_asset_id, DELETE_collection, PUT_asset_tag,
@@ -19,12 +26,44 @@ app = Flask(__name__)
 # TODO: Auth
 # TODO: api tests
 # TODO: Make_response, and http codes
+# TODO: catch/process no cred file error
+
+
 
 # config
 ROUTE = '/glance/api'
 
+# function for checkcing/setting db
+"""
+Set up dev database, if False
+
+sudo -u postgres psql
+CREATE DATABASE glance;
+CREATE USER vhrender WITH PASSWORD 'vhrender2011';
+ALTER ROLE vhrender SET client_encoding TO 'utf8';
+ALTER ROLE vhrender SET default_transaction_isolation TO 'read committed';
+ALTER ROLE vhrender SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE issues TO vhrender;
+"""
+
 # Make connection and Metadata object
-con, meta = connect(cred.username, cred.password, 'glance', cred.ip)
+con, meta = connect(cred.username, cred.password, 'glance', cred.ip_local)
+
+engine = create_engine(
+    'postgresql://{}:{}@{}:5432/glance'.format(
+        cred.username, cred.password, cred.ip_local
+    ), echo=False
+)
+
+# Init sessionmaker
+Session = sessionmaker(bind=engine)
+
+
+"""
+# Dev functions
+session = Session()
+reset_db(session, engine)
+"""
 
 @app.route('{}'.format(ROUTE))
 def api():
@@ -97,8 +136,25 @@ def asset():
             return jsonify({'POST /asset': fail})
 
     elif request.method=='GET':
-        assets = GET_asset(con, meta)
-        return jsonify({'assets': assets})
+        session = Session()
+        assets = get_assets(session)
+
+        if len(assets) == 0:
+            return make_response(
+                jsonify(
+                    {
+                        'GET assets': {
+                            'Status': 'Successful',
+                            'Message': 'No assets in database'
+                        }
+                    }
+                )
+            ), 200
+
+        return make_response(
+            jsonify(assets)
+        ), 200
+
     else:
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
@@ -131,8 +187,25 @@ def collection():
             return jsonify({'POST: /collection': fail})
 
     elif request.method=='GET':
-        collections = GET_collection(con, meta)
-        return jsonify({'collections': collections})
+
+        session = Session()
+        collections = get_collections(session)
+
+        if len(collections) == 0:
+            return make_response(
+                jsonify(
+                    {
+                        'GET collections': {
+                            'Status': 'Successful',
+                            'Message': 'No collections in database'
+                        }
+                    }
+                )
+            ), 200
+
+        return make_response(
+            jsonify(collections)
+        ), 200
 
     else:
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
@@ -141,19 +214,22 @@ def collection():
 @app.route('{}/collection/<int:collection_id>'.format(ROUTE), methods=['GET'])
 def get_collection_id(collection_id):
     if request.method=='GET':
-        collection_id = GET_collection_id(con, meta, collection_id)
+        session = Session()
+
+        collectio_id = get_collection_by_id(session, collection_id)
     else:
         return jsonify({'collection': 'failed - endpoint only accepts GET methods'})
-    return jsonify({'collection': collection_id})
+    return jsonify({'collection': collectio_id})
 
 
 @app.route('{}/asset/<int:asset_id>'.format(ROUTE), methods=['GET'])
 def get_asset_id(asset_id):
     if request.method=='GET':
-        asset_id = GET_asset_id(con, meta, asset_id)
+        session = Session()
+        asse_id = get_asset_by_id(session, asset_id)
     else:
         return jsonify({'asset': 'failed - endpoint only accepts GET methods'})
-    return jsonify({'asset': asset_id})
+    return jsonify({'asset': asse_id})
 
 
 @app.route('{}/query'.format(ROUTE), methods=['GET'])
@@ -169,7 +245,7 @@ def query():
     for term in querylist:
         # Query dev_asset
         # Build list of ids that match search terms.
-        query_sql = con.execute("""SELECT array_agg(id) from dev_asset where '{}' = ANY(tag)""".format(term))
+        query_sql = con.execute("""SELECT array_agg(id) from asset where '{}' = ANY(tag)""".format(term))
         for i in query_sql:
             for x in i[0]:
                 found_ids.append(x)
@@ -239,7 +315,7 @@ def patch_asset():
             else:
                 query_sql = con.execute(
                     """
-                    UPDATE dev_asset SET {} = '{}'
+                    UPDATE asset SET {} = '{}'
                     WHERE
                     ID = '{}'
                     """.format(k, v, query['id']))
@@ -269,7 +345,7 @@ def patch_collection():
             else:
                 query_sql = con.execute(
                     """
-                    UPDATE dev_collection SET {} = '{}'
+                    UPDATE asset SET {} = '{}'
                     WHERE
                     ID = '{}'
                     """.format(k, v, query['id']))
@@ -277,10 +353,11 @@ def patch_collection():
     return jsonify({'PATCH': 'success'})
 
 
+"""
 # Dev helpers
 def RESET_DB(con, meta):
     drop_table(con, meta, 'dev_collection')
-    drop_table(con, meta, 'dev_asset')
+    drop_table(con, meta, 'asset')
     make_test_tables(con, meta)
 
 
@@ -289,7 +366,7 @@ def POP_DB(con, meta):
     POST_asset(con, meta)
     POST_collection(con, meta)
     POST_asset(con, meta)
-
+"""
 
 # RESET_DB(con, meta)
 # POP_DB(con, meta)

@@ -1,9 +1,9 @@
 import datetime
 
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import relationship
 
 import cred
 
@@ -13,7 +13,7 @@ Base = declarative_base()
 
 class Collection(Base):
     # TODO: Better repr
-    __tablename__ = 'test_collection'
+    __tablename__ = 'collection'
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -26,8 +26,7 @@ class Collection(Base):
     moddate = Column(Date, default=datetime.datetime.utcnow())
     # relational data
     assets = relationship(
-        "Asset", back_populates='collection',
-        cascade="all, delete, delete-orphan"
+        "Asset", backref='collection'
     )
 
     def __repr__(self):
@@ -38,7 +37,7 @@ class Collection(Base):
 
 class Asset(Base):
     # TODO: Better repr
-    __tablename__ = 'test_asset'
+    __tablename__ = 'asset'
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -51,14 +50,15 @@ class Asset(Base):
     initdate = Column(Date, default=datetime.datetime.utcnow())
     moddate = Column(Date, default=datetime.datetime.utcnow())
     # relational data
-    collection_id = Column(Integer, ForeignKey('test_collection.id'))
-    collection = relationship("Collection", back_populates="assets")
+    collection_id = Column(Integer, ForeignKey('collection.id'))
+    # collection = relationship("Collection", back_populates="assets")
 
     def __repr__(self):
         return "<Asset(id='%s', name='%s')>" % (
             self.id, self.name
         )
 
+"""
 
 # Int sqlalchemy engine
 engine = create_engine(
@@ -74,8 +74,10 @@ Session = sessionmaker(bind=engine)
 # Init session
 session = Session()
 
+"""
+
 # private functions
-def reset_db(session, engine=engine):
+def reset_db(session, engine):
     """drops tables and rebuild"""
     session.close()
     try:
@@ -171,7 +173,21 @@ def get_collections(session):
     for instance in session.query(Collection).order_by(Collection.id):
         collections.append(instance)
 
-    return collections
+    result = []
+    for collection in collections:
+        result.append({
+            'id': collection.id,
+            'name': collection.name,
+            'image': collection.image,
+            'image_thumb': collection.image_thumb,
+            'tag': collection.tag,
+            'flag': collection.flag,
+            'author': collection.author,
+            'initdate': collection.initdate,
+            'moddate': collection.moddate
+        })
+
+    return result
 
 
 def get_assets(session):
@@ -180,21 +196,52 @@ def get_assets(session):
     for instance in session.query(Asset).order_by(Asset.id):
         assets.append(instance)
 
-    return assets
+    result = []
+    for asset in assets:
+        result.append({
+            'id': asset.id,
+            'name': asset.name,
+            'image': asset.image,
+            'image_thumb': asset.image_thumb,
+            'attached': asset.attached,
+            'tag': asset.tag,
+            'flag': asset.flag,
+            'author': asset.author,
+            'initdate': asset.initdate,
+            'moddate': asset.moddate
+        })
+
+
+    return result
 
 
 def get_asset_by_id(session, id):
     """Return asset object using id"""
     asset_by_id = session.query(Asset).get(id)
 
-    return asset_by_id
+    if asset_by_id:
+        # TODO: Below takes a row and converts to a dict.
+        result = {}
+        for column in asset_by_id.__table__.columns:
+            result[column.name] = str(getattr(asset_by_id, column.name))
+    else:
+        result = {}
+
+    return result
 
 
 def get_collection_by_id(session, id):
     """Returns collection object using id"""
     collection_by_id = session.query(Collection).get(id)
+    if collection_by_id:
+        # TODO: Below takes a row and converts to a dict.
+        result = {}
+        for column in collection_by_id.__table__.columns:
+            result[column.name] = str(getattr(collection_by_id, column.name))
+    else:
+        result = {}
 
-    return collection_by_id
+    return result
 
 
 def get_query(session, *query):
@@ -205,11 +252,6 @@ def get_query(session, *query):
     print(test)
 
     pass
-
-bla = ['whaaa']
-get_query(session, bla)
-
-print(get_asset_by_id(session, 1))
 
 
 def patch_asset(session, id, **user_columns):

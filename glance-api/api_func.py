@@ -29,7 +29,7 @@ def connect(user, password, db, host='localhost', port=5432):
 
 
 def POST_asset(con, meta, **kwargs):
-    tablename='dev_asset'
+    tablename='asset'
     """
     Create a new asset in the database
     :param conn: Connection object
@@ -58,7 +58,7 @@ def POST_asset(con, meta, **kwargs):
 
 def POST_collection(con, meta, **kwargs):
     print(kwargs)
-    tablename='dev_collection'
+    tablename='asset'
     """
     Craete a new collection in the database
     :param conn: Connection object
@@ -99,7 +99,7 @@ def GET_collection(con, meta):
     """
     # TODO: Build correct return structure
     collections = {}
-    table = meta.tables['dev_collection']
+    table = meta.tables['asset']
     for row in con.execute(table.select()):
         collections[row[0]] = {
             'name': row[1], 'image': row[2], 'tag': row[3], 'flag': row[4],
@@ -118,7 +118,7 @@ def GET_collection_id(con, meta, _id):
     :return: collect, dict.
     """
     result = {}
-    collection = meta.tables['dev_collection']
+    collection = meta.tables['asset']
     clause = collection.select().where(collection.c.id == _id)
 
     for row in con.execute(clause):
@@ -141,7 +141,7 @@ def GET_asset(con, meta):
     :return: list of assets, dicts.
     """
     assets = {}
-    table = meta.tables['dev_asset']
+    table = meta.tables['asset']
     for row in con.execute(table.select()):
         assets[row[0]] = {
         'name': row[1], 'image': row[2], 'attached': row[3], 'tag': row[4],
@@ -160,7 +160,7 @@ def GET_asset_id(con, meta, _id):
     :return: asset, dict.
     """
     result = {}
-    asset = meta.tables['dev_asset']
+    asset = meta.tables['asset']
     clause = asset.select().where(asset.c.id == _id)
 
     for row in con.execute(clause):
@@ -183,7 +183,7 @@ def PUT_asset_tag(
     # TODO: ump updating all asset attributes and rename function
     print(image_thumb)
     result = {}
-    asset = meta.tables['dev_asset']
+    asset = meta.tables['asset']
     clause = asset.select().where(asset.c.id == asset_id)
     if asset_n != None:
         # IMP name rename
@@ -228,7 +228,7 @@ def PUT_collection_tag(con, meta, asset_id, *tags):
     # TODO: Figure out arrays in postgrest, retriving and appending
     # TODO:
     result = {}
-    asset = meta.tables['dev_asset']
+    asset = meta.tables['asset']
     clause = asset.select().where(asset.c.id == asset_id)
 
     if tags:
@@ -260,7 +260,7 @@ def DELETE_collection(meta, collection_id):
     :return: Boolean
     """
     # TODO: Return something useful. Success or not, etc.
-    collection = meta.tables['dev_collection']
+    collection = meta.tables['asset']
     try:
         delete_collection = collection.delete().where(collection.c.id == collection_id)
         delete_collection.execute()
@@ -280,7 +280,7 @@ def DELETE_asset(meta, asset_id):
     :return: Boolean
     """
     # TODO: Return something useful. Success or not, etc.
-    asset = meta.tables['dev_asset']
+    asset = meta.tables['asset']
     try:
         delete_asset = asset.delete().where(asset.c.id == asset_id)
         delete_asset.execute()
