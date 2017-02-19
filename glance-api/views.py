@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 # from dev_tool import get_tables_db, get_columns_, drop_table
 from models import (
     reset_db, get_collections, get_assets, get_collection_by_id,
-    get_asset_by_id
+    get_asset_by_id, get_query, post_collection, post_asset
     )
 from api_func import (
     connect, POST_collection, POST_asset, GET_asset, GET_collection,
@@ -117,18 +117,23 @@ def asset():
             # query dict collector
             query = {}
             # query dict padder (for empty values)
-            param_list = ['name', 'image', 'tag', 'author', 'image_thumb', 'attached']
+            param_list = [
+                'name', 'image', 'tag', 'author', 'image_thumb', 'attached',
+            ]
             for attri in request.args:
                 query[attri] = request.args[attri]
                 for param in param_list:
                     if param not in query:
                         query[param] = None
 
-            asset = POST_asset(con, meta, **query)
+            session = Session()
+            asset = post_asset(session, **query)
+
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/asset/' + str(asset[0])
+                'location': ROUTE + '/asset/' + str(asset.id)
             }
+            session.close()
             return make_response(jsonify({'POST: /asset': result})), 200
 
         except:
@@ -161,30 +166,31 @@ def asset():
 
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
 def collection():
-    # TODO: POST collections isnt working? Something todo with assets.
-    # TODO: IMP Aug dict build (patch_asset)
+    # TODO: make pretty.
     if request.method=='POST':
-        try:
-            # query dict collector
-            query = {}
-            # query dict padder (for empty values)
-            param_list = ['name', 'image', 'tag', 'author', 'image_thumb', 'assets']
-            for attri in request.args:
-                query[attri] = request.args[attri]
-                for param in param_list:
-                    if param not in query:
-                        query[param] = None
-            print(query)
-            collection = POST_collection(con, meta, **query,)
-            result = {
-                'responce': 'successful',
-                'location': ROUTE + '/collection/' + str(collection[0])
-            }
-            return jsonify({'POST /Collection': result})
 
-        except:
-            fail = {'Action': 'failed'}
-            return jsonify({'POST: /collection': fail})
+        # query dict collector
+        query = {}
+        # query dict padder (for empty values)
+        param_list = ['name', 'image', 'tag', 'author', 'image_thumb', 'assets']
+        for attri in request.args:
+            query[attri] = request.args[attri]
+            for param in param_list:
+                if param not in query:
+                    query[param] = None
+
+        session = Session()
+        bla = post_collection(session, **query)
+
+        result = {
+            'responce': 'successful',
+            'location': ROUTE + '/collection/' + str(bla.id)
+        }
+        session.close()
+
+
+        return make_response(jsonify({'POST: /asset': result})), 200
+
 
     elif request.method=='GET':
 
@@ -234,21 +240,14 @@ def get_asset_id(asset_id):
 
 @app.route('{}/query'.format(ROUTE), methods=['GET'])
 def query():
-    # TODO: refactor to function.
-    # TODO: currently only one word can be search at a time.
-    query = request.args.get('query')
+    # TODO: Use sessions, not con/meta
+    # TODO: figure out best way to query multiple tables, with multiple search terms
+    query = request.args.get('query').split()
 
-    # convert query to list
-    querylist = query.split(',')
+    test = get_query(session, query)
+    print(query)
 
     found_ids = []
-    for term in querylist:
-        # Query dev_asset
-        # Build list of ids that match search terms.
-        query_sql = con.execute("""SELECT array_agg(id) from asset where '{}' = ANY(tag)""".format(term))
-        for i in query_sql:
-            for x in i[0]:
-                found_ids.append(x)
 
     return jsonify({'query': found_ids})
 
@@ -258,6 +257,7 @@ def query():
     )
 def delete_collection(collection_id):
     # TODO: Return flow control. currently its always successful.
+    # TODO: Use sessions, not con/meta
     if request.method=='DELETE':
         collection_id = DELETE_collection(meta, collection_id)
 
@@ -278,6 +278,7 @@ def delete_collection(collection_id):
 @app.route('{}/asset/delete/<int:asset_id>'.format(ROUTE), methods=['DELETE'])
 def delete_asset(asset_id):
     # TODO: Return flow control. currently its always successful.
+    # TODO: Use sessions, not con/meta
     if request.method=='DELETE':
         asset_id = DELETE_asset(meta, asset_id)
 
@@ -297,6 +298,7 @@ def delete_asset(asset_id):
 
 @app.route('/glance/api/asset/patch', methods=['PATCH'])
 def patch_asset():
+    # TODO: Use sessions, not con/meta
     # TODO: Refactor to function
     # TODO: function should update moddate
     # TODO: IMP tag process
@@ -325,6 +327,7 @@ def patch_asset():
 
 @app.route('{}/collection/patch'.format(ROUTE), methods=['PATCH'])
 def patch_collection():
+    # TODO: Use sessions, not con/meta
     # TODO: Refactor to function
     # TODO: function should update moddate
     query = {}
@@ -352,31 +355,6 @@ def patch_collection():
 
     return jsonify({'PATCH': 'success'})
 
-
-"""
-# Dev helpers
-def RESET_DB(con, meta):
-    drop_table(con, meta, 'dev_collection')
-    drop_table(con, meta, 'asset')
-    make_test_tables(con, meta)
-
-
-def POP_DB(con, meta):
-    POST_collection(con, meta)
-    POST_asset(con, meta)
-    POST_collection(con, meta)
-    POST_asset(con, meta)
-"""
-
-# RESET_DB(con, meta)
-# POP_DB(con, meta)
-# tagss = ['a', 'couple', 'moraaade']
-# PUT_asset_tag(con, meta, 1, ['foo', 'woo'])
-# GET_asset(con, meta)
-# print(GET_collection(con, meta))
-# GET_collection_id(con, meta, 1)
-# get_tables_db(meta)
-# get_columns_(meta, 'dev_asset')
 
 
 if __name__ == '__main__':

@@ -92,75 +92,30 @@ def reset_db(session, engine):
     return True
 
 # public functions
-def post_collection(session, **user_columns):
+def post_collection(session, **kwarg):
     """ POST: Collection"""
-    print(user_columns)
-    # TODO: Once collection table is finished update this function.
-    # Approved query
-    query = {}
-    # Check user columns
-    collection_columns = Collection.__table__.columns.keys()
-    # compare user column data to database columns
-    for k, v in user_columns.items():
-        if k in collection_columns:
-            # if match append user data to approved query variable
-            query[k] = v
-        else:
-            pass
-    for column in collection_columns:
-        # if user data does include all database columns. There are added to
-        # approve query variable and padded with 'None'
-        if column not in user_columns and column != 'id':
-            query[column] = None
-
-    # TODO: Validate assets?
-    # Append user assets to approved query
-    try:
-        query['assets'] = user_columns['assets']
-    except KeyError:
-        query['assets'] = []
-
-    # create new collection and commit to database
-    collection = Collection(
-        name=query['name'], image=query['image'],
-        image_thumb=query['image_thumb'], tag=query['tag'],
-        author=query['author'], assets=query['assets']
+    # TODO: make pretty
+    test = Collection(
+        name=kwarg['name'], image=kwarg['image'], image_thumb=kwarg['image_thumb'],
+        tag=kwarg['tag'], author=kwarg['author'],
     )
-    session.add(collection)
+    session.add(test)
     session.commit()
-    session.close()
 
-    return collection
+    return test
 
 
-def post_asset(session, **user_columns):
+def post_asset(session, **kwarg):
     """ POST: Asset"""
     # TODO: Once asset table is finished update this function.
     # Approved query
     # TODO: Figure out how to use arrays with ORM. i.e. collection_ids
-
-    query = {}
-    # Check user columns
-    asset_columns = Asset.__table__.columns.keys()
-    # compare user column data to database columns
-    for k, v in user_columns.items():
-        if k in asset_columns:
-            # if match append user data to approved query variable
-            query[k] = v
-        else:
-            pass
-    for column in asset_columns:
-        # if user data does include all database columns. There are added to
-        # approve query variable and padded with 'None'
-        if column not in user_columns and column != 'id':
-            query[column] = None
-
-    # create new asset and commit to database
     asset = Asset(
-        name=query['name'], image=query['image'],
-        collection_id=query['collection_id'], tag=query['tag'], attached=query['attached'],
-        author=query['author'], image_thumb=query['image_thumb']
+        name=kwarg['name'], image=kwarg['image'],
+        image_thumb=kwarg['image_thumb'], attached=kwarg['attached'],
+        tag=kwarg['tag']
     )
+
     session.add(asset)
     session.commit()
 
@@ -217,10 +172,11 @@ def get_assets(session):
 
 def get_asset_by_id(session, id):
     """Return asset object using id"""
+    # TODO: Returns trunc dates. Should return whole date.
     asset_by_id = session.query(Asset).get(id)
 
     if asset_by_id:
-        # TODO: Below takes a row and converts to a dict.
+        # TODO: Below takes a row and converts to a dict. Make func?
         result = {}
         for column in asset_by_id.__table__.columns:
             result[column.name] = str(getattr(asset_by_id, column.name))
@@ -232,6 +188,7 @@ def get_asset_by_id(session, id):
 
 def get_collection_by_id(session, id):
     """Returns collection object using id"""
+    # TODO: Returns trunc dates. Should return whole date.
     collection_by_id = session.query(Collection).get(id)
     if collection_by_id:
         # TODO: Below takes a row and converts to a dict.
@@ -246,11 +203,7 @@ def get_collection_by_id(session, id):
 
 def get_query(session, *query):
     """takes list of words and returns related objects"""
-
-    test = session.query(Asset).filter(Asset.tag.any(query[0])).all()
-
-    print(test)
-
+    print(query)
     pass
 
 

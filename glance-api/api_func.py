@@ -58,7 +58,7 @@ def POST_asset(con, meta, **kwargs):
 
 def POST_collection(con, meta, **kwargs):
     print(kwargs)
-    tablename='asset'
+    tablename='collection'
     """
     Craete a new collection in the database
     :param conn: Connection object
@@ -80,12 +80,16 @@ def POST_collection(con, meta, **kwargs):
         assets_in_list = None
 
     collection = meta.tables[tablename]
+    print('weak')
     clause = collection.insert().values(
-        name=kwargs['name'], image=kwargs['image'], tag=tags_in_list, flag=0,
-        author=kwargs['author'], initdate=datetime.datetime.utcnow(), moddate=datetime.datetime.utcnow(),
-        image_thumb=kwargs['image_thumb'], assets=assets_in_list
+        name=kwargs['name'], image=kwargs['image'], tag='tags_in_list', flag=0,
+        author=kwargs['author'], initdate='datetime.datetime.utcnow()', moddate='datetime.datetime.utcnow()',
+        image_thumb=kwargs['image_thumb'], assets='assets_in_list'
         )
+    print('weak2')
     result = con.execute(clause)
+    print('weak2')
+
 
     return result.inserted_primary_key
 
