@@ -5,8 +5,9 @@ from sqlalchemy import create_engine
 
 # from dev_tool import get_tables_db, get_columns_, drop_table
 from models import (
-    reset_db, get_collections, get_assets, get_collection_by_id,
-    get_asset_by_id, get_query, post_collection, post_asset
+    __reset_db, get_collections, get_assets, get_collection_by_id,
+    get_asset_by_id, get_query, post_collection, post_asset, delete_assety,
+    delete_collectiony
     )
 from api_func import (
     connect, POST_collection, POST_asset, GET_asset, GET_collection,
@@ -21,19 +22,16 @@ app = Flask(__name__)
 #app.config.from_object('config.config')
 #app.config.from_object('config')
 
-# TODO: refactor - post, get, put, delete can be used all on the same URI
-# TODO: research - Should connect() be getting closed at some onepoint? Is it?
+
 # TODO: Auth
 # TODO: api tests
-# TODO: Make_response, and http codes
 # TODO: catch/process no cred file error
-
 
 
 # config
 ROUTE = '/glance/api'
 
-# function for checkcing/setting db
+# make function for checkcing/setting db
 """
 Set up dev database, if False
 
@@ -62,7 +60,7 @@ Session = sessionmaker(bind=engine)
 """
 # Dev functions
 session = Session()
-reset_db(session, engine)
+__reset_db(session, engine)
 """
 
 @app.route('{}'.format(ROUTE))
@@ -219,23 +217,26 @@ def collection():
 
 @app.route('{}/collection/<int:collection_id>'.format(ROUTE), methods=['GET'])
 def get_collection_id(collection_id):
+    # TODO : doc string
     if request.method=='GET':
         session = Session()
+        collection = get_collection_by_id(session, collection_id)
 
-        collectio_id = get_collection_by_id(session, collection_id)
     else:
         return jsonify({'collection': 'failed - endpoint only accepts GET methods'})
-    return jsonify({'collection': collectio_id})
+
+    return jsonify({'collection': collection})
 
 
 @app.route('{}/asset/<int:asset_id>'.format(ROUTE), methods=['GET'])
 def get_asset_id(asset_id):
+    # TODO: Doc string
     if request.method=='GET':
         session = Session()
-        asse_id = get_asset_by_id(session, asset_id)
+        asset = get_asset_by_id(session, asset_id)
     else:
         return jsonify({'asset': 'failed - endpoint only accepts GET methods'})
-    return jsonify({'asset': asse_id})
+    return jsonify({'asset': asset})
 
 
 @app.route('{}/query'.format(ROUTE), methods=['GET'])
@@ -259,7 +260,8 @@ def delete_collection(collection_id):
     # TODO: Return flow control. currently its always successful.
     # TODO: Use sessions, not con/meta
     if request.method=='DELETE':
-        collection_id = DELETE_collection(meta, collection_id)
+        session = Session()
+        asset = delete_collectiony(session, collection_id)
 
         if collection_id:
             result = {
@@ -280,19 +282,25 @@ def delete_asset(asset_id):
     # TODO: Return flow control. currently its always successful.
     # TODO: Use sessions, not con/meta
     if request.method=='DELETE':
-        asset_id = DELETE_asset(meta, asset_id)
+        session = Session()
+        asset = delete_assety(session, asset_id)
 
-        if asset_id:
+        if asset:
+            session.close()
             result = {
                 'Action': 'successful',
                 'asset id': 'IMP'
             }
+
             return jsonify({'DELETE asset/delete/': result})
+
         else:
+            session.close()
             result = {
                 'Action': 'fail',
                 'asset id': 'IMP'
             }
+
             return jsonify({'DELETE asset/delete/': result})
 
 

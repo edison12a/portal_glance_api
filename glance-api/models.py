@@ -58,26 +58,9 @@ class Asset(Base):
             self.id, self.name
         )
 
-"""
-
-# Int sqlalchemy engine
-engine = create_engine(
-    'postgresql://{}:{}@{}:5432/glance'.format(
-        cred.username, cred.password, cred.ip
-    ),
-    echo=False
-)
-
-# Init sessionmaker
-Session = sessionmaker(bind=engine)
-
-# Init session
-session = Session()
-
-"""
 
 # private functions
-def reset_db(session, engine):
+def __reset_db(session, engine):
     """drops tables and rebuild"""
     session.close()
     try:
@@ -90,6 +73,7 @@ def reset_db(session, engine):
     print('building new tables')
 
     return True
+
 
 # public functions
 def post_collection(session, **kwarg):
@@ -312,5 +296,19 @@ def patch_collection(session, id, **user_columns):
     return collection
 
 
-# reset db
-# reset_db(session, engine)
+def delete_assety(session, asset_id):
+    # TODO: doc strings
+    session.query(Asset).filter(Asset.id=='{}'.format(asset_id)).delete()
+    session.commit()
+
+    return True
+
+
+def delete_collectiony(session, collection_id):
+    # TODO: doc strings
+    session.query(Collection).filter(
+        Collection.id=='{}'.format(collection_id)
+    ).delete()
+    session.commit()
+
+    return True
