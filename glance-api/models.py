@@ -104,12 +104,16 @@ def post_asset(session, **kwarg):
     asset = Asset(
         name=kwarg['name'], image=kwarg['image'],
         image_thumb=kwarg['image_thumb'], attached=kwarg['attached'],
-        tag=kwarg['tag']
+        author=kwarg['author']
     )
+
+
+    tags = kwarg['tag'].split(',')
+
+    asset.tag = tags
 
     session.add(asset)
     session.commit()
-
     return asset
 
 
@@ -194,7 +198,6 @@ def get_collection_by_id(session, id):
 
 def get_query(session, **query):
     """takes list of words and returns related objects"""
-    print(query)
 
     return True
 

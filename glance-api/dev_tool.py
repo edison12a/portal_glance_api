@@ -39,7 +39,6 @@ def make_test_tables(con, meta):
 def get_tables_db(meta):
 
     for table in meta.tables:
-        print(table)
 
 
 def get_columns_(meta, tablename):

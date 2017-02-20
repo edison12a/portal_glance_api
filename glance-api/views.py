@@ -124,6 +124,7 @@ def asset():
                     if param not in query:
                         query[param] = None
 
+
             session = Session()
             asset = post_asset(session, **query)
 
