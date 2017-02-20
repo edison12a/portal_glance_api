@@ -201,6 +201,7 @@ def get_query(session, **query):
 
     return True
 
+
 def get_query_flag(session, flag):
 
     assets = []
@@ -227,8 +228,10 @@ def get_query_flag(session, flag):
 
 def patch_assety(session, **user_columns):
     """patches users defined columns with user defined values"""
+    # TODO: catch error - if asset id doesnt exist.
+    # TODO: patch tag doesnt work, should append, instead it overwrites
     query = {}
-    id = user_columns['id']
+    id = int(user_columns['id'])
     # Check user columns
     asset_columns = Asset.__table__.columns.keys()
     # compare user column data to database columns
@@ -241,6 +244,7 @@ def patch_assety(session, **user_columns):
 
     # query logical for appendind fields
     asset = session.query(Asset).get(id)
+
     for k, v in query.items():
         if k == 'name':
             asset.name = v

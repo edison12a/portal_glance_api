@@ -320,8 +320,14 @@ def patch_asset():
     for x in request.args:
         patch_data[x] = request.args.get(x)
 
+    print(request.args)
+
     session = Session()
-    bla = patch_assety(session, **patch_data)
+    try:
+        bla = patch_assety(session, **patch_data)
+    except:
+        pass
+    session.close()
 
     return jsonify({'PATCH': 'NO IMP'})
 
