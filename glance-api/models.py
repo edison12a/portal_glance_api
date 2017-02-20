@@ -79,10 +79,17 @@ def __reset_db(session, engine):
 def post_collection(session, **kwarg):
     """ POST: Collection"""
     # TODO: make pretty
+
     test = Collection(
-        name=kwarg['name'], image=kwarg['image'], image_thumb=kwarg['image_thumb'],
+        name=kwarg['name'], image=kwarg['image'], image_thumb='ooo.jpg',
         tag=kwarg['tag'], author=kwarg['author'],
     )
+
+    if kwarg['image_thumb'] == None:
+        test.image_thumb = 'default_cover.jpg'
+    else:
+        test.image_thumb = kwarg['image_thumb']
+
     session.add(test)
     session.commit()
 
@@ -185,15 +192,40 @@ def get_collection_by_id(session, id):
     return result
 
 
-def get_query(session, *query):
+def get_query(session, **query):
     """takes list of words and returns related objects"""
     print(query)
-    pass
+
+    return True
+
+def get_query_flag(session, flag):
+
+    assets = []
+    for instance in session.query(Asset).filter(Asset.flag>=1).order_by(Asset.id):
+        assets.append(instance)
+
+    result = []
+    for asset in assets:
+        result.append({
+            'id': asset.id,
+            'name': asset.name,
+            'image': asset.image,
+            'image_thumb': asset.image_thumb,
+            'attached': asset.attached,
+            'tag': asset.tag,
+            'flag': asset.flag,
+            'author': asset.author,
+            'initdate': asset.initdate,
+            'moddate': asset.moddate
+        })
+
+    return result
 
 
-def patch_asset(session, id, **user_columns):
+def patch_assety(session, **user_columns):
     """patches users defined columns with user defined values"""
     query = {}
+    id = user_columns['id']
     # Check user columns
     asset_columns = Asset.__table__.columns.keys()
     # compare user column data to database columns
@@ -219,13 +251,13 @@ def patch_asset(session, id, **user_columns):
             # TODO: Tag logic
             asset.tag = v
         elif k == 'flag':
-            if query['flag'] == 1:
+            if int(query['flag']) == 1:
                 try:
                     asset.flag += 1
                 except TypeError:
                     asset.flag = 0
                     asset.flag += 1
-            elif query['flag'] == 0:
+            elif int(query['flag']) == 0:
                 asset.flag -= 1
             else:
                 pass

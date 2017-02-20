@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from models import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, delete_assety,
-    delete_collectiony
+    delete_collectiony, patch_assety, get_query_flag
     )
 from api_func import (
     connect, POST_collection, POST_asset, GET_asset, GET_collection,
@@ -243,10 +243,20 @@ def get_asset_id(asset_id):
 def query():
     # TODO: Use sessions, not con/meta
     # TODO: figure out best way to query multiple tables, with multiple search terms
-    query = request.args.get('query').split()
 
-    test = get_query(session, query)
-    print(query)
+    if 'flag' in request.args:
+        session = Session()
+        flagged = get_query_flag(session, request.args['flag'])
+
+        return jsonify({'flagged assets': flagged})
+
+    elif 'query' in request.args:
+        # TODO: figure how best way to apply used to query and filter.
+        pass
+
+    session = Session()
+    # bla = get_query(session, **query)
+    session.close()
 
     found_ids = []
 
@@ -257,8 +267,7 @@ def query():
     '{}/collection/delete/<int:collection_id>'.format(ROUTE), methods=['DELETE']
     )
 def delete_collection(collection_id):
-    # TODO: Return flow control. currently its always successful.
-    # TODO: Use sessions, not con/meta
+    # TODO: make better responce
     if request.method=='DELETE':
         session = Session()
         asset = delete_collectiony(session, collection_id)
@@ -279,8 +288,7 @@ def delete_collection(collection_id):
 
 @app.route('{}/asset/delete/<int:asset_id>'.format(ROUTE), methods=['DELETE'])
 def delete_asset(asset_id):
-    # TODO: Return flow control. currently its always successful.
-    # TODO: Use sessions, not con/meta
+    # TODO: make better responce
     if request.method=='DELETE':
         session = Session()
         asset = delete_assety(session, asset_id)
@@ -306,62 +314,21 @@ def delete_asset(asset_id):
 
 @app.route('/glance/api/asset/patch', methods=['PATCH'])
 def patch_asset():
-    # TODO: Use sessions, not con/meta
-    # TODO: Refactor to function
-    # TODO: function should update moddate
-    # TODO: IMP tag process
-    query = {}
-    # collect user entered data
-    for attri in request.args:
-        query[attri] = request.args[attri]
+    # TODO: impletement with sqlalchemy session
+    patch_data = {}
+    for x in request.args:
+        patch_data[x] = request.args.get(x)
 
-    if 'id' in query:
-        for k, v in query.items():
-            if k == 'id':
-                pass
-            elif k == 'tag':
-                # TODO: process tags
-                pass
-            else:
-                query_sql = con.execute(
-                    """
-                    UPDATE asset SET {} = '{}'
-                    WHERE
-                    ID = '{}'
-                    """.format(k, v, query['id']))
+    session = Session()
+    bla = patch_assety(session, **patch_data)
 
-    return jsonify({'PATCH': 'success'})
+    return jsonify({'PATCH': 'NO IMP'})
 
 
 @app.route('{}/collection/patch'.format(ROUTE), methods=['PATCH'])
 def patch_collection():
-    # TODO: Use sessions, not con/meta
-    # TODO: Refactor to function
-    # TODO: function should update moddate
-    query = {}
-    # collect user entered data
-    for attri in request.args:
-        query[attri] = request.args[attri]
-
-    if 'id' in query:
-        for k, v in query.items():
-            if k == 'id':
-                pass
-            elif k == 'tag':
-                # TODO: process tags
-                pass
-            elif k == 'asset':
-                # TODO: IMP asset patch
-                pass
-            else:
-                query_sql = con.execute(
-                    """
-                    UPDATE asset SET {} = '{}'
-                    WHERE
-                    ID = '{}'
-                    """.format(k, v, query['id']))
-
-    return jsonify({'PATCH': 'success'})
+    # TODO: impletement with sqlalchemy session
+    return jsonify({'PATCH': 'NO IMP'})
 
 
 
