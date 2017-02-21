@@ -1,11 +1,15 @@
 import datetime
+from ast import literal_eval
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
-from sqlalchemy.dialects import postgresql
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, JSON
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 import cred
+
+from sqlalchemy import *
+from sqlalchemy.orm import *
 
 
 # Database models
@@ -19,7 +23,7 @@ class Collection(Base):
     name = Column(String)
     image = Column(String)
     image_thumb = Column(String)
-    tag = Column(postgresql.ARRAY(String))
+    tag = Column(ARRAY(String))
     flag = Column(Integer, default=0)
     author = Column(String)
     initdate = Column(Date, default=datetime.datetime.utcnow())
@@ -44,7 +48,7 @@ class Asset(Base):
     image = Column(String)
     image_thumb = Column(String)
     attached = Column(String)
-    tag = Column(postgresql.ARRAY(String))
+    tag = Column(ARRAY(String))
     flag = Column(Integer, default=0)
     author = Column(String)
     initdate = Column(Date, default=datetime.datetime.utcnow())
@@ -101,19 +105,28 @@ def post_asset(session, **kwarg):
     # TODO: Once asset table is finished update this function.
     # Approved query
     # TODO: Figure out how to use arrays with ORM. i.e. collection_ids
+
     asset = Asset(
         name=kwarg['name'], image=kwarg['image'],
         image_thumb=kwarg['image_thumb'], attached=kwarg['attached'],
         author=kwarg['author']
     )
 
+    # TODO: Figure out how to add tags to the db
+    """
+    try:
+        tags = kwarg['tag'].split(',')
+        asset.tag = tags
+    except:
+        pass
+    """
 
-    tags = kwarg['tag'].split(',')
-
-    asset.tag = tags
 
     session.add(asset)
     session.commit()
+
+    print('---')
+    print('whaaa')
     return asset
 
 
@@ -198,8 +211,48 @@ def get_collection_by_id(session, id):
 
 def get_query(session, **query):
     """takes list of words and returns related objects"""
+    # TODO: currently searching every table with every query term, multiple
+    # searches. gotta be a better way. look into postgres joins?
+    result = []
+    assets = []
 
-    return True
+    # query asset name
+    for term in query['query']:
+        bla = session.query(Asset).filter_by(name=term).all()
+        for x in bla:
+            try:
+                assets.append(x)
+            except:
+                pass
+
+    # query asset tag
+    print(query['query'])
+
+    # foo = session.query(Asset).filter(Asset.tag.contains(['what'])).all()
+    # print(foo)
+
+    """
+    z = ['test', 'one']
+    match = session.query(Asset).filter(Asset.name == cast(z, ARRAY(String))).all()
+    print(match)
+    """
+    try:
+        foo = session.query(Asset).filter(Asset.tag.contains('some')).all()
+        print(foo)
+    except:
+        pass
+
+    # process all assets all all tables
+    for asset in assets:
+        # assets.append(asset)
+
+        asset_dict = {}
+        for column in asset.__table__.columns:
+            asset_dict[column.name] =str(getattr(asset, column.name))
+
+        result.append(asset_dict)
+
+    return result
 
 
 def get_query_flag(session, flag):
@@ -248,15 +301,23 @@ def patch_assety(session, **user_columns):
     for k, v in query.items():
         if k == 'name':
             asset.name = v
+
         elif k == 'image':
             asset.image = v
+
         elif k == 'image_thumb':
             asset.image_thumb = v
+
         elif k == 'attached':
             asset.attached = v
+
         elif k == 'tag':
             # TODO: Tag logic
-            asset.tag = v
+            # TODO: shouldnt be using literal_eval. fix in model.
+
+            conv = literal_eval(v)
+            asset.tag = conv
+
         elif k == 'flag':
             if int(query['flag']) == 1:
                 try:
@@ -268,9 +329,11 @@ def patch_assety(session, **user_columns):
                 asset.flag -= 1
             else:
                 pass
+
         elif k == 'collection_id':
             # TODO: IMP many-to-many for collections and tags?
             pass
+
         else:
             pass
 

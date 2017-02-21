@@ -125,7 +125,10 @@ def asset():
                         query[param] = None
 
 
+
+
             session = Session()
+
             asset = post_asset(session, **query)
 
             result = {
@@ -245,6 +248,7 @@ def query():
     # TODO: Use sessions, not con/meta
     # TODO: figure out best way to query multiple tables, with multiple search terms
 
+
     if 'flag' in request.args:
         session = Session()
         flagged = get_query_flag(session, request.args['flag'])
@@ -253,15 +257,16 @@ def query():
 
     elif 'query' in request.args:
         # TODO: figure how best way to apply used to query and filter.
-        pass
+        query = {'query': request.args['query'].split()}
 
-    session = Session()
-    # bla = get_query(session, **query)
-    session.close()
+        session = Session()
+        assets = get_query(session, **query)
 
-    found_ids = []
+        session.close()
 
-    return jsonify({'query': found_ids})
+        found_ids = []
+
+    return jsonify({'result': assets})
 
 
 @app.route(
@@ -320,7 +325,7 @@ def patch_asset():
     for x in request.args:
         patch_data[x] = request.args.get(x)
 
-    print(request.args)
+    print(patch_data)
 
     session = Session()
     try:
