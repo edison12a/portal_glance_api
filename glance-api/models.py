@@ -282,6 +282,14 @@ def get_query_flag(session, flag):
     return result
 
 
+def get_query_tag(session):
+
+    # bla = session.query(Asset).filter(Asset.tag).all()
+    hrr = session.query(Asset).order_by(Asset.id)
+
+    return 'bla'
+
+
 def patch_assety(session, **user_columns):
     """patches users defined columns with user defined values"""
     # TODO: catch error - if asset id doesnt exist.

@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from models import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, delete_assety,
-    delete_collectiony, patch_assety, get_query_flag
+    delete_collectiony, patch_assety, get_query_flag, get_query_tag
     )
 from api_func import (
     connect, POST_collection, POST_asset, GET_asset, GET_collection,
@@ -118,14 +118,12 @@ def asset():
             param_list = [
                 'name', 'image', 'tag', 'author', 'image_thumb', 'attached',
             ]
+
             for attri in request.args:
                 query[attri] = request.args[attri]
                 for param in param_list:
                     if param not in query:
                         query[param] = None
-
-
-
 
             session = Session()
 
@@ -261,10 +259,14 @@ def query():
 
         session = Session()
         assets = get_query(session, **query)
-
         session.close()
 
-        found_ids = []
+    elif 'tag' in request.args:
+
+        session = Session()
+        bla = get_query_tag(session)
+        session.close()
+        return jsonify({'result': 'tags'})
 
     return jsonify({'result': assets})
 
