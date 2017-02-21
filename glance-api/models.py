@@ -20,7 +20,7 @@ class Collection(Base):
     name = Column(String)
     image = Column(String)
     image_thumb = Column(String)
-    tag = Column(ARRAY(String))
+    tag = Column(ARRAY(String), default=[])
     flag = Column(Integer, default=0)
     author = Column(String)
     initdate = Column(Date, default=datetime.datetime.utcnow())
@@ -81,20 +81,22 @@ def post_collection(session, **kwarg):
     """ POST: Collection"""
     # TODO: make pretty
 
-    test = Collection(
+    collection = Collection(
         name=kwarg['name'], image=kwarg['image'], image_thumb='ooo.jpg',
-        tag=kwarg['tag'], author=kwarg['author'],
+        author=kwarg['author'],
     )
 
-    if kwarg['image_thumb'] == None:
-        test.image_thumb = 'default_cover.jpg'
-    else:
-        test.image_thumb = kwarg['image_thumb']
+    # TODO: IMP tagging on post collection
 
-    session.add(test)
+    if kwarg['image_thumb'] == None:
+        collection.image_thumb = 'default_cover.jpg'
+    else:
+        collection.image_thumb = kwarg['image_thumb']
+
+    session.add(collection)
     session.commit()
 
-    return test
+    return collection
 
 
 def post_asset(session, **kwarg):
@@ -359,7 +361,7 @@ def patch_assety(session, **user_columns):
     return asset
 
 
-def patch_collection(session, id, **user_columns):
+def patch_collectiony(session, id, **user_columns):
     """patches users defined columns with user defined values"""
     query = {}
     # Check user columns
@@ -387,7 +389,13 @@ def patch_collection(session, id, **user_columns):
             pass
         elif k == 'tag':
             # TODO: Tag logic
-            collection.tag = v
+            # TODO: shouldnt be using literal_eval. fix in model.
+
+            # asset.update().where(Asset.id == 1).values(tag=['testpoo'])
+
+            conv = literal_eval(v)
+            collection.tag = conv
+
         elif k == 'flag':
             if query['flag'] == 1:
                 try:

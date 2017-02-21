@@ -7,7 +7,8 @@ from sqlalchemy import create_engine
 from models import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, delete_assety,
-    delete_collectiony, patch_assety, get_query_flag, get_query_tag
+    delete_collectiony, patch_assety, get_query_flag, get_query_tag,
+    patch_collectiony
     )
 from api_func import (
     connect, POST_collection, POST_asset, GET_asset, GET_collection,
@@ -180,16 +181,15 @@ def collection():
                     query[param] = None
 
         session = Session()
-        bla = post_collection(session, **query)
+        collection = post_collection(session, **query)
 
         result = {
             'responce': 'successful',
-            'location': ROUTE + '/collection/' + str(bla.id)
+            'location': ROUTE + '/collection/' + str(collection.id)
         }
         session.close()
 
-
-        return make_response(jsonify({'POST: /asset': result})), 200
+        return make_response(jsonify({'POST: /asset': result}), 200)
 
 
     elif request.method=='GET':
@@ -209,11 +209,13 @@ def collection():
                 )
             ), 200
 
+
         return make_response(
             jsonify(collections)
         ), 200
 
     else:
+
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
@@ -237,7 +239,9 @@ def get_asset_id(asset_id):
         session = Session()
         asset = get_asset_by_id(session, asset_id)
     else:
+
         return jsonify({'asset': 'failed - endpoint only accepts GET methods'})
+
     return jsonify({'asset': asset})
 
 
@@ -266,6 +270,7 @@ def query():
         session = Session()
         bla = get_query_tag(session)
         session.close()
+
         return jsonify({'result': 'tags'})
 
     return jsonify({'result': assets})
@@ -291,6 +296,7 @@ def delete_collection(collection_id):
                 'Action': 'fail',
                 'collection id': 'IMP'
             }
+
             return jsonify({'DELETE collection/delete/': result})
 
 
@@ -320,30 +326,41 @@ def delete_asset(asset_id):
             return jsonify({'DELETE asset/delete/': result})
 
 
-@app.route('/glance/api/asset/patch', methods=['PATCH'])
+@app.route('{}/asset/patch'.format(ROUTE), methods=['PATCH'])
 def patch_asset():
     # TODO: impletement with sqlalchemy session
     patch_data = {}
     for x in request.args:
         patch_data[x] = request.args.get(x)
 
-    print(patch_data)
-
     session = Session()
     try:
-        bla = patch_assety(session, **patch_data)
+        patch_assety(session, **patch_data)
     except:
         pass
+    asset = get_asset_by_id(session, patch_data['id'])
     session.close()
 
-    return jsonify({'PATCH': 'NO IMP'})
+    return jsonify({'PATCH': asset})
 
 
 @app.route('{}/collection/patch'.format(ROUTE), methods=['PATCH'])
 def patch_collection():
     # TODO: impletement with sqlalchemy session
-    return jsonify({'PATCH': 'NO IMP'})
+    patch_data = {}
+    for x in request.args:
+        patch_data[x] = request.args.get(x)
 
+    session = Session()
+    try:
+        patch_collectiony(session, **patch_data)
+    except:
+        pass
+
+    collection = get_collection_by_id(session, patch_data['id'])
+    session.close()
+
+    return jsonify({'PATCH': collection})
 
 
 if __name__ == '__main__':
