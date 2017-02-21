@@ -1,4 +1,4 @@
-name: glance_api-env
+name: glance-api-env
 channels: !!python/tuple
 - defaults
 dependencies:

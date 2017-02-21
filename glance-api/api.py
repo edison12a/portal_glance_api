@@ -41,7 +41,7 @@ CREATE USER vhrender WITH PASSWORD 'vhrender2011';
 ALTER ROLE vhrender SET client_encoding TO 'utf8';
 ALTER ROLE vhrender SET default_transaction_isolation TO 'read committed';
 ALTER ROLE vhrender SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE issues TO vhrender;
+GRANT ALL PRIVILEGES ON DATABASE glance TO vhrender;
 """
 
 # Make connection and Metadata object

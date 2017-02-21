@@ -2,15 +2,12 @@ import datetime
 from ast import literal_eval
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, JSON
+from sqlalchemy.sql import text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 import cred
-
-from sqlalchemy import *
-from sqlalchemy.orm import *
-
 
 # Database models
 Base = declarative_base()
@@ -48,7 +45,7 @@ class Asset(Base):
     image = Column(String)
     image_thumb = Column(String)
     attached = Column(String)
-    tag = Column(ARRAY(String))
+    tag = Column(ARRAY(String), default=[])
     flag = Column(Integer, default=0)
     author = Column(String)
     initdate = Column(Date, default=datetime.datetime.utcnow())
@@ -121,12 +118,9 @@ def post_asset(session, **kwarg):
         pass
     """
 
-
     session.add(asset)
     session.commit()
 
-    print('---')
-    print('whaaa')
     return asset
 
 
@@ -215,6 +209,7 @@ def get_query(session, **query):
     # searches. gotta be a better way. look into postgres joins?
     result = []
     assets = []
+    query_id = []
 
     # query asset name
     for term in query['query']:
@@ -226,21 +221,29 @@ def get_query(session, **query):
                 pass
 
     # query asset tag
-    print(query['query'])
+    # TODO: Figure out a better way to search tags. currently it finds tags, ids
+    # returns ids to list, then query each id to get item details.
+    for term in query['query']:
+        query_sql = session.execute(
+            """SELECT array_agg(id) from asset where '{}' = ANY(tag)""".format(
+                term
+            )
+        )
 
-    # foo = session.query(Asset).filter(Asset.tag.contains(['what'])).all()
-    # print(foo)
+        # catch if query returns None
+        try:
+            for _id in query_sql:
+                query_id.append(_id[0][0])
+        except TypeError as e:
+            print('{}, not found in tags'.format(term))
 
-    """
-    z = ['test', 'one']
-    match = session.query(Asset).filter(Asset.name == cast(z, ARRAY(String))).all()
-    print(match)
-    """
-    try:
-        foo = session.query(Asset).filter(Asset.tag.contains('some')).all()
-        print(foo)
-    except:
-        pass
+    # remove dups from id list
+    query_id = list(set(query_id))
+
+    # using ids query whole rows, and append to assets.
+    for _id in query_id:
+        get = session.query(Asset).get(int(_id))
+        assets.append(get)
 
     # process all assets all all tables
     for asset in assets:
@@ -248,7 +251,7 @@ def get_query(session, **query):
 
         asset_dict = {}
         for column in asset.__table__.columns:
-            asset_dict[column.name] =str(getattr(asset, column.name))
+            asset_dict[column.name] = str(getattr(asset, column.name))
 
         result.append(asset_dict)
 
@@ -314,6 +317,8 @@ def patch_assety(session, **user_columns):
         elif k == 'tag':
             # TODO: Tag logic
             # TODO: shouldnt be using literal_eval. fix in model.
+
+            # asset.update().where(Asset.id == 1).values(tag=['testpoo'])
 
             conv = literal_eval(v)
             asset.tag = conv
