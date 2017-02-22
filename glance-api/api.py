@@ -333,6 +333,9 @@ def patch_asset():
     for x in request.args:
         patch_data[x] = request.args.get(x)
 
+    print('-----------------')
+    print(patch_data)
+
     session = Session()
     try:
         patch_assety(session, **patch_data)
@@ -350,6 +353,8 @@ def patch_collection():
     patch_data = {}
     for x in request.args:
         patch_data[x] = request.args.get(x)
+
+    print(patch_data)
 
     session = Session()
     try:

@@ -266,6 +266,10 @@ def get_query_flag(session, flag):
     for instance in session.query(Asset).filter(Asset.flag>=1).order_by(Asset.id):
         assets.append(instance)
 
+    collections = []
+    for instance in session.query(Collection).filter(Collection.flag>=1).order_by(Collection.id):
+        collections.append(instance)
+
     result = []
     for asset in assets:
         result.append({
@@ -279,6 +283,19 @@ def get_query_flag(session, flag):
             'author': asset.author,
             'initdate': asset.initdate,
             'moddate': asset.moddate
+        })
+
+    for collection in collections:
+        result.append({
+            'id': collection.id,
+            'name': collection.name,
+            'image': collection.image,
+            'image_thumb': collection.image_thumb,
+            'tag': collection.tag,
+            'flag': collection.flag,
+            'author': collection.author,
+            'initdate': collection.initdate,
+            'moddate': collection.moddate
         })
 
     return result
@@ -297,6 +314,7 @@ def patch_assety(session, **user_columns):
     # TODO: catch error - if asset id doesnt exist.
     # TODO: patch tag doesnt work, should append, instead it overwrites
     query = {}
+    print(user_columns)
     id = int(user_columns['id'])
     # Check user columns
     asset_columns = Asset.__table__.columns.keys()
@@ -347,10 +365,13 @@ def patch_assety(session, **user_columns):
 
         elif k == 'collection_id':
             # TODO: IMP many-to-many for collections and tags?
+            print(asset.collection_id)
+            asset.collection_id = int(v)
             pass
 
         else:
             pass
+
 
     # patches append moddate automatically
     asset.moddate = datetime.datetime.utcnow()
@@ -397,13 +418,13 @@ def patch_collectiony(session, id, **user_columns):
             collection.tag = conv
 
         elif k == 'flag':
-            if query['flag'] == 1:
+            if int(query['flag']) == 1:
                 try:
                     collection.flag += 1
                 except TypeError:
                     collection.flag = 0
                     collection.flag += 1
-            elif query['flag'] == 0:
+            elif int(query['flag']) == 0:
                 collection.flag -= 1
             else:
                 pass
@@ -429,9 +450,7 @@ def delete_assety(session, asset_id):
 
 def delete_collectiony(session, collection_id):
     # TODO: doc strings
-    session.query(Collection).filter(
-        Collection.id=='{}'.format(collection_id)
-    ).delete()
+    session.query(Collection).filter(Collection.id=='{}'.format(collection_id)).delete()
     session.commit()
 
     return True
