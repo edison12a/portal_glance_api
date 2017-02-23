@@ -25,9 +25,10 @@ class Collection(Base):
     author = Column(String)
     initdate = Column(Date, default=datetime.datetime.utcnow())
     moddate = Column(Date, default=datetime.datetime.utcnow())
+    item_type = Column(String, default=__tablename__)
     # relational data
     assets = relationship(
-        "Asset", backref='collection'
+        "Asset", backref="collection", cascade="all, delete-orphan"
     )
 
     def __repr__(self):
@@ -50,9 +51,10 @@ class Asset(Base):
     author = Column(String)
     initdate = Column(Date, default=datetime.datetime.utcnow())
     moddate = Column(Date, default=datetime.datetime.utcnow())
+    item_type = Column(String, default=__tablename__)
     # relational data
     collection_id = Column(Integer, ForeignKey('collection.id'))
-    # collection = relationship("Collection", back_populates="assets")
+    collections = relationship("Collection", backref="asset")
 
     def __repr__(self):
         return "<Asset(id='%s', name='%s')>" % (
@@ -78,20 +80,29 @@ def __reset_db(session, engine):
 
 # public functions
 def post_collection(session, **kwarg):
-    """ POST: Collection"""
-    # TODO: make pretty
+    """Posts collection to the database"""
+    payload = {}
+    data = {}
+
+    for k, v in kwarg.items():
+        payload[k] = v[0]
+
+    for column in Collection.__table__.columns:
+        if column.name in payload:
+            data[column.name] = payload[column.name]
+        elif column.name not in payload:
+            data[column.name] = None
+        else:
+            pass
 
     collection = Collection(
-        name=kwarg['name'], image=kwarg['image'], image_thumb='ooo.jpg',
-        author=kwarg['author'],
+        name=data['name'], image=data['image'], author=data['author']
     )
 
-    # TODO: IMP tagging on post collection
-
-    if kwarg['image_thumb'] == None:
+    if data['image_thumb'] == None:
         collection.image_thumb = 'default_cover.jpg'
     else:
-        collection.image_thumb = kwarg['image_thumb']
+        collection.image_thumb = data['image_thumb']
 
     session.add(collection)
     session.commit()
@@ -100,25 +111,29 @@ def post_collection(session, **kwarg):
 
 
 def post_asset(session, **kwarg):
-    """ POST: Asset"""
-    # TODO: Once asset table is finished update this function.
-    # Approved query
-    # TODO: Figure out how to use arrays with ORM. i.e. collection_ids
+    """Posts asset to the database"""
+    payload = {}
+    data = {}
 
+    # process user input
+    for k, v in kwarg.items():
+        payload[k] = v[0]
+
+    # remove attri that arnt in the database
+    for column in Asset.__table__.columns:
+        if column.name in payload:
+            data[column.name] = payload[column.name]
+        elif column.name not in payload:
+            data[column.name] = None
+        else:
+            pass
+
+    # Database entry
     asset = Asset(
-        name=kwarg['name'], image=kwarg['image'],
-        image_thumb=kwarg['image_thumb'], attached=kwarg['attached'],
-        author=kwarg['author']
+        name=data['name'], image=data['image'],
+        image_thumb=data['image_thumb'], attached=data['attached'],
+        author=data['author']
     )
-
-    # TODO: Figure out how to add tags to the db
-    """
-    try:
-        tags = kwarg['tag'].split(',')
-        asset.tag = tags
-    except:
-        pass
-    """
 
     session.add(asset)
     session.commit()
@@ -129,22 +144,15 @@ def post_asset(session, **kwarg):
 def get_collections(session):
     """Returns all collection objects"""
     collections = []
-    for instance in session.query(Collection).order_by(Collection.id):
-        collections.append(instance)
+    for collection in session.query(Collection).order_by(Collection.id):
+        collections.append(collection)
 
     result = []
     for collection in collections:
-        result.append({
-            'id': collection.id,
-            'name': collection.name,
-            'image': collection.image,
-            'image_thumb': collection.image_thumb,
-            'tag': collection.tag,
-            'flag': collection.flag,
-            'author': collection.author,
-            'initdate': collection.initdate,
-            'moddate': collection.moddate
-        })
+        item = {}
+        for column in collection.__table__.columns:
+            item[column.name] = str(getattr(collection, column.name))
+        result.append(item)
 
     return result
 
@@ -152,24 +160,15 @@ def get_collections(session):
 def get_assets(session):
     """Returns all asset objects"""
     assets = []
-    for instance in session.query(Asset).order_by(Asset.id):
-        assets.append(instance)
+    for asset in session.query(Asset).order_by(Asset.moddate):
+        assets.append(asset)
 
     result = []
     for asset in assets:
-        result.append({
-            'id': asset.id,
-            'name': asset.name,
-            'image': asset.image,
-            'image_thumb': asset.image_thumb,
-            'attached': asset.attached,
-            'tag': asset.tag,
-            'flag': asset.flag,
-            'author': asset.author,
-            'initdate': asset.initdate,
-            'moddate': asset.moddate
-        })
-
+        item = {}
+        for column in asset.__table__.columns:
+            item[column.name] = str(getattr(asset, column.name))
+        result.append(item)
 
     return result
 
@@ -194,13 +193,25 @@ def get_collection_by_id(session, id):
     """Returns collection object using id"""
     # TODO: Returns trunc dates. Should return whole date.
     collection_by_id = session.query(Collection).get(id)
+    # if collection exists, get item
     if collection_by_id:
         # TODO: Below takes a row and converts to a dict.
         result = {}
+        result['assets'] = []
         for column in collection_by_id.__table__.columns:
             result[column.name] = str(getattr(collection_by_id, column.name))
     else:
         result = {}
+
+    # get all assets associated with collection
+    assets = session.query(Asset).filter_by(collection_id=id).all()
+    # process and append assets to return item
+    for asset in assets:
+        asset_item = {}
+        for column in asset.__table__.columns:
+            asset_item[column.name] = str(getattr(asset, column.name))
+
+        result['assets'].append(asset_item)
 
     return result
 
@@ -211,14 +222,23 @@ def get_query(session, **query):
     # searches. gotta be a better way. look into postgres joins?
     result = []
     assets = []
+    collections = []
     query_id = []
+    collection_id = []
 
-    # query asset name
     for term in query['query']:
+        # query asset name
         bla = session.query(Asset).filter_by(name=term).all()
         for x in bla:
             try:
                 assets.append(x)
+            except:
+                pass
+        # query collection name
+        bla = session.query(Collection).filter_by(name=term).all()
+        for x in bla:
+            try:
+                collections.append(x)
             except:
                 pass
 
@@ -232,20 +252,39 @@ def get_query(session, **query):
             )
         )
 
-        # catch if query returns None
+        query_collection_sql = session.execute(
+            """SELECT array_agg(id) from collection where '{}' = ANY(tag)""".format(
+                term
+            )
+        )
+
+        # catch if asset query returns None
         try:
             for _id in query_sql:
                 query_id.append(_id[0][0])
         except TypeError as e:
-            print('{}, not found in tags'.format(term))
+            print('{}, not found in asset tags'.format(term))
+
+        # catch if collection query returns None
+        try:
+            for _id in query_collection_sql:
+                collection_id.append(_id[0][0])
+        except TypeError as e:
+            print('{}, not found in collection tags'.format(term))
+
 
     # remove dups from id list
     query_id = list(set(query_id))
+    collection_id = list(set(collection_id))
 
     # using ids query whole rows, and append to assets.
     for _id in query_id:
         get = session.query(Asset).get(int(_id))
         assets.append(get)
+
+    for _id in collection_id:
+        get = session.query(Collection).get(int(_id))
+        collections.append(get)
 
     # process all assets all all tables
     for asset in assets:
@@ -256,6 +295,15 @@ def get_query(session, **query):
             asset_dict[column.name] = str(getattr(asset, column.name))
 
         result.append(asset_dict)
+
+    for collection in collections:
+        # collections.append(collection)
+
+        collection_dict = {}
+        for column in collection.__table__.columns:
+            collection_dict[column.name] = str(getattr(collection, column.name))
+
+        result.append(collection_dict)
 
     return result
 
@@ -282,7 +330,8 @@ def get_query_flag(session, flag):
             'flag': asset.flag,
             'author': asset.author,
             'initdate': asset.initdate,
-            'moddate': asset.moddate
+            'moddate': asset.moddate,
+            'collections': asset.collection_id
         })
 
     for collection in collections:
@@ -365,7 +414,6 @@ def patch_assety(session, **user_columns):
 
         elif k == 'collection_id':
             # TODO: IMP many-to-many for collections and tags?
-            print(asset.collection_id)
             asset.collection_id = int(v)
             pass
 

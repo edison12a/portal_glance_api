@@ -66,6 +66,7 @@ __reset_db(session, engine)
 
 @app.route('{}'.format(ROUTE))
 def api():
+    """ Returns avaliable methods for the api """
     info = {
         'End Points': {
             'POST': {
@@ -104,42 +105,36 @@ def api():
 
 @app.route('{}/asset'.format(ROUTE), methods=['POST', 'GET'])
 def asset():
-    """Endpoint that returns asset objects
-        POST: AUG: name, image, tag, author, image_thumb, attached
-            Returns: Responce, location
-        GET:
-            Returns: All asset objects
-    """
-    # TODO: IMP Aug dict build (patch_asset)
+    """Endpoint that returns asset objects"""
     if request.method=='POST':
         try:
-            # query dict collector
-            query = {}
-            # query dict padder (for empty values)
-            param_list = [
-                'name', 'image', 'tag', 'author', 'image_thumb', 'attached',
-            ]
-
-            for attri in request.args:
-                query[attri] = request.args[attri]
-                for param in param_list:
-                    if param not in query:
-                        query[param] = None
-
             session = Session()
-
-            asset = post_asset(session, **query)
+            asset = post_asset(session, **request.args)
 
             result = {
                 'responce': 'successful',
                 'location': ROUTE + '/asset/' + str(asset.id)
             }
+
             session.close()
-            return make_response(jsonify({'POST: /asset': result})), 200
+
+            return make_response(
+                jsonify(
+                    {
+                        'POST: /asset': result
+                    }
+                )
+            ), 200
 
         except:
             fail = {'Action': 'failed'}
-            return jsonify({'POST /asset': fail})
+            return make_response(
+                jsonify(
+                    {
+                        'POST /asset': fail
+                    }
+                )
+            ), 404
 
     elif request.method=='GET':
         session = Session()
@@ -167,33 +162,41 @@ def asset():
 
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
 def collection():
-    # TODO: make pretty.
+
     if request.method=='POST':
 
-        # query dict collector
-        query = {}
-        # query dict padder (for empty values)
-        param_list = ['name', 'image', 'tag', 'author', 'image_thumb', 'assets']
-        for attri in request.args:
-            query[attri] = request.args[attri]
-            for param in param_list:
-                if param not in query:
-                    query[param] = None
+        try:
+            session = Session()
+            collection = post_collection(session, **request.args)
 
-        session = Session()
-        collection = post_collection(session, **query)
+            result = {
+                'responce': 'successful',
+                'location': ROUTE + '/collection/' + str(collection.id)
+            }
 
-        result = {
-            'responce': 'successful',
-            'location': ROUTE + '/collection/' + str(collection.id)
-        }
-        session.close()
+            session.close()
 
-        return make_response(jsonify({'POST: /asset': result}), 200)
+            return make_response(
+                jsonify(
+                    {
+                        'POST: /collection': result
+                    }
+                )
+            ), 200
 
+        except:
+
+            fail = {'Action': 'failed'}
+
+            return make_response(
+                jsonify(
+                    {
+                        'POST /collection': fail
+                    }
+                )
+            ), 404
 
     elif request.method=='GET':
-
         session = Session()
         collections = get_collections(session)
 
@@ -272,6 +275,11 @@ def query():
         session.close()
 
         return jsonify({'result': 'tags'})
+
+    elif 'collection' in request.args:
+        print(request.args['collection'])
+
+        return jsonify({'result': 'collections'})
 
     return jsonify({'result': assets})
 
