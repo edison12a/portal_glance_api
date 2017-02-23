@@ -230,6 +230,7 @@ def get_collection_id(collection_id):
         collection = get_collection_by_id(session, collection_id)
 
     else:
+
         return jsonify({'collection': 'failed - endpoint only accepts GET methods'})
 
     return jsonify({'collection': collection})
@@ -241,6 +242,7 @@ def get_asset_id(asset_id):
     if request.method=='GET':
         session = Session()
         asset = get_asset_by_id(session, asset_id)
+
     else:
 
         return jsonify({'asset': 'failed - endpoint only accepts GET methods'})
@@ -257,16 +259,17 @@ def query():
     if 'flag' in request.args:
         session = Session()
         flagged = get_query_flag(session, request.args['flag'])
+        session.close()
 
         return jsonify({'flagged assets': flagged})
 
     elif 'query' in request.args:
         # TODO: figure how best way to apply used to query and filter.
-        query = {'query': request.args['query'].split()}
-
         session = Session()
-        assets = get_query(session, **query)
+        assets = get_query(session, request.args)
         session.close()
+
+        return jsonify({'result': assets})
 
     elif 'tag' in request.args:
 
@@ -277,8 +280,6 @@ def query():
         return jsonify({'result': 'tags'})
 
     elif 'collection' in request.args:
-        print(request.args['collection'])
-
         return jsonify({'result': 'collections'})
 
     return jsonify({'result': assets})

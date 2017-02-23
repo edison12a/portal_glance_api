@@ -152,6 +152,7 @@ def get_collections(session):
         item = {}
         for column in collection.__table__.columns:
             item[column.name] = str(getattr(collection, column.name))
+        item['tag'] = literal_eval(item['tag'])
         result.append(item)
 
     return result
@@ -168,6 +169,7 @@ def get_assets(session):
         item = {}
         for column in asset.__table__.columns:
             item[column.name] = str(getattr(asset, column.name))
+        item['tag'] = literal_eval(item['tag'])
         result.append(item)
 
     return result
@@ -192,15 +194,19 @@ def get_asset_by_id(session, id):
 def get_collection_by_id(session, id):
     """Returns collection object using id"""
     # TODO: Returns trunc dates. Should return whole date.
+    # TODO: Figure out a better way to set collections assets.
     collection_by_id = session.query(Collection).get(id)
+
     # if collection exists, get item
     if collection_by_id:
-        # TODO: Below takes a row and converts to a dict.
         result = {}
         result['assets'] = []
+
         for column in collection_by_id.__table__.columns:
             result[column.name] = str(getattr(collection_by_id, column.name))
+
     else:
+
         result = {}
 
     # get all assets associated with collection
@@ -216,29 +222,29 @@ def get_collection_by_id(session, id):
     return result
 
 
-def get_query(session, **query):
+def get_query(session, userquery):
     """takes list of words and returns related objects"""
     # TODO: currently searching every table with every query term, multiple
     # searches. gotta be a better way. look into postgres joins?
     result = []
     assets = []
-    collections = []
     query_id = []
     collection_id = []
 
+    for k, v in userquery.items():
+        query = {k: str(v).split()}
+
     for term in query['query']:
-        # query asset name
-        bla = session.query(Asset).filter_by(name=term).all()
-        for x in bla:
+        # query asset names
+        for x in session.query(Asset).filter_by(name=term).all():
             try:
                 assets.append(x)
             except:
                 pass
         # query collection name
-        bla = session.query(Collection).filter_by(name=term).all()
-        for x in bla:
+        for x in session.query(Asset).filter_by(name=term).all():
             try:
-                collections.append(x)
+                assets.append(x)
             except:
                 pass
 
@@ -272,7 +278,6 @@ def get_query(session, **query):
         except TypeError as e:
             print('{}, not found in collection tags'.format(term))
 
-
     # remove dups from id list
     query_id = list(set(query_id))
     collection_id = list(set(collection_id))
@@ -284,68 +289,41 @@ def get_query(session, **query):
 
     for _id in collection_id:
         get = session.query(Collection).get(int(_id))
-        collections.append(get)
+        assets.append(get)
 
     # process all assets all all tables
     for asset in assets:
-        # assets.append(asset)
-
-        asset_dict = {}
+        item = {}
         for column in asset.__table__.columns:
-            asset_dict[column.name] = str(getattr(asset, column.name))
+            item[column.name] = str(getattr(asset, column.name))
 
-        result.append(asset_dict)
-
-    for collection in collections:
-        # collections.append(collection)
-
-        collection_dict = {}
-        for column in collection.__table__.columns:
-            collection_dict[column.name] = str(getattr(collection, column.name))
-
-        result.append(collection_dict)
+        result.append(item)
 
     return result
 
 
 def get_query_flag(session, flag):
-
+    """ Returns list of flagged items """
     assets = []
     for instance in session.query(Asset).filter(Asset.flag>=1).order_by(Asset.id):
         assets.append(instance)
 
-    collections = []
     for instance in session.query(Collection).filter(Collection.flag>=1).order_by(Collection.id):
-        collections.append(instance)
+        assets.append(instance)
 
     result = []
     for asset in assets:
-        result.append({
-            'id': asset.id,
-            'name': asset.name,
-            'image': asset.image,
-            'image_thumb': asset.image_thumb,
-            'attached': asset.attached,
-            'tag': asset.tag,
-            'flag': asset.flag,
-            'author': asset.author,
-            'initdate': asset.initdate,
-            'moddate': asset.moddate,
-            'collections': asset.collection_id
-        })
+        if asset.item_type == 'asset':
+            item = {}
+            for column in asset.__table__.columns:
+                item[column.name] = str(getattr(asset, column.name))
+            result.append(item)
 
-    for collection in collections:
-        result.append({
-            'id': collection.id,
-            'name': collection.name,
-            'image': collection.image,
-            'image_thumb': collection.image_thumb,
-            'tag': collection.tag,
-            'flag': collection.flag,
-            'author': collection.author,
-            'initdate': collection.initdate,
-            'moddate': collection.moddate
-        })
+        elif asset.item_type == 'collection':
+            item = {}
+            for column in asset.__table__.columns:
+                item[column.name] = str(getattr(asset, column.name))
+            result.append(item)
 
     return result
 
