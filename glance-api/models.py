@@ -1,7 +1,7 @@
 import datetime
 from ast import literal_eval
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, JSON
+from sqlalchemy import Column, Integer, Table, String, ForeignKey, Date, JSON
 from sqlalchemy.sql import text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
@@ -11,6 +11,36 @@ import cred
 
 # Database models
 Base = declarative_base()
+
+
+"""
+
+class Parent(Base):
+    __tablename__ = 'left'
+    id = Column(Integer, primary_key=True)
+    children = relationship(
+        "Child",
+        secondary=association_table,
+        back_populates="parents")
+
+class Child(Base):
+    __tablename__ = 'right'
+    id = Column(Integer, primary_key=True)
+    parents = relationship(
+        "Parent",
+        secondary=association_table,
+        back_populates="children")
+
+"""
+
+
+
+
+assignment = Table('assignment', Base.metadata,
+    Column('collection_id', Integer, ForeignKey('collection.id')),
+    Column('asset_id', Integer, ForeignKey('asset.id'))
+)
+
 
 class Collection(Base):
     # TODO: Better repr
@@ -27,8 +57,8 @@ class Collection(Base):
     moddate = Column(Date, default=datetime.datetime.utcnow())
     item_type = Column(String, default=__tablename__)
     # relational data
-    assets = relationship(
-        "Asset", backref="collection", cascade="all, delete-orphan"
+    assets = relationship("Asset",
+        secondary=assignment, back_populates="collections"
     )
 
     def __repr__(self):
@@ -53,8 +83,10 @@ class Asset(Base):
     moddate = Column(Date, default=datetime.datetime.utcnow())
     item_type = Column(String, default=__tablename__)
     # relational data
-    collection_id = Column(Integer, ForeignKey('collection.id'))
-    collections = relationship("Collection", backref="asset")
+    collections = relationship("Collection",
+    secondary=assignment, back_populates="assets"
+    )
+
 
     def __repr__(self):
         return "<Asset(id='%s', name='%s')>" % (
@@ -67,8 +99,9 @@ def __reset_db(session, engine):
     """drops tables and rebuild"""
     session.close()
     try:
-        Asset.__table__.drop(engine)
+        assignment.__table__.drop(engine)
         Collection.__table__.drop(engine)
+        Asset.__table__.drop(engine)
         print('Old tables removed')
     except:
         pass
@@ -152,8 +185,21 @@ def get_collections(session):
         item = {}
         for column in collection.__table__.columns:
             item[column.name] = str(getattr(collection, column.name))
+
         item['tag'] = literal_eval(item['tag'])
+        item['assets'] = []
+
+        koo = session.query(Collection).filter_by(id=collection.id).first().assets
+        for x in koo:
+            item['assets'].append(str(x))
+
+        # session.query(Collection).filter(Collection.assets.any(collection_id=collection.id)).all()
+
+
         result.append(item)
+        #append collections to 'assets'
+
+
 
     return result
 
@@ -171,6 +217,11 @@ def get_assets(session):
             item[column.name] = str(getattr(asset, column.name))
         item['tag'] = literal_eval(item['tag'])
         result.append(item)
+
+        # koo = session.query(Asset).filter_by(id=asset.id).first()
+        # print(koo)
+
+
 
     return result
 
@@ -209,6 +260,7 @@ def get_collection_by_id(session, id):
 
         result = {}
 
+    """
     # get all assets associated with collection
     assets = session.query(Asset).filter_by(collection_id=id).all()
     # process and append assets to return item
@@ -218,7 +270,7 @@ def get_collection_by_id(session, id):
             asset_item[column.name] = str(getattr(asset, column.name))
 
         result['assets'].append(asset_item)
-
+    """
     return result
 
 
@@ -418,8 +470,12 @@ def patch_collectiony(session, id, **user_columns):
         if k in collection_columns:
             # if match append user data to approved query variable
             query[k] = v
+
         else:
             pass
+        if k == 'assets':
+            query[k] = v
+
 
     # query logical for appendind fields
     collection = session.query(Collection).get(id)
@@ -431,9 +487,16 @@ def patch_collectiony(session, id, **user_columns):
         elif k == 'image_thumb':
             collection.image_thumb = v
         elif k == 'assets':
-            # TODO: Test adding assets
-            #collection.assets = query['assets']
-            pass
+            # query assets and append to collection
+            # TODO: remove try/except
+            try:
+                newasset = session.query(Asset).get(int(v))
+                collection.assets.append(newasset)
+            except:
+                print('query asset error')
+
+            # all_ = session.query(Collection).filter_by(id=collection.id).first().assets
+
         elif k == 'tag':
             # TODO: Tag logic
             # TODO: shouldnt be using literal_eval. fix in model.
@@ -462,6 +525,8 @@ def patch_collectiony(session, id, **user_columns):
 
     session.add(collection)
     session.commit()
+
+
 
     return collection
 

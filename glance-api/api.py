@@ -363,8 +363,6 @@ def patch_collection():
     for x in request.args:
         patch_data[x] = request.args.get(x)
 
-    print(patch_data)
-
     session = Session()
     try:
         patch_collectiony(session, **patch_data)
