@@ -13,32 +13,15 @@ import cred
 Base = declarative_base()
 
 
-"""
-
-class Parent(Base):
-    __tablename__ = 'left'
-    id = Column(Integer, primary_key=True)
-    children = relationship(
-        "Child",
-        secondary=association_table,
-        back_populates="parents")
-
-class Child(Base):
-    __tablename__ = 'right'
-    id = Column(Integer, primary_key=True)
-    parents = relationship(
-        "Parent",
-        secondary=association_table,
-        back_populates="children")
-
-"""
-
-
-
-
 assignment = Table('assignment', Base.metadata,
     Column('collection_id', Integer, ForeignKey('collection.id')),
     Column('asset_id', Integer, ForeignKey('asset.id'))
+)
+
+tag_table = Table('tag_table', Base.metadata,
+    Column('tag_id', Integer, ForeignKey('tag.id')),
+    Column('asset_id', Integer, ForeignKey('asset.id')),
+    Column('collection_id', Integer, ForeignKey('collection.id'))
 )
 
 
@@ -50,21 +33,38 @@ class Collection(Base):
     name = Column(String)
     image = Column(String)
     image_thumb = Column(String)
-    tag = Column(ARRAY(String), default=[])
     flag = Column(Integer, default=0)
     author = Column(String)
     initdate = Column(Date, default=datetime.datetime.utcnow())
     moddate = Column(Date, default=datetime.datetime.utcnow())
     item_type = Column(String, default=__tablename__)
-    # relational data
+
     assets = relationship("Asset",
         secondary=assignment, back_populates="collections"
+    )
+    tags = relationship("Tag",
+        secondary=tag_table
     )
 
     def __repr__(self):
         return "<Collection(name='%s', image='%s', assets='%s')>" % (
             self.name, self.image, self.assets
         )
+
+class Tag(Base):
+    __tablename__ = 'tag'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+
+    item = relationship('Asset',
+        secondary=tag_table, back_populates='tags'
+    )
+    collection_tags = relationship('Collection',
+        secondary=tag_table, back_populates='tags'
+    )
+
+    def __repr__(self):
+        return "<Tag(name={})>".format(self.name)
 
 
 class Asset(Base):
@@ -76,15 +76,17 @@ class Asset(Base):
     image = Column(String)
     image_thumb = Column(String)
     attached = Column(String)
-    tag = Column(ARRAY(String), default=[])
     flag = Column(Integer, default=0)
     author = Column(String)
     initdate = Column(Date, default=datetime.datetime.utcnow())
     moddate = Column(Date, default=datetime.datetime.utcnow())
     item_type = Column(String, default=__tablename__)
-    # relational data
+
     collections = relationship("Collection",
-    secondary=assignment, back_populates="assets"
+        secondary=assignment
+    )
+    tags = relationship("Tag",
+        secondary=tag_table
     )
 
 
@@ -97,6 +99,7 @@ class Asset(Base):
 # private functions
 def __reset_db(session, engine):
     """drops tables and rebuild"""
+    # TODO: remove tables doesnt work
     session.close()
     try:
         assignment.__table__.drop(engine)
@@ -169,6 +172,14 @@ def post_asset(session, **kwarg):
     )
 
     session.add(asset)
+
+    if 'tags' in payload:
+        tags = payload['tags'].split()
+        for term in tags:
+            newtag = Tag(name=term)
+            asset.tags.append(newtag)
+
+
     session.commit()
 
     return asset
@@ -186,19 +197,26 @@ def get_collections(session):
         for column in collection.__table__.columns:
             item[column.name] = str(getattr(collection, column.name))
 
-        item['tag'] = literal_eval(item['tag'])
+        # init tags
+        item['tags'] = []
+        try:
+            bla = session.query(Collection).filter_by(id=collection.id).first().tags
+            for x in bla:
+                item['tags'].append(str(x.name))
+        except:
+            pass
+
+        # init assets
         item['assets'] = []
 
-        koo = session.query(Collection).filter_by(id=collection.id).first().assets
-        for x in koo:
-            item['assets'].append(str(x))
+        assignments = session.query(Collection).filter_by(
+            id=collection.id
+        ).first().assets
 
-        # session.query(Collection).filter(Collection.assets.any(collection_id=collection.id)).all()
-
+        for assignment in assignments:
+            item['assets'].append(str(assignment))
 
         result.append(item)
-        #append collections to 'assets'
-
 
 
     return result
@@ -211,17 +229,24 @@ def get_assets(session):
         assets.append(asset)
 
     result = []
+    # build asset item object for user
     for asset in assets:
         item = {}
         for column in asset.__table__.columns:
             item[column.name] = str(getattr(asset, column.name))
-        item['tag'] = literal_eval(item['tag'])
+
+        # init collections
+        item['collections'] = []
+        koo = session.query(Asset).filter_by(id=asset.id).first().collections
+        for x in koo:
+            item['collections'].append(str(x))
+
+        # init tags
+        item['tags'] = []
+        for x in asset.tags:
+            item['tags'].append(x.name)
+
         result.append(item)
-
-        # koo = session.query(Asset).filter_by(id=asset.id).first()
-        # print(koo)
-
-
 
     return result
 
@@ -236,8 +261,22 @@ def get_asset_by_id(session, id):
         result = {}
         for column in asset_by_id.__table__.columns:
             result[column.name] = str(getattr(asset_by_id, column.name))
+
+        # init collections
+        result['collections'] = []
+        koo = session.query(Asset).filter_by(id=asset_by_id.id).first().collections
+        for x in koo:
+            result['collections'].append(str(x))
+
+        # init tags
+        result['tags'] = []
+        bla = session.query(Asset).filter_by(id=asset_by_id.id).first().tags
+        for x in bla:
+            result['tags'].append(str(x.name))
+
     else:
         result = {}
+
 
     return result
 
@@ -251,26 +290,30 @@ def get_collection_by_id(session, id):
     # if collection exists, get item
     if collection_by_id:
         result = {}
-        result['assets'] = []
 
         for column in collection_by_id.__table__.columns:
             result[column.name] = str(getattr(collection_by_id, column.name))
+
+        # init tags
+        result['tags'] = []
+        bla = collection_by_id.tags
+
+        for x in bla:
+            result['tags'].append(str(x.name))
+
+        # init assets
+        result['assets'] = []
+        assignments = session.query(Collection).filter_by(
+            id=collection_by_id.id
+        ).first().assets
+
+        for assignment in assignments:
+            result['assets'].append(str(assignment))
 
     else:
 
         result = {}
 
-    """
-    # get all assets associated with collection
-    assets = session.query(Asset).filter_by(collection_id=id).all()
-    # process and append assets to return item
-    for asset in assets:
-        asset_item = {}
-        for column in asset.__table__.columns:
-            asset_item[column.name] = str(getattr(asset, column.name))
-
-        result['assets'].append(asset_item)
-    """
     return result
 
 
@@ -392,20 +435,25 @@ def patch_assety(session, **user_columns):
     """patches users defined columns with user defined values"""
     # TODO: catch error - if asset id doesnt exist.
     # TODO: patch tag doesnt work, should append, instead it overwrites
+
     query = {}
-    print(user_columns)
+
     id = int(user_columns['id'])
     # Check user columns
     asset_columns = Asset.__table__.columns.keys()
     # compare user column data to database columns
     for k, v in user_columns.items():
+
         if k in asset_columns:
             # if match append user data to approved query variable
             query[k] = v
+        elif k == 'collections':
+            query[k] = v.split()
+        elif k == 'tags':
+            query['tags'] = v.split()
         else:
             pass
 
-    # query logical for appendind fields
     asset = session.query(Asset).get(id)
 
     for k, v in query.items():
@@ -421,14 +469,16 @@ def patch_assety(session, **user_columns):
         elif k == 'attached':
             asset.attached = v
 
-        elif k == 'tag':
-            # TODO: Tag logic
-            # TODO: shouldnt be using literal_eval. fix in model.
+        elif k == 'tags':
+            for tag in v:
+                inputy = str(tag)
+                newtag = Tag(name=inputy)
+                asset.tags.append(newtag)
 
-            # asset.update().where(Asset.id == 1).values(tag=['testpoo'])
+            session.add(newtag)
 
-            conv = literal_eval(v)
-            asset.tag = conv
+            # query for assets tags
+            bla = session.query(Asset).filter_by(id=asset.id).first().tags
 
         elif k == 'flag':
             if int(query['flag']) == 1:
@@ -442,14 +492,13 @@ def patch_assety(session, **user_columns):
             else:
                 pass
 
-        elif k == 'collection_id':
-            # TODO: IMP many-to-many for collections and tags?
-            asset.collection_id = int(v)
-            pass
+        elif k == 'collections':
+            for collection_id in query['collections']:
+                existingcollection = session.query(Collection).get(collection_id)
+                asset.collections.append(existingcollection)
 
         else:
             pass
-
 
     # patches append moddate automatically
     asset.moddate = datetime.datetime.utcnow()
@@ -474,8 +523,9 @@ def patch_collectiony(session, id, **user_columns):
         else:
             pass
         if k == 'assets':
-            query[k] = v
-
+            query[k] = v.split()
+        elif k == 'tags':
+            query[k] = v.split()
 
     # query logical for appendind fields
     collection = session.query(Collection).get(id)
@@ -487,24 +537,21 @@ def patch_collectiony(session, id, **user_columns):
         elif k == 'image_thumb':
             collection.image_thumb = v
         elif k == 'assets':
-            # query assets and append to collection
-            # TODO: remove try/except
-            try:
-                newasset = session.query(Asset).get(int(v))
-                collection.assets.append(newasset)
-            except:
-                print('query asset error')
+            for asset_id in v:
+                # TODO: dont use try/except for control flow
+                try:
+                    newasset = session.query(Asset).get(int(asset_id))
+                    collection.assets.append(newasset)
+                except:
+                    pass
 
-            # all_ = session.query(Collection).filter_by(id=collection.id).first().assets
+        elif k == 'tags':
 
-        elif k == 'tag':
-            # TODO: Tag logic
-            # TODO: shouldnt be using literal_eval. fix in model.
+            for x in v:
+                test = Tag(name=str(x))
+                session.add(test)
 
-            # asset.update().where(Asset.id == 1).values(tag=['testpoo'])
-
-            conv = literal_eval(v)
-            collection.tag = conv
+                collection.tags.append(test)
 
         elif k == 'flag':
             if int(query['flag']) == 1:
@@ -525,7 +572,6 @@ def patch_collectiony(session, id, **user_columns):
 
     session.add(collection)
     session.commit()
-
 
 
     return collection

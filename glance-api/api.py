@@ -338,18 +338,17 @@ def delete_asset(asset_id):
 @app.route('{}/asset/patch'.format(ROUTE), methods=['PATCH'])
 def patch_asset():
     # TODO: impletement with sqlalchemy session
-    patch_data = {}
-    for x in request.args:
-        patch_data[x] = request.args.get(x)
 
-    print('-----------------')
-    print(patch_data)
+    patch_data = {}
+    for y in request.args:
+        patch_data[y] = request.args[y]
 
     session = Session()
     try:
         patch_assety(session, **patch_data)
     except:
         pass
+
     asset = get_asset_by_id(session, patch_data['id'])
     session.close()
 
