@@ -1,7 +1,7 @@
 import datetime
 from ast import literal_eval
 
-from sqlalchemy import Column, Integer, Table, String, ForeignKey, Date, JSON
+from sqlalchemy import Column, func, Integer, Table, String, ForeignKey, DateTime, JSON
 from sqlalchemy.sql import text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
@@ -29,14 +29,16 @@ class Collection(Base):
     # TODO: Better repr
     __tablename__ = 'collection'
 
+
+
     id = Column(Integer, primary_key=True)
     name = Column(String)
     image = Column(String)
     image_thumb = Column(String)
     flag = Column(Integer, default=0)
     author = Column(String)
-    initdate = Column(Date, default=datetime.datetime.utcnow())
-    moddate = Column(Date, default=datetime.datetime.utcnow())
+    initdate = Column(DateTime, default=func.now())
+    moddate = Column(DateTime, default=func.now())
     item_type = Column(String, default=__tablename__)
 
     assets = relationship("Asset",
@@ -71,6 +73,8 @@ class Asset(Base):
     # TODO: Better repr
     __tablename__ = 'asset'
 
+    print(func.now())
+
     id = Column(Integer, primary_key=True)
     name = Column(String)
     image = Column(String)
@@ -78,8 +82,8 @@ class Asset(Base):
     attached = Column(String)
     flag = Column(Integer, default=0)
     author = Column(String)
-    initdate = Column(Date, default=datetime.datetime.utcnow())
-    moddate = Column(Date, default=datetime.datetime.utcnow())
+    initdate = Column(DateTime, default=func.now())
+    moddate = Column(DateTime, default=func.now())
     item_type = Column(String, default=__tablename__)
 
     collections = relationship("Collection",
@@ -163,6 +167,8 @@ def post_asset(session, **kwarg):
             data[column.name] = None
         else:
             pass
+
+    print(data)
 
     # Database entry
     asset = Asset(
@@ -255,6 +261,7 @@ def get_asset_by_id(session, id):
     """Return asset object using id"""
     # TODO: Returns trunc dates. Should return whole date.
     asset_by_id = session.query(Asset).get(id)
+    print(asset_by_id.initdate)
 
     if asset_by_id:
         # TODO: Below takes a row and converts to a dict. Make func?
@@ -526,6 +533,8 @@ def patch_collectiony(session, id, **user_columns):
             query[k] = v.split()
         elif k == 'tags':
             query[k] = v.split()
+        elif k == 'remove_assets':
+            query[k] = v.split()
 
     # query logical for appendind fields
     collection = session.query(Collection).get(id)
@@ -539,9 +548,18 @@ def patch_collectiony(session, id, **user_columns):
         elif k == 'assets':
             for asset_id in v:
                 # TODO: dont use try/except for control flow
+                # TODO: figure out how to handle removeal of assets
+                # myparent.children.remove(somechild)
                 try:
                     newasset = session.query(Asset).get(int(asset_id))
                     collection.assets.append(newasset)
+                except:
+                    pass
+        elif k == 'remove_assets':
+            for asset_id in v:
+                try:
+                    removeasset = session.query(Asset).get(int(asset_id))
+                    collection.assets.remove(removeasset)
                 except:
                     pass
 
@@ -587,7 +605,11 @@ def delete_assety(session, asset_id):
 
 def delete_collectiony(session, collection_id):
     # TODO: doc strings
-    session.query(Collection).filter(Collection.id=='{}'.format(collection_id)).delete()
-    session.commit()
+    print('whaaa')
+
+    # myparent.children.remove(somechild)
+
+    # session.query(Collection).filter(Collection.id=='{}'.format(collection_id)).delete()
+    # session.commit()``
 
     return True

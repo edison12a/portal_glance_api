@@ -293,6 +293,7 @@ def delete_collection(collection_id):
     if request.method=='DELETE':
         session = Session()
         asset = delete_collectiony(session, collection_id)
+        print('passed api model')
 
         if collection_id:
             result = {
