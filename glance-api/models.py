@@ -3,7 +3,7 @@
 import datetime
 from ast import literal_eval
 
-from sqlalchemy import Column, func, Integer, Table, String, ForeignKey, DateTime, JSON
+from sqlalchemy import Column, func, Integer, Table, String, ForeignKey, DateTime, JSON, inspect
 from sqlalchemy.sql import text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
@@ -57,7 +57,7 @@ class Collection(Base):
         secondary=assignment, back_populates="collections"
     )
     tags = relationship("Tag",
-        secondary=tag_table
+        secondary=tag_table, back_populates='collection_tags'
     )
 
     def __repr__(self):
@@ -105,7 +105,7 @@ class Asset(Base):
         secondary=assignment
     )
     tags = relationship("Tag",
-        secondary=tag_table
+        secondary=tag_table, back_populates='item'
     )
 
     def __repr__(self):
@@ -135,6 +135,58 @@ def __reset_db(session, engine):
     # TODO: is return True 'pythonic', something better?
     return True
 
+# helper functions
+def make_dict(items):
+    # TODO: using '__tablename__' on objects does the same jobs as 'item_type'
+    # any point in having it?
+
+    result = []
+    for x in items:
+        item = {}
+        for column in x.__table__.columns:
+            item[column.name] = str(getattr(x, column.name))
+
+        # additional many-to-many data
+        # init tags
+        # TODO: '.append(str(tag.name))' could more info be used here? like
+        # {'name': 'int(assets rate?)'} maybe too advanced?
+        if x.item_type == 'asset':
+            # asset
+            # init tags
+            item['tags'] = []
+            assets_tags = x.tags
+
+            for tag in assets_tags:
+                item['tags'].append(str(tag.name))
+
+            # init collections
+            item['collections'] = []
+            # get assets collections via many-to-many
+            assets_collections = x.collections
+
+            # append collection objects to 'item'
+            for collection in assets_collections:
+                item['collections'].append(str(collection))
+
+        elif x.item_type == 'collection':
+            # collection
+            # init tags
+            item['tags'] = []
+            collections_tags = x.tags
+
+            for tag in collections_tags:
+                item['tags'].append(str(tag.name))
+
+            # init assets
+            item['assets'] = []
+            assignments = x.assets
+
+            for assignment in assignments:
+                item['assets'].append(str(assignment))
+
+        result.append(item)
+
+    return result
 
 # user functions
 def post_collection(session, **kwarg):
@@ -230,36 +282,7 @@ def get_collections(session):
         collections.append(collection)
 
     # iterates through 'collections' objects to build dicts of objects, 'item'
-    result = []
-    for collection in collections:
-        item = {}
-        for column in collection.__table__.columns:
-            item[column.name] = str(getattr(collection, column.name))
-
-        # Additional many-to-many data
-        # init tags
-        # TODO: remove try/except
-        item['tags'] = []
-        try:
-            bla = session.query(Collection).filter_by(id=collection.id).first().tags
-            for x in bla:
-                item['tags'].append(str(x.name))
-        except:
-            pass
-
-        # init assets
-        item['assets'] = []
-
-        assignments = session.query(Collection).filter_by(
-            id=collection.id
-        ).first().assets
-
-        # TODO: '.append(str(assignment))' needd to append a dict of data.
-        for assignment in assignments:
-            item['assets'].append(str(assignment))
-
-        # appends final 'item' rep of collection object.
-        result.append(item)
+    result = make_dict(collections)
 
     # returns list of dicts, collection assets
     return result
@@ -273,36 +296,7 @@ def get_assets(session):
         assets.append(asset)
 
     # iterates through 'assets' objects to build dicts of objects, 'item'
-    result = []
-    for asset in assets:
-        item = {}
-        for column in asset.__table__.columns:
-            item[column.name] = str(getattr(asset, column.name))
-
-        # Additional many-to-many data
-        # init collections
-        # TODO: look inot '.first()' is this the quickest way to return a unique
-        # result?
-        item['collections'] = []
-        # get assets collections via many-to-many
-        assets_collections = session.query(Asset).filter_by(
-            id=asset.id
-        ).first().collections
-
-        # append object data to 'item'.
-        # TODO: '.append(str(collection))' needs to be a dict of the collections
-        # data.
-        for collection in assets_collections:
-            item['collections'].append(str(collection))
-
-        # init tags
-        # TODO: Needs to impltement 'set{}' for duplicate tags?
-        item['tags'] = []
-        for tag in asset.tags:
-            item['tags'].append(tag.name)
-
-        # append 'item' of asset object
-        result.append(item)
+    result = make_dict(assets)
 
     # returns list of dict,
     return result
@@ -315,32 +309,7 @@ def get_asset_by_id(session, id):
 
     # if asset is found, build dict of object, 'item'
     if asset_by_id:
-        item = {}
-
-        for column in asset_by_id.__table__.columns:
-            item[column.name] = str(getattr(asset_by_id, column.name))
-
-        # Additional many-to-many data
-
-        # init tags
-        # TODO: '.append(str(tag.name))' could more info be used here? like
-        # {'name': 'int(assets rate?)'} maybe too advanced?
-        item['tags'] = []
-        assets_tags = session.query(Asset).filter_by(id=asset_by_id.id).first().tags
-
-        for tag in assets_tags:
-            item['tags'].append(str(tag.name))
-
-        # init collections
-        # TODO: '.append(str(collection))' will need to be dict of collection
-        # object
-        item['collections'] = []
-        # get assets collections via many-to-many
-        assets_collections = session.query(Asset).filter_by(id=asset_by_id.id).first().collections
-
-        # append collection objects to 'item'
-        for collection in assets_collections:
-            item['collections'].append(str(collection))
+        item = make_dict((asset_by_id,))
 
     else:
         # TODO: Is this needed?
@@ -357,32 +326,9 @@ def get_collection_by_id(session, id):
 
     # if collection exists, build dict from data, 'item'
     if collection_by_id:
-        result = {}
-
-        for column in collection_by_id.__table__.columns:
-            result[column.name] = str(getattr(collection_by_id, column.name))
-
-        # Additional many-to-mnay data
-        # init tags
-        # TODO: '.append(str(tag.name))' could more info be used here? like
-        # {'name': 'int(assets rate?)'} maybe too advanced?
-        result['tags'] = []
-        collections_tags = collection_by_id.tags
-
-        for tag in collections_tags:
-            result['tags'].append(str(tag.name))
-
-        # init assets
-        result['assets'] = []
-        assignments = session.query(Collection).filter_by(
-            id=collection_by_id.id
-        ).first().assets
-
-        for assignment in assignments:
-            result['assets'].append(str(assignment))
+        result = make_dict((collection_by_id,))
 
     else:
-
         result = {}
 
     return result
@@ -395,78 +341,32 @@ def get_query(session, userquery):
     # TODO: DEV: needs to be rewritten to account for many-to-many relationships
     # TODO: currently searching every table with every query term, multiple
     # searches. gotta be a better way. look into postgres joins?
-    result = []
-    assets = []
-    query_id = []
-    collection_id = []
+    result = {}
 
+    # makes users query a dict
     for k, v in userquery.items():
         query = {k: str(v).split()}
 
+    # querying through many-to-many relationships leaves us with an
+    # instrumentedlist which needs to be exracted before using make_dict
+    item_list = []
     for term in query['query']:
-        # query asset names
-        for x in session.query(Asset).filter_by(name=term).all():
-            try:
-                assets.append(x)
-            except:
-                pass
-        # query collection name
-        for x in session.query(Asset).filter_by(name=term).all():
-            try:
-                assets.append(x)
-            except:
-                pass
+        # return list of tags
+        taglists = session.query(Tag).filter_by(name=term).all()
+        # for each tag
+        for tag in taglists:
+            # if one exists
+            if tag.item:
+                # get asset assigned to tag and append to list, 'item_list'
+                for item in tag.item:
+                    item_list.append(item)
+            # get collection assigned to tag and append to list, 'item_list'
+            elif tag.collection_tags:
+                for item in tag.collection_tags:
+                    item_list.append(item)
 
-    # query asset tag
-    # TODO: Figure out a better way to search tags. currently it finds tags, ids
-    # returns ids to list, then query each id to get item details.
-    for term in query['query']:
-        query_sql = session.execute(
-            """SELECT array_agg(id) from asset where '{}' = ANY(tag)""".format(
-                term
-            )
-        )
-
-        query_collection_sql = session.execute(
-            """SELECT array_agg(id) from collection where '{}' = ANY(tag)""".format(
-                term
-            )
-        )
-
-        # catch if asset query returns None
-        try:
-            for _id in query_sql:
-                query_id.append(_id[0][0])
-        except TypeError as e:
-            print('{}, not found in asset tags'.format(term))
-
-        # catch if collection query returns None
-        try:
-            for _id in query_collection_sql:
-                collection_id.append(_id[0][0])
-        except TypeError as e:
-            print('{}, not found in collection tags'.format(term))
-
-    # remove dups from id list
-    query_id = list(set(query_id))
-    collection_id = list(set(collection_id))
-
-    # using ids query whole rows, and append to assets.
-    for _id in query_id:
-        get = session.query(Asset).get(int(_id))
-        assets.append(get)
-
-    for _id in collection_id:
-        get = session.query(Collection).get(int(_id))
-        assets.append(get)
-
-    # process all assets all all tables
-    for asset in assets:
-        item = {}
-        for column in asset.__table__.columns:
-            item[column.name] = str(getattr(asset, column.name))
-
-        result.append(item)
+    # run items through make_dict for the return
+    result = make_dict(item_list)
 
     return result
 

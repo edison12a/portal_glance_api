@@ -255,7 +255,6 @@ def query():
     # TODO: Use sessions, not con/meta
     # TODO: figure out best way to query multiple tables, with multiple search terms
 
-
     if 'flag' in request.args:
         session = Session()
         flagged = get_query_flag(session, request.args['flag'])
@@ -264,7 +263,6 @@ def query():
         return jsonify({'flagged assets': flagged})
 
     elif 'query' in request.args:
-        # TODO: figure how best way to apply used to query and filter.
         session = Session()
         assets = get_query(session, request.args)
         session.close()
