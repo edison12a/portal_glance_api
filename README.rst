@@ -1,4 +1,4 @@
-NOT USABLE
+IN DEVELOPMENT
 
 Glance Api
 =========================
@@ -10,14 +10,14 @@ Code Examples
 
 .. code-block:: python
 
-    >>> code = {'code': ['smaple', 'code']}
+    >>> code = {'code': ['sample', 'code']}
 
 Installation
 ------------
 
 .. code-block:: python
 
-    >>> code = {'code': ['smaple', 'code']}
+    >>> code = {'code': ['sample', 'code']}
 
 Documentation & Tests
 -------------
