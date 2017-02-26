@@ -3,7 +3,6 @@ from flask import Flask, jsonify, request, make_response
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
-# from dev_tool import get_tables_db, get_columns_, drop_table
 from functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, delete_assety,
