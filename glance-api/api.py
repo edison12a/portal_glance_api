@@ -7,14 +7,10 @@ from sqlalchemy import create_engine
 from models import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, delete_assety,
-    delete_collectiony, patch_assety, get_query_flag, get_query_tag,
-    patch_collectiony
+    delete_collectiony, patch_asset, get_query_flag,
+    patch_collection
     )
-from api_func import (
-    connect, POST_collection, POST_asset, GET_asset, GET_collection,
-    GET_collection_id, GET_asset_id, DELETE_collection, PUT_asset_tag,
-    DELETE_asset, GET_query
-    )
+
 import cred
 
 
@@ -45,9 +41,6 @@ ALTER ROLE vhrender SET timezone TO 'UTC';
 GRANT ALL PRIVILEGES ON DATABASE glance TO vhrender;
 """
 
-# Make connection and Metadata object
-con, meta = connect(cred.username, cred.password, 'glance', cred.ip_local)
-
 engine = create_engine(
     'postgresql://{}:{}@{}:5432/glance'.format(
         cred.username, cred.password, cred.ip_local
@@ -56,7 +49,6 @@ engine = create_engine(
 
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
-
 
 """
 # Dev functions
@@ -252,15 +244,18 @@ def get_asset_id(asset_id):
 
 @app.route('{}/query'.format(ROUTE), methods=['GET'])
 def query():
-    # TODO: Use sessions, not con/meta
-    # TODO: figure out best way to query multiple tables, with multiple search terms
+    """ returns results from querys
+    'flag': takes key/value, returns
+    'query': takes list of string, returns list of dict;
 
+    """
     if 'flag' in request.args:
         session = Session()
         flagged = get_query_flag(session, request.args['flag'])
         session.close()
 
         return jsonify({'flagged assets': flagged})
+
 
     elif 'query' in request.args:
         session = Session()
@@ -269,16 +264,10 @@ def query():
 
         return jsonify({'result': assets})
 
-    elif 'tag' in request.args:
-
-        session = Session()
-        bla = get_query_tag(session)
-        session.close()
-
-        return jsonify({'result': 'tags'})
 
     elif 'collection' in request.args:
         return jsonify({'result': 'collections'})
+
 
     return jsonify({'result': assets})
 
@@ -335,42 +324,31 @@ def delete_asset(asset_id):
 
 
 @app.route('{}/asset/patch'.format(ROUTE), methods=['PATCH'])
-def patch_asset():
-    # TODO: impletement with sqlalchemy session
+def patch_asset_id():
+    # TODO: dont use try/except here
 
     patch_data = {}
     for y in request.args:
         patch_data[y] = request.args[y]
 
     session = Session()
-    try:
-        patch_assety(session, **patch_data)
-    except:
-        pass
-
-    asset = get_asset_by_id(session, patch_data['id'])
+    patched_asset = patch_asset(session, **patch_data)
     session.close()
 
-    return jsonify({'PATCH': asset})
+    return jsonify({'PATCH': patched_asset})
 
 
 @app.route('{}/collection/patch'.format(ROUTE), methods=['PATCH'])
-def patch_collection():
-    # TODO: impletement with sqlalchemy session
+def patch_collection_id():
     patch_data = {}
     for x in request.args:
         patch_data[x] = request.args.get(x)
 
     session = Session()
-    try:
-        patch_collectiony(session, **patch_data)
-    except:
-        pass
-
-    collection = get_collection_by_id(session, patch_data['id'])
+    patched_collection = patch_collection(session, **patch_data)
     session.close()
 
-    return jsonify({'PATCH': collection})
+    return jsonify({'PATCH': patched_collection})
 
 
 if __name__ == '__main__':

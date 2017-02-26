@@ -3,7 +3,9 @@
 import datetime
 from ast import literal_eval
 
-from sqlalchemy import Column, func, Integer, Table, String, ForeignKey, DateTime, JSON, inspect
+from sqlalchemy import (
+    Column, func, Integer, Table, String, ForeignKey, DateTime, JSON, inspect
+)
 from sqlalchemy.sql import text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,8 +14,8 @@ from sqlalchemy.orm import relationship
 import cred
 
 
-# TODO: Model / function logic code is getting big. need to split into different
-# modules
+# TODO: Model / function logic code is getting big. need to split into
+# different modules
 
 """postgrest/sqlalchemy database design"""
 # Database models
@@ -27,14 +29,13 @@ assignment = Table('assignment', Base.metadata,
 )
 
 # association table: Tag.id, Asset.id, Collection.id
-# TODO: I think many-to-manys should link 3 classes? perhaps theres a better way
-# maybe an additional 'all objects table' so everything have a unique id?
+# TODO: I think many-to-manys should link 3 classes? perhaps theres a better
+# way maybe an additional 'all objects table' so everything have a unique id?
 tag_table = Table('tag_table', Base.metadata,
     Column('tag_id', Integer, ForeignKey('tag.id')),
     Column('asset_id', Integer, ForeignKey('asset.id')),
     Column('collection_id', Integer, ForeignKey('collection.id'))
 )
-
 
 """declarative tables"""
 class Collection(Base):
@@ -136,25 +137,27 @@ def __reset_db(session, engine):
     return True
 
 # helper functions
-def make_dict(items):
+def make_dict(item_list):
+    """ takes list of database objects, returns dict repr of objects. """
     # TODO: using '__tablename__' on objects does the same jobs as 'item_type'
-    # any point in having it?
-
+    # any point in having it as column?
     result = []
-    for x in items:
+
+    # for each database object, build dict, 'item', from data.
+    for item_object in item_list:
         item = {}
-        for column in x.__table__.columns:
-            item[column.name] = str(getattr(x, column.name))
+        for column in item_object.__table__.columns:
+            item[column.name] = str(getattr(item_object, column.name))
 
         # additional many-to-many data
         # init tags
         # TODO: '.append(str(tag.name))' could more info be used here? like
         # {'name': 'int(assets rate?)'} maybe too advanced?
-        if x.item_type == 'asset':
-            # asset
+        if item_object.item_type == 'asset':
+            # If object is asset
             # init tags
             item['tags'] = []
-            assets_tags = x.tags
+            assets_tags = item_object.tags
 
             for tag in assets_tags:
                 item['tags'].append(str(tag.name))
@@ -162,30 +165,31 @@ def make_dict(items):
             # init collections
             item['collections'] = []
             # get assets collections via many-to-many
-            assets_collections = x.collections
+            assets_collections = item_object.collections
 
             # append collection objects to 'item'
             for collection in assets_collections:
                 item['collections'].append(str(collection))
 
-        elif x.item_type == 'collection':
-            # collection
+        elif item_object.item_type == 'collection':
+            # If object is a collection
             # init tags
             item['tags'] = []
-            collections_tags = x.tags
+            collections_tags = item_object.tags
 
             for tag in collections_tags:
                 item['tags'].append(str(tag.name))
 
             # init assets
             item['assets'] = []
-            assignments = x.assets
+            assignments = item_object.assets
 
             for assignment in assignments:
                 item['assets'].append(str(assignment))
 
         result.append(item)
 
+    # return database objects as dicts.
     return result
 
 # user functions
@@ -338,7 +342,6 @@ def get_collection_by_id(session, id):
 # flags or something.
 def get_query(session, userquery):
     """takes list of words and returns related objects"""
-    # TODO: DEV: needs to be rewritten to account for many-to-many relationships
     # TODO: currently searching every table with every query term, multiple
     # searches. gotta be a better way. look into postgres joins?
     result = {}
@@ -375,44 +378,22 @@ def get_query_flag(session, flag):
     """ Returns list of flagged items """
     # TODO: DEV: rewritten to account for many-to-many relationships.
     assets = []
-    for instance in session.query(Asset).filter(Asset.flag>=1).order_by(Asset.id):
-        assets.append(instance)
+    for item in session.query(Asset).filter(Asset.flag>=1).order_by(Asset.id):
+        assets.append(item)
 
-    for instance in session.query(Collection).filter(Collection.flag>=1).order_by(Collection.id):
-        assets.append(instance)
+    for item in session.query(Collection).filter(Collection.flag>=1).order_by(Collection.id):
+        assets.append(item)
 
     result = []
     for asset in assets:
-        if asset.item_type == 'asset':
-            item = {}
-            for column in asset.__table__.columns:
-                item[column.name] = str(getattr(asset, column.name))
-            result.append(item)
-
-        elif asset.item_type == 'collection':
-            item = {}
-            for column in asset.__table__.columns:
-                item[column.name] = str(getattr(asset, column.name))
-            result.append(item)
+        item = make_dict(asset)
+        result.append(item)
 
     return result
 
 
-def get_query_tag(session):
-    """query tags"""
-    # TODO: DEV: rewritten to account for many-to-many relationships.
-    # What is this?
-
-    # bla = session.query(Asset).filter(Asset.tag).all()
-    #hrr = session.query(Asset).order_by(Asset.id)
-
-    return False
-
-
-def patch_assety(session, **user_columns):
+def patch_asset(session, **user_columns):
     """updates asset fields using user data"""
-    # TODO: earlist issues meant the function had 'y' added to the end. clean up
-    # function name
     # TODO: This is a pretty heftly function... needs refactoring
 
     # init query dict
@@ -507,14 +488,14 @@ def patch_assety(session, **user_columns):
     session.add(asset)
     session.commit()
 
+    result = make_dict((asset,))
+
     # Returns asset object
-    return asset
+    return result
 
 
-def patch_collectiony(session, id, **user_columns):
+def patch_collection(session, id, **user_columns):
     """updates users defined columns with user defined values"""
-    # TODO: earlist issues meant the function had 'y' added to the end. clean up
-    # function name
     # TODO: This is a pretty heftly function... needs refactoring
     # init query dict
 
@@ -622,8 +603,10 @@ def patch_collectiony(session, id, **user_columns):
     session.add(collection)
     session.commit()
 
-    # Returns asset object
-    return collection
+    result = make_dict((collection,))
+
+    # Returns collection object
+    return result
 
 
 def delete_assety(session, asset_id):
