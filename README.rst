@@ -32,7 +32,7 @@ Run api.py to get the web api running.
     (glance-api-env)$ cd glance-api
     (glance-api-env)$ python api.py
 
-  Entry point is **http://[localhost]/glance/api**
+Entry point is **http://[localhost]/glance/api**
 
 Documentation & Tests
 -------------
