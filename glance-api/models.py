@@ -1,3 +1,5 @@
+# TODO: Clean up imports, ast, datetime?
+# TODO: Implement proper config, include auth to replace 'import cred'
 import datetime
 from ast import literal_eval
 
@@ -9,15 +11,24 @@ from sqlalchemy.orm import relationship
 
 import cred
 
+
+# TODO: Model / function logic code is getting big. need to split into different
+# modules
+
+"""postgrest/sqlalchemy database design"""
 # Database models
 Base = declarative_base()
 
-
+"""association tables"""
+# association table: Collection.id, Asset.id
 assignment = Table('assignment', Base.metadata,
     Column('collection_id', Integer, ForeignKey('collection.id')),
     Column('asset_id', Integer, ForeignKey('asset.id'))
 )
 
+# association table: Tag.id, Asset.id, Collection.id
+# TODO: I think many-to-manys should link 3 classes? perhaps theres a better way
+# maybe an additional 'all objects table' so everything have a unique id?
 tag_table = Table('tag_table', Base.metadata,
     Column('tag_id', Integer, ForeignKey('tag.id')),
     Column('asset_id', Integer, ForeignKey('asset.id')),
@@ -25,11 +36,12 @@ tag_table = Table('tag_table', Base.metadata,
 )
 
 
+"""declarative tables"""
 class Collection(Base):
+    """Collection Database structure, declarative"""
     # TODO: Better repr
+    # TODO: read more on the back_populates/backref stuff
     __tablename__ = 'collection'
-
-
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -49,11 +61,15 @@ class Collection(Base):
     )
 
     def __repr__(self):
-        return "<Collection(name='%s', image='%s', assets='%s')>" % (
-            self.name, self.image, self.assets
+        return "<Collection(name='%s', image='%s')>" % (
+            self.name, self.image
         )
 
+
 class Tag(Base):
+    """Tag database structure, declarative"""
+    # TODO: I think all asset databases should be replaced with a 'all assets'
+    # table.
     __tablename__ = 'tag'
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -70,10 +86,9 @@ class Tag(Base):
 
 
 class Asset(Base):
+    """Asset database structure, declarative"""
     # TODO: Better repr
     __tablename__ = 'asset'
-
-    print(func.now())
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -93,18 +108,20 @@ class Asset(Base):
         secondary=tag_table
     )
 
-
     def __repr__(self):
         return "<Asset(id='%s', name='%s')>" % (
             self.id, self.name
         )
 
 
-# private functions
+"""database methods"""
+# dev functions
 def __reset_db(session, engine):
-    """drops tables and rebuild"""
-    # TODO: remove tables doesnt work
+    """DEV: drops tables and rebuild"""
+    # TODO: remove tables doesnt work, need to figure out how to 'drop cascade'
+    # close any open session.
     session.close()
+    # TODO: remove try/except for EXISTS, code flow etc.
     try:
         assignment.__table__.drop(engine)
         Collection.__table__.drop(engine)
@@ -115,18 +132,23 @@ def __reset_db(session, engine):
     Base.metadata.create_all(engine)
     print('building new tables')
 
+    # TODO: is return True 'pythonic', something better?
     return True
 
 
-# public functions
+# user functions
 def post_collection(session, **kwarg):
-    """Posts collection to the database"""
+    """Posts collection to the database
+    Return: collection; 'newly posted collection'
+    """
     payload = {}
     data = {}
 
+    # build POST data payload query from user data, **kwarg
     for k, v in kwarg.items():
         payload[k] = v[0]
 
+    # validate payload agaisnt database columnns, automate None to empty fields
     for column in Collection.__table__.columns:
         if column.name in payload:
             data[column.name] = payload[column.name]
@@ -135,15 +157,19 @@ def post_collection(session, **kwarg):
         else:
             pass
 
+    # init collection object
     collection = Collection(
         name=data['name'], image=data['image'], author=data['author']
     )
 
+    # append default cover to Collection object, if 'None'
+    # TODO: can possibly do this during validation?
     if data['image_thumb'] == None:
         collection.image_thumb = 'default_cover.jpg'
     else:
         collection.image_thumb = data['image_thumb']
 
+    # commit new collection.
     session.add(collection)
     session.commit()
 
@@ -151,7 +177,9 @@ def post_collection(session, **kwarg):
 
 
 def post_asset(session, **kwarg):
-    """Posts asset to the database"""
+    """Posts asset to the database
+    Return: asset; 'new posted aset'
+    """
     payload = {}
     data = {}
 
@@ -168,8 +196,6 @@ def post_asset(session, **kwarg):
         else:
             pass
 
-    print(data)
-
     # Database entry
     asset = Asset(
         name=data['name'], image=data['image'],
@@ -177,6 +203,10 @@ def post_asset(session, **kwarg):
         author=data['author']
     )
 
+    # I think i put this here because the asset had to be 'init' with
+    # session.add() because i needed to append new tags?
+    # TODO: understand before better, refactor multiple session hits might not
+    # be needed?
     session.add(asset)
 
     if 'tags' in payload:
@@ -185,25 +215,30 @@ def post_asset(session, **kwarg):
             newtag = Tag(name=term)
             asset.tags.append(newtag)
 
-
+    # commit changes to database
     session.commit()
 
     return asset
 
 
 def get_collections(session):
-    """Returns all collection objects"""
+    """Returns list of dict collection objects"""
+    # querys for all Collection objects in order of id, appends to list
+    # TODO: This should return objects in order of moddate
     collections = []
     for collection in session.query(Collection).order_by(Collection.id):
         collections.append(collection)
 
+    # iterates through 'collections' objects to build dicts of objects, 'item'
     result = []
     for collection in collections:
         item = {}
         for column in collection.__table__.columns:
             item[column.name] = str(getattr(collection, column.name))
 
+        # Additional many-to-many data
         # init tags
+        # TODO: remove try/except
         item['tags'] = []
         try:
             bla = session.query(Collection).filter_by(id=collection.id).first().tags
@@ -219,94 +254,123 @@ def get_collections(session):
             id=collection.id
         ).first().assets
 
+        # TODO: '.append(str(assignment))' needd to append a dict of data.
         for assignment in assignments:
             item['assets'].append(str(assignment))
 
+        # appends final 'item' rep of collection object.
         result.append(item)
 
-
+    # returns list of dicts, collection assets
     return result
 
 
 def get_assets(session):
     """Returns all asset objects"""
+    # querys for all asset objects in order of moddate, appends to list
     assets = []
     for asset in session.query(Asset).order_by(Asset.moddate):
         assets.append(asset)
 
+    # iterates through 'assets' objects to build dicts of objects, 'item'
     result = []
-    # build asset item object for user
     for asset in assets:
         item = {}
         for column in asset.__table__.columns:
             item[column.name] = str(getattr(asset, column.name))
 
+        # Additional many-to-many data
         # init collections
+        # TODO: look inot '.first()' is this the quickest way to return a unique
+        # result?
         item['collections'] = []
-        koo = session.query(Asset).filter_by(id=asset.id).first().collections
-        for x in koo:
-            item['collections'].append(str(x))
+        # get assets collections via many-to-many
+        assets_collections = session.query(Asset).filter_by(
+            id=asset.id
+        ).first().collections
+
+        # append object data to 'item'.
+        # TODO: '.append(str(collection))' needs to be a dict of the collections
+        # data.
+        for collection in assets_collections:
+            item['collections'].append(str(collection))
 
         # init tags
+        # TODO: Needs to impltement 'set{}' for duplicate tags?
         item['tags'] = []
-        for x in asset.tags:
-            item['tags'].append(x.name)
+        for tag in asset.tags:
+            item['tags'].append(tag.name)
 
+        # append 'item' of asset object
         result.append(item)
 
+    # returns list of dict,
     return result
 
 
 def get_asset_by_id(session, id):
-    """Return asset object using id"""
-    # TODO: Returns trunc dates. Should return whole date.
+    """Return asset object as a dict using Asset.id"""
+    # querys for asset object
     asset_by_id = session.query(Asset).get(id)
-    print(asset_by_id.initdate)
 
+    # if asset is found, build dict of object, 'item'
     if asset_by_id:
-        # TODO: Below takes a row and converts to a dict. Make func?
-        result = {}
-        for column in asset_by_id.__table__.columns:
-            result[column.name] = str(getattr(asset_by_id, column.name))
+        item = {}
 
-        # init collections
-        result['collections'] = []
-        koo = session.query(Asset).filter_by(id=asset_by_id.id).first().collections
-        for x in koo:
-            result['collections'].append(str(x))
+        for column in asset_by_id.__table__.columns:
+            item[column.name] = str(getattr(asset_by_id, column.name))
+
+        # Additional many-to-many data
 
         # init tags
-        result['tags'] = []
-        bla = session.query(Asset).filter_by(id=asset_by_id.id).first().tags
-        for x in bla:
-            result['tags'].append(str(x.name))
+        # TODO: '.append(str(tag.name))' could more info be used here? like
+        # {'name': 'int(assets rate?)'} maybe too advanced?
+        item['tags'] = []
+        assets_tags = session.query(Asset).filter_by(id=asset_by_id.id).first().tags
+
+        for tag in assets_tags:
+            item['tags'].append(str(tag.name))
+
+        # init collections
+        # TODO: '.append(str(collection))' will need to be dict of collection
+        # object
+        item['collections'] = []
+        # get assets collections via many-to-many
+        assets_collections = session.query(Asset).filter_by(id=asset_by_id.id).first().collections
+
+        # append collection objects to 'item'
+        for collection in assets_collections:
+            item['collections'].append(str(collection))
 
     else:
-        result = {}
+        # TODO: Is this needed?
+        item = {}
 
-
-    return result
+    # returns dic, 'item' repr of asset object
+    return item
 
 
 def get_collection_by_id(session, id):
-    """Returns collection object using id"""
-    # TODO: Returns trunc dates. Should return whole date.
-    # TODO: Figure out a better way to set collections assets.
+    """Returns collection object as dict using Collection.id"""
+    # querys for collection object
     collection_by_id = session.query(Collection).get(id)
 
-    # if collection exists, get item
+    # if collection exists, build dict from data, 'item'
     if collection_by_id:
         result = {}
 
         for column in collection_by_id.__table__.columns:
             result[column.name] = str(getattr(collection_by_id, column.name))
 
+        # Additional many-to-mnay data
         # init tags
+        # TODO: '.append(str(tag.name))' could more info be used here? like
+        # {'name': 'int(assets rate?)'} maybe too advanced?
         result['tags'] = []
-        bla = collection_by_id.tags
+        collections_tags = collection_by_id.tags
 
-        for x in bla:
-            result['tags'].append(str(x.name))
+        for tag in collections_tags:
+            result['tags'].append(str(tag.name))
 
         # init assets
         result['assets'] = []
@@ -324,8 +388,11 @@ def get_collection_by_id(session, id):
     return result
 
 
+# TODO: Can all these get_query_* re refactored to a single methods? using
+# flags or something.
 def get_query(session, userquery):
     """takes list of words and returns related objects"""
+    # TODO: DEV: needs to be rewritten to account for many-to-many relationships
     # TODO: currently searching every table with every query term, multiple
     # searches. gotta be a better way. look into postgres joins?
     result = []
@@ -406,6 +473,7 @@ def get_query(session, userquery):
 
 def get_query_flag(session, flag):
     """ Returns list of flagged items """
+    # TODO: DEV: rewritten to account for many-to-many relationships.
     assets = []
     for instance in session.query(Asset).filter(Asset.flag>=1).order_by(Asset.id):
         assets.append(instance)
@@ -431,38 +499,53 @@ def get_query_flag(session, flag):
 
 
 def get_query_tag(session):
+    """query tags"""
+    # TODO: DEV: rewritten to account for many-to-many relationships.
+    # What is this?
 
     # bla = session.query(Asset).filter(Asset.tag).all()
-    hrr = session.query(Asset).order_by(Asset.id)
+    #hrr = session.query(Asset).order_by(Asset.id)
 
-    return 'bla'
+    return False
 
 
 def patch_assety(session, **user_columns):
-    """patches users defined columns with user defined values"""
-    # TODO: catch error - if asset id doesnt exist.
-    # TODO: patch tag doesnt work, should append, instead it overwrites
+    """updates asset fields using user data"""
+    # TODO: earlist issues meant the function had 'y' added to the end. clean up
+    # function name
+    # TODO: This is a pretty heftly function... needs refactoring
 
+    # init query dict
     query = {}
-
+    # asset id
     id = int(user_columns['id'])
-    # Check user columns
-    asset_columns = Asset.__table__.columns.keys()
-    # compare user column data to database columns
-    for k, v in user_columns.items():
 
+    # build list of assets column names for validation
+    asset_columns = Asset.__table__.columns.keys()
+
+    # validate user data and build query dict, from data.
+    for k, v in user_columns.items():
         if k in asset_columns:
-            # if match append user data to approved query variable
             query[k] = v
-        elif k == 'collections':
-            query[k] = v.split()
-        elif k == 'tags':
-            query['tags'] = v.split()
+
         else:
             pass
 
+        # additional many-to-many data
+        if k == 'collections':
+            query[k] = v.split()
+
+        elif k == 'tags':
+            query['tags'] = v.split()
+
+        else:
+            pass
+
+    # once all user data is validated and ready to append, get asset object.
     asset = session.query(Asset).get(id)
 
+    # Process user data and update asset object fields.
+    # TODO: is there a better way to handle these sort of 'flags'?
     for k, v in query.items():
         if k == 'name':
             asset.name = v
@@ -477,134 +560,184 @@ def patch_assety(session, **user_columns):
             asset.attached = v
 
         elif k == 'tags':
+            # process asset tags
             for tag in v:
-                inputy = str(tag)
-                newtag = Tag(name=inputy)
+                # create new Tag object and append to asset object
+                # TODO: Could this be a point to implement a 'set{}' for
+                # duplicutes
+                newtag = Tag(name=str(tag))
+                session.add(newtag)
+
                 asset.tags.append(newtag)
 
-            session.add(newtag)
-
-            # query for assets tags
-            bla = session.query(Asset).filter_by(id=asset.id).first().tags
-
         elif k == 'flag':
+            # process flag field
+            # if 'flag' is true value is increased
             if int(query['flag']) == 1:
+                # TODO: is a try/except needed here?
                 try:
                     asset.flag += 1
+
                 except TypeError:
                     asset.flag = 0
                     asset.flag += 1
+
+            # if 'flag' is false value is reduced
             elif int(query['flag']) == 0:
                 asset.flag -= 1
+
+            # is the 'else:' 'pythonic'?
             else:
                 pass
 
         elif k == 'collections':
             for collection_id in query['collections']:
+                # get Collection object using collection.id
                 existingcollection = session.query(Collection).get(collection_id)
+                # append existing collection to assets collections
                 asset.collections.append(existingcollection)
 
         else:
             pass
 
-    # patches append moddate automatically
+    # Finish asset object
+    # append object moddate
     asset.moddate = datetime.datetime.utcnow()
 
     session.add(asset)
     session.commit()
 
+    # Returns asset object
     return asset
 
 
 def patch_collectiony(session, id, **user_columns):
-    """patches users defined columns with user defined values"""
+    """updates users defined columns with user defined values"""
+    # TODO: earlist issues meant the function had 'y' added to the end. clean up
+    # function name
+    # TODO: This is a pretty heftly function... needs refactoring
+    # init query dict
+
+    #init query dict
     query = {}
-    # Check user columns
+
+    # build list of collections columnnams for validation
     collection_columns = Collection.__table__.columns.keys()
-    # compare user column data to database columns
+
+    # validdate uer data and build query dict, from data.
     for k, v in user_columns.items():
         if k in collection_columns:
-            # if match append user data to approved query variable
             query[k] = v
 
         else:
             pass
+
+        # additional many-to-many data
         if k == 'assets':
             query[k] = v.split()
+
         elif k == 'tags':
             query[k] = v.split()
+
         elif k == 'remove_assets':
             query[k] = v.split()
 
-    # query logical for appendind fields
+        else:
+            pass
+
+    # once all user data is alidate and ready to append, get collection object
     collection = session.query(Collection).get(id)
+
+    # process user data and update collection object fields.
+    # TODO: is there a better way to handle these sort of 'flags'?
     for k, v in query.items():
         if k == 'name':
             collection.name = v
+
         elif k == 'image':
             collection.image = v
+
         elif k == 'image_thumb':
             collection.image_thumb = v
+
         elif k == 'assets':
             for asset_id in v:
                 # TODO: dont use try/except for control flow
-                # TODO: figure out how to handle removeal of assets
-                # myparent.children.remove(somechild)
                 try:
+                    # get asset object and append to collection
                     newasset = session.query(Asset).get(int(asset_id))
                     collection.assets.append(newasset)
+
                 except:
                     pass
+
         elif k == 'remove_assets':
             for asset_id in v:
+                # TODO: dont use try/except for this
                 try:
+                    # get asset object and remove from collection.
+                    # TODO: is there a quicker way? without getting the object first?
                     removeasset = session.query(Asset).get(int(asset_id))
                     collection.assets.remove(removeasset)
+
                 except:
                     pass
 
         elif k == 'tags':
-
             for x in v:
-                test = Tag(name=str(x))
-                session.add(test)
+                # create to Tag objects and append to collection.
+                # TODO: Could this be a point to implement a 'set{}' for
+                # duplicutes
+                newtag = Tag(name=str(x))
+                session.add(newtag)
 
-                collection.tags.append(test)
+                collection.tags.append(newtag)
 
         elif k == 'flag':
+            # process flag field
+            # if 'flag' is true value is increased
             if int(query['flag']) == 1:
+                # TODO: is a try/except needed here?
                 try:
                     collection.flag += 1
+
                 except TypeError:
                     collection.flag = 0
                     collection.flag += 1
+
+            # if 'flag' is false value is reduced
             elif int(query['flag']) == 0:
                 collection.flag -= 1
+
+            # is the 'else:' 'pythonic'?
             else:
                 pass
         else:
             pass
 
-    # patches append moddate automatically
+    # Finish asset object
+    # append object moddate
     collection.moddate = datetime.datetime.utcnow()
 
     session.add(collection)
     session.commit()
 
-
+    # Returns asset object
     return collection
 
 
 def delete_assety(session, asset_id):
-    # TODO: doc strings
+    """deletes asset object"""
+    # TODO: DEV: rewritten to account for many-to-many relationships.
     session.query(Asset).filter(Asset.id=='{}'.format(asset_id)).delete()
     session.commit()
 
-    return True
+    return False
 
 
 def delete_collectiony(session, collection_id):
-    # TODO: doc strings
+    """deletes collection object"""
+    # TODO: DEV: rewritten to account for many-to-many relationships.
     print('whaaa')
 
     # myparent.children.remove(somechild)
@@ -612,4 +745,4 @@ def delete_collectiony(session, collection_id):
     # session.query(Collection).filter(Collection.id=='{}'.format(collection_id)).delete()
     # session.commit()``
 
-    return True
+    return False
