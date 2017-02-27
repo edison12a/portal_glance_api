@@ -5,8 +5,8 @@ from sqlalchemy import create_engine
 
 from functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
-    get_asset_by_id, get_query, post_collection, post_asset, delete_assety,
-    delete_collectiony, patch_asset, get_query_flag,
+    get_asset_by_id, get_query, post_collection, post_asset, del_asset,
+    del_collection, patch_asset, get_query_flag,
     patch_collection
     )
 
@@ -277,7 +277,7 @@ def delete_collection(collection_id):
     # TODO: make better responce
     if request.method=='DELETE':
         session = Session()
-        asset = delete_collectiony(session, collection_id)
+        asset = del_collection(session, collection_id)
         print('passed api model')
 
         if collection_id:
@@ -300,7 +300,7 @@ def delete_asset(asset_id):
     # TODO: make better responce
     if request.method=='DELETE':
         session = Session()
-        asset = delete_assety(session, asset_id)
+        asset = del_asset(session, asset_id)
 
         if asset:
             session.close()

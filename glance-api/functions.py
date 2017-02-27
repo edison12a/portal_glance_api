@@ -1,6 +1,6 @@
 # TODO: classes needed?
 import datetime
-from models import assignment, tag_table, Collection, Tag, Asset
+from models import assignment, tag_table, Collection, Tag, Asset, Base
 
 
 # dev functions
@@ -74,8 +74,10 @@ def make_dict(item_list):
             assignments = item_object.assets
 
             for assignment in assignments:
-                # TODO; need to make assignment objects into dicts, 'make_dict()'
-                item['assets'].append(str(assignment))
+                bla = make_dict((assignment,))[0]
+                item['assets'].append(
+                    bla
+                )
 
         result.append(item)
 
@@ -265,13 +267,17 @@ def get_query(session, userquery):
 
 
 def get_query_flag(session, flag):
-    print('get_query_flag')
     """ Returns list of flagged items """
-    assets = []
-    goo = session.query(Asset).filter(int(flag)>0).all()
-    assets = goo
+    result = []
+    # collection assets
+    assets = session.query(Asset).filter(int(flag)>0).all()
+    for x in assets:
+        result.append(make_dict((x,))[0])
 
-    result = make_dict(assets)
+    # collect collections
+    collections = session.query(Collection).filter(int(flag)>0).all()
+    for x in collections:
+        result.append(make_dict((x,))[0])
 
     return result
 
@@ -493,23 +499,29 @@ def patch_collection(session, id, **user_columns):
     return result
 
 
-def delete_assety(session, asset_id):
+def del_asset(session, asset_id):
     """deletes asset object"""
-    # TODO: DEV: rewritten to account for many-to-many relationships.
-    session.query(Asset).filter(Asset.id=='{}'.format(asset_id)).delete()
+    # TODO: also delete physical files.
+    # TODO: IMP aset database?
+    # get collection
+    asset = session.query(Asset).filter(Asset.id=='{}'.format(asset_id)).first()
+    # delete collection
+    session.delete(asset)
+    # and commit to session.
     session.commit()
 
-    return False
+    return True
 
 
-def delete_collectiony(session, collection_id):
+def del_collection(session, collection_id):
     """deletes collection object"""
-    # TODO: DEV: rewritten to account for many-to-many relationships.
-    print('whaaa')
+    # TODO: also delete physical files.
+    # TODO: IMP aset database?
+    # get collection
+    collection = session.query(Collection).filter(Collection.id=='{}'.format(collection_id)).first()
+    # delete collection
+    session.delete(collection)
+    # and commit to session.
+    session.commit()
 
-    # myparent.children.remove(somechild)
-
-    # session.query(Collection).filter(Collection.id=='{}'.format(collection_id)).delete()
-    # session.commit()``
-
-    return False
+    return True
