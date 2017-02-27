@@ -6,19 +6,27 @@ from models import assignment, tag_table, Collection, Tag, Asset, Base
 # dev functions
 def __reset_db(session, engine):
     """DEV: drops tables and rebuild"""
-    # TODO: remove tables doesnt work, need to figure out how to 'drop cascade'
-    # close any open session.
     session.close()
-    # TODO: remove try/except for EXISTS, code flow etc.
+
     try:
-        assignment.__table__.drop(engine)
-        Collection.__table__.drop(engine)
-        Asset.__table__.drop(engine)
-        print('Old tables removed')
+        import sqlalchemy
+        meta = sqlalchemy.MetaData(engine)
+        meta.reflect()
+        meta.drop_all()
     except:
-        pass
-    Base.metadata.create_all(engine)
-    print('building new tables')
+        print('----------------------------')
+        print('Table have not been deleted.')
+        print('----------------------------')
+    try:
+        Base.metadata.create_all(engine)
+    except:
+        print('---------------------------')
+        print('Tables have not been built.')
+        print('---------------------------')
+
+    print('----------------------------------------')
+    print('Tables removed, and re-built successful.')
+    print('----------------------------------------')
 
     # TODO: is return True 'pythonic', something better?
     return True
