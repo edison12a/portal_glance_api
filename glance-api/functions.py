@@ -56,7 +56,9 @@ def make_dict(item_list):
 
             # append collection objects to 'item'
             for collection in assets_collections:
-                item['collections'].append(str(collection))
+                item['collections'].append(
+                    (int(collection.id), str(collection.name))
+                )
 
         elif item_object.item_type == 'collection':
             # If object is a collection
@@ -72,6 +74,7 @@ def make_dict(item_list):
             assignments = item_object.assets
 
             for assignment in assignments:
+                # TODO; need to make assignment objects into dicts, 'make_dict()'
                 item['assets'].append(str(assignment))
 
         result.append(item)
@@ -262,19 +265,13 @@ def get_query(session, userquery):
 
 
 def get_query_flag(session, flag):
+    print('get_query_flag')
     """ Returns list of flagged items """
-    # TODO: DEV: rewritten to account for many-to-many relationships.
     assets = []
-    for item in session.query(Asset).filter(Asset.flag>=1).order_by(Asset.id):
-        assets.append(item)
+    goo = session.query(Asset).filter(int(flag)>0).all()
+    assets = goo
 
-    for item in session.query(Collection).filter(Collection.flag>=1).order_by(Collection.id):
-        assets.append(item)
-
-    result = []
-    for asset in assets:
-        item = make_dict(asset)
-        result.append(item)
+    result = make_dict(assets)
 
     return result
 

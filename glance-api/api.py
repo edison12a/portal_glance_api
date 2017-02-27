@@ -246,7 +246,6 @@ def query():
     """ returns results from querys
     'flag': takes key/value, returns
     'query': takes list of string, returns list of dict;
-
     """
     if 'flag' in request.args:
         session = Session()
