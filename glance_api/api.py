@@ -119,6 +119,7 @@ def asset():
             ), 200
 
         except:
+            session.close()
             fail = {'Action': 'failed'}
             return make_response(
                 jsonify(
@@ -133,6 +134,7 @@ def asset():
         assets = get_assets(session)
 
         if len(assets) == 0:
+            session.close()
             return make_response(
                 jsonify(
                     {
@@ -144,11 +146,13 @@ def asset():
                 )
             ), 200
 
+        session.close()
         return make_response(
             jsonify(assets)
         ), 200
 
     else:
+        session.close()
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
@@ -179,7 +183,7 @@ def collection():
         except:
 
             fail = {'Action': 'failed'}
-
+            session.close()
             return make_response(
                 jsonify(
                     {
@@ -193,6 +197,7 @@ def collection():
         collections = get_collections(session)
 
         if len(collections) == 0:
+            session.close()
             return make_response(
                 jsonify(
                     {
@@ -204,13 +209,14 @@ def collection():
                 )
             ), 200
 
-
+        session.close()
         return make_response(
             jsonify(collections)
         ), 200
 
     else:
 
+        session.close()
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
@@ -222,9 +228,10 @@ def get_collection_id(collection_id):
         collection = get_collection_by_id(session, collection_id)
 
     else:
-
+        session.close()
         return jsonify({'collection': 'failed - endpoint only accepts GET methods'})
 
+    session.close()
     return jsonify({'collection': collection})
 
 
@@ -237,8 +244,10 @@ def get_asset_id(asset_id):
 
     else:
 
+        session.close()
         return jsonify({'asset': 'failed - endpoint only accepts GET methods'})
 
+    session.close()
     return jsonify({'asset': asset})
 
 
@@ -279,20 +288,20 @@ def delete_collection(collection_id):
     if request.method=='DELETE':
         session = Session()
         asset = del_collection(session, collection_id)
-        print('passed api model')
 
         if collection_id:
             result = {
                 'Action': 'successful',
                 'collection id': 'IMP'
             }
+            session.close()
             return jsonify({'DELETE collection/delete/': result})
         else:
             result = {
                 'Action': 'fail',
                 'collection id': 'IMP'
             }
-
+            session.close()
             return jsonify({'DELETE collection/delete/': result})
 
 
@@ -304,20 +313,21 @@ def delete_asset(asset_id):
         asset = del_asset(session, asset_id)
 
         if asset:
-            session.close()
+
             result = {
                 'Action': 'successful',
                 'asset id': 'IMP'
             }
+            session.close()
 
             return jsonify({'DELETE asset/delete/': result})
 
         else:
-            session.close()
             result = {
                 'Action': 'fail',
                 'asset id': 'IMP'
             }
+            session.close()
 
             return jsonify({'DELETE asset/delete/': result})
 
