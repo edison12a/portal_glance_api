@@ -42,4 +42,5 @@ Extended API docs
 Running tests, while in project root.
 
 .. code-block:: python
+
     >>> python setup.py test
