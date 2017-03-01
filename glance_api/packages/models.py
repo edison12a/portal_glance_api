@@ -5,7 +5,8 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-import cred
+def __model_helper():
+    pass
 
 
 # Database models

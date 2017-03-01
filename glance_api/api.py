@@ -3,14 +3,14 @@ from flask import Flask, jsonify, request, make_response
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
-from functions import (
+from packages.functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
     del_collection, patch_asset, get_query_flag,
     patch_collection
     )
 
-import cred
+from config import cred
 
 
 app = Flask(__name__)

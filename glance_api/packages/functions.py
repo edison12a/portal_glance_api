@@ -1,7 +1,10 @@
 # TODO: classes needed?
 import datetime
-from models import assignment, tag_table, Collection, Tag, Asset, Base
+from .models import assignment, tag_table, Collection, Tag, Asset, Base
 
+
+def __func_helper():
+    pass
 
 # dev functions
 def __reset_db(session, engine):

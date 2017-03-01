@@ -39,7 +39,7 @@ Documentation & Tests
 
 Extended API docs
 
-Running tests
+Running tests, while in project root.
 
 .. code-block:: python
-    >>> test = {'test': ['test', 'test']}
+    >>> python setup.py test
