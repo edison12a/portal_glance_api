@@ -2,6 +2,10 @@
 cred.py
 config/
 
+# setup.py junk
+.eggs/
+glance.egg-info/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -21,4 +25,3 @@ coverage.xml
 # Flask stuff:
 instance/
 .webassets-cache
-
