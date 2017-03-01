@@ -3,7 +3,7 @@ IN DEVELOPMENT
 Glance Api
 =========================
 
-Rest api code for glance.
+database and web api for digital asset management, storage and retrieval.
 
 Code Examples
 ---
@@ -17,7 +17,7 @@ Installation
 
 A postgresql database needs to be set up prior.
 
-use miniconda for env
+Use miniconda for env, environment.yml
 
 .. code-block:: cmd
 
