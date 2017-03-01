@@ -1,4 +1,4 @@
-name: glance-api-env
+name: glance_api_env
 channels: !!python/tuple
 - defaults
 dependencies:
@@ -25,4 +25,4 @@ dependencies:
   - requests==2.12.4
   - sqlalchemy==1.1.4
   - werkzeug==0.11.11
-prefix: /home/deploy/miniconda3/envs/glance_api-env
+prefix: /home/deploy/miniconda3/envs/glance_api_env
