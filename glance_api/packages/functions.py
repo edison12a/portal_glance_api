@@ -251,9 +251,6 @@ def get_query(session, userquery):
                 for item in tag.collection_tags:
                     item_list.append(item)
 
-    # run items through make_dict for the return
-    # result = make_dict(item_list)
-
     return item_list
 
 

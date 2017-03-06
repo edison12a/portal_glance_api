@@ -8,26 +8,12 @@ from sqlalchemy.orm import sessionmaker
 from glance_api.packages import functions
 from glance_api.packages import models
 
-"""
-# config
-SERVER = 'http://127.0.0.1:5000'
-ROUTE = '/glance/api'
-
-# sqlite3 in memory
-engine = create_engine('sqlite:///tests/sqlite_test_database.db')
-
-# Init sessionmaker
-Session = sessionmaker(bind=engine)
-
-# make db
-session = Session()
-functions.__reset_db(session, engine)
-"""
 
 @pytest.fixture(scope='session')
-def db_connect(request):
+def test_session(request):
     # TODO: set up rollback on database, so it doesnt get deleted on every
     # test.
+    # TODO: IMP deletion of db after tests.
     engine = create_engine('sqlite:///tests/sqlite_test_database.db')
 
     try:
@@ -69,79 +55,105 @@ def test_make_dict():
     pass
 
 
-def test_post_collection(db_connect):
+def test_post_collection(test_session):
     # test data
     test_data = {'name': 'test_collection_name'}
-    test_function = functions.post_collection(db_connect, **test_data)
+    test_function = functions.post_collection(test_session, **test_data)
 
     # asserts
-    testing_data = db_connect.query(models.Collection).get(test_function.id)
+    testing_data = test_session.query(models.Collection).get(test_function.id)
     assert testing_data.name == test_function.name
 
 
-def test_post_asset(db_connect):
+def test_post_asset(test_session):
     # test data
     test_data = {'name':'test_asset_name', 'image': 'test_asset_image'}
-    test_function = functions.post_asset(db_connect, **test_data)
+    test_function = functions.post_asset(test_session, **test_data)
 
     # asserts
-    testing_data = db_connect.query(models.Asset).get(int(test_function.id))
+    testing_data = test_session.query(models.Asset).get(int(test_function.id))
     assert testing_data.name == test_function.name
 
 
-def test_get_collections(db_connect):
+def test_get_collections(test_session):
     # test function
     test_data = models.Collection(name='test_collection_name')
-    db_connect.add(test_data)
-    db_connect.commit()
-    test_function = functions.get_collections(db_connect)
+    test_session.add(test_data)
+    test_session.commit()
+    test_function = functions.get_collections(test_session)
 
     # asserts
-    testing_data = db_connect.query(models.Collection).all()
+    testing_data = test_session.query(models.Collection).all()
     assert len(test_function) == len(testing_data)
 
 
-def test_get_assets(db_connect):
+def test_get_assets(test_session):
     # test data
     test_data = models.Asset(name='test_asset_name')
-    db_connect.add(test_data)
-    db_connect.commit()
+    test_session.add(test_data)
+    test_session.commit()
     # test function
-    test_function = functions.get_assets(db_connect)
+    test_function = functions.get_assets(test_session)
 
     # asserts
-    testing_data = db_connect.query(models.Asset).all()
+    testing_data = test_session.query(models.Asset).all()
     assert len(test_function) == len(testing_data)
 
 
-def test_get_asset_by_id(db_connect):
+def test_get_asset_by_id(test_session):
     # test data
     test_data = models.Asset(name='test_asset_name')
-    db_connect.add(test_data)
-    db_connect.commit()
+    test_session.add(test_data)
+    test_session.commit()
     # test function
-    test_function = functions.get_asset_by_id(db_connect, test_data.id)
+    test_function = functions.get_asset_by_id(test_session, test_data.id)
     # asserts
     assert test_data.name == test_function.name
 
 
-def test_get_collection_by_id(db_connect):
+def test_get_collection_by_id(test_session):
     # test data
     test_data = models.Collection(name='test_collection_name')
-    db_connect.add(test_data)
-    db_connect.commit()
+    test_session.add(test_data)
+    test_session.commit()
     # test function
-    test_function = functions.get_collection_by_id(db_connect, test_data.id)
+    test_function = functions.get_collection_by_id(test_session, test_data.id)
     # asserts
     assert test_data.name == test_function.name
 
 
-def test_get_query():
-    pass
+def test_get_query(test_session):
+    # TODO: Only testing assets at the moment.
+    # test data
+    # objects
+    test_data_asset = models.Asset(name='test_asset_name')
+    # tags
+    test_tag_asset = models.Tag(name='testtagasset')
+
+    test_session.add(test_data_asset)
+    test_session.add(test_tag_asset)
+    test_tag_data = {'query': [test_tag_asset.name]}
+    # append tags to objects
+    test_data_asset.tags.append(test_tag_asset)
+
+    test_session.add(test_data_asset)
+    test_session.commit()
+
+    # test function
+    test_function = functions.get_query(test_session, {'query': 'testtagasset'})
+    # asserts
+    assert len(test_function) == 1
 
 
-def test_get_query_flag():
-    pass
+def test_get_query_flag(test_session):
+    # test data
+    test_data = models.Asset(name='test_asset_name', flag=1)
+    test_session.add(test_data)
+    test_session.commit()
+    # testing data
+    testing_data = test_session.query(models.Asset).filter(int(flag)>0).all()
+    # asserts
+    assert len(testing_data) == 1
 
 
 def test_patch_asset():
@@ -152,9 +164,29 @@ def test_patch_collection():
     pass
 
 
-def test_del_asset():
-    pass
+def test_del_asset(test_session):
+    # test data
+    test_data = models.Asset(name='test_asset_name')
+    test_session.add(test_data)
+    test_session.commit()
+    # asserts
+    # First test that the asset has been entered into the database.
+    assert test_session.query(models.Asset).get(test_data.id).id == test_data.id
+    # test function
+    test_function = functions.del_asset(test_session, test_data.id)
+    # final test to see if asset has been removed from database.
+    assert test_session.query(models.Asset).get(test_data.id) == None
 
 
-def test_del_collection():
-    pass
+def test_del_collection(test_session):
+    # test data
+    test_data = models.Collection(name='test_collection_name')
+    test_session.add(test_data)
+    test_session.commit()
+    # asserts
+    # First test that the asset has been entered into the database.
+    assert test_session.query(models.Collection).get(test_data.id).id == test_data.id
+    # test function
+    test_function = functions.del_collection(test_session, test_data.id)
+    # final test to see if asset has been removed from database.
+    assert test_session.query(models.Collection).get(test_data.id) == None

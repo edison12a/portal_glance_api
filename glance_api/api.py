@@ -284,13 +284,6 @@ def query():
         return jsonify({'result': assets})
 
 
-    elif 'collection' in request.args:
-        return jsonify({'result': 'collections'})
-
-
-    return jsonify({'result': assets})
-
-
 @app.route(
     '{}/collection/delete/<int:collection_id>'.format(ROUTE), methods=['DELETE']
     )
