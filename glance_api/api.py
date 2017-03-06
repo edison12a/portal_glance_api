@@ -7,7 +7,7 @@ from packages.functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
     del_collection, patch_asset, get_query_flag,
-    patch_collection
+    patch_collection, make_dict
     )
 
 from config import cred
@@ -99,9 +99,14 @@ def api():
 def asset():
     """Endpoint that returns asset objects"""
     if request.method=='POST':
+        # build query from user args
+        query = {}
+        for x in request.args:
+            query[x] = x
+
         try:
             session = Session()
-            asset = post_asset(session, **request.args)
+            asset = post_asset(session, **query)
 
             result = {
                 'responce': 'successful',
@@ -131,7 +136,8 @@ def asset():
 
     elif request.method=='GET':
         session = Session()
-        assets = get_assets(session)
+        raw_assets = get_assets(session)
+        assets = make_dict(raw_assets)
 
         if len(assets) == 0:
             session.close()
@@ -194,7 +200,9 @@ def collection():
 
     elif request.method=='GET':
         session = Session()
-        collections = get_collections(session)
+        raw_collections = get_collections(session)
+
+        collections = make_dict(raw_collections)
 
         if len(collections) == 0:
             session.close()
@@ -225,7 +233,8 @@ def get_collection_id(collection_id):
     # TODO : doc string
     if request.method=='GET':
         session = Session()
-        collection = get_collection_by_id(session, collection_id)
+        raw_collection = get_collection_by_id(session, collection_id)
+        collection = make_dict(raw_collection)
 
     else:
         session.close()
@@ -240,7 +249,8 @@ def get_asset_id(asset_id):
     # TODO: Doc string
     if request.method=='GET':
         session = Session()
-        asset = get_asset_by_id(session, asset_id)
+        raw_asset = get_asset_by_id(session, asset_id)
+        asset = make_dict((raw_asset,))
 
     else:
 
@@ -267,7 +277,8 @@ def query():
 
     elif 'query' in request.args:
         session = Session()
-        assets = get_query(session, request.args)
+        raw_assets = get_query(session, request.args)
+        assets = make_dict(raw_assets)
         session.close()
 
         return jsonify({'result': assets})

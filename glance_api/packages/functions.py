@@ -105,7 +105,7 @@ def post_collection(session, **kwarg):
 
     # build POST data payload query from user data, **kwarg
     for k, v in kwarg.items():
-        payload[k] = v[0]
+        payload[k] = v
 
     # validate payload agaisnt database columnns, automate None to empty fields
     for column in Collection.__table__.columns:
@@ -139,12 +139,13 @@ def post_asset(session, **kwarg):
     """Posts asset to the database
     Return: asset; 'new posted aset'
     """
+
     payload = {}
     data = {}
 
     # process user input
     for k, v in kwarg.items():
-        payload[k] = v[0]
+        payload[k] = v
 
     # remove attri that arnt in the database
     for column in Asset.__table__.columns:
@@ -164,7 +165,7 @@ def post_asset(session, **kwarg):
 
     # I think i put this here because the asset had to be 'init' with
     # session.add() because i needed to append new tags?
-    # TODO: understand before better, refactor multiple session hits might not
+    # TODO: understand before better, refactor, multiple session hits might not
     # be needed?
     session.add(asset)
 
@@ -188,11 +189,8 @@ def get_collections(session):
     for collection in session.query(Collection).order_by(Collection.id):
         collections.append(collection)
 
-    # iterates through 'collections' objects to build dicts of objects, 'item'
-    result = make_dict(collections)
-
-    # returns list of dicts, collection assets
-    return result
+    # return raw db objects
+    return collections
 
 
 def get_assets(session):
@@ -202,11 +200,8 @@ def get_assets(session):
     for asset in session.query(Asset).order_by(Asset.moddate):
         assets.append(asset)
 
-    # iterates through 'assets' objects to build dicts of objects, 'item'
-    result = make_dict(assets)
-
-    # returns list of dict,
-    return result
+    # returns raw db objects
+    return assets
 
 
 def get_asset_by_id(session, id):
@@ -214,16 +209,8 @@ def get_asset_by_id(session, id):
     # querys for asset object
     asset_by_id = session.query(Asset).get(id)
 
-    # if asset is found, build dict of object, 'item'
-    if asset_by_id:
-        item = make_dict((asset_by_id,))
-
-    else:
-        # TODO: Is this needed?
-        item = {}
-
-    # returns dic, 'item' repr of asset object
-    return item
+    # returns raw asset
+    return asset_by_id
 
 
 def get_collection_by_id(session, id):
@@ -231,14 +218,7 @@ def get_collection_by_id(session, id):
     # querys for collection object
     collection_by_id = session.query(Collection).get(id)
 
-    # if collection exists, build dict from data, 'item'
-    if collection_by_id:
-        result = make_dict((collection_by_id,))
-
-    else:
-        result = {}
-
-    return result
+    return collection_by_id
 
 
 # TODO: Can all these get_query_* re refactored to a single methods? using
@@ -272,9 +252,9 @@ def get_query(session, userquery):
                     item_list.append(item)
 
     # run items through make_dict for the return
-    result = make_dict(item_list)
+    # result = make_dict(item_list)
 
-    return result
+    return item_list
 
 
 def get_query_flag(session, flag):
