@@ -86,7 +86,7 @@ def api():
                 },
                 'Collection': {
                     'name': 'string', 'image': 'string', 'image_thumb': 'string',
-                    'attached': 'string', 'tag': 'string, separate with comma (,) only.}'
+                    'attached': 'string', 'tag': 'string, separate with comma (,) only.'
                 }
             }
         },
@@ -139,6 +139,8 @@ def footage():
             ), 404
         """
         pass
+
+
     elif request.method=='GET':
         session = Session()
         raw_footages = get_footages(session)

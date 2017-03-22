@@ -90,6 +90,34 @@ def make_dict(item_list):
                     bla
                 )
 
+        elif item_object.item_type == 'footage':
+            # If object is asset
+            # init tags
+            try:
+                # TODO: IMP tags for footage
+                item['tags'] = []
+                assets_tags = item_object.tags
+
+                for tag in assets_tags:
+                    item['tags'].append(str(tag.name))
+            except:
+                pass
+
+            try:
+                # TODO: IMP collections for footage
+                # init collections
+                item['collections'] = []
+                # get assets collections via many-to-many
+                footage_collections = item_object.collections
+
+                # append collection objects to 'item'
+                for collection in footage_collections:
+                    item['collections'].append(
+                        (int(collection.id), str(collection.name))
+                    )
+            except:
+                pass
+
         result.append(item)
 
     # return database objects as dicts.
