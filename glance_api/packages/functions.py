@@ -1,6 +1,6 @@
 # TODO: classes needed?
 import datetime
-from .models import assignment, tag_table, Collection, Tag, Asset, Base
+from .models import assignment, tag_table, Collection, Tag, Asset, Base, Footage
 
 
 def __func_helper():
@@ -202,6 +202,17 @@ def get_assets(session):
 
     # returns raw db objects
     return assets
+
+
+def get_footages(session):
+    """Returns all footage objects"""
+    # querys for all asset objects in order of moddate, appends to list
+    footages = []
+    for footage in session.query(Footage).order_by(Footage.moddate):
+        assets.append(footage)
+
+    # returns raw db objects
+    return footages
 
 
 def get_asset_by_id(session, id):

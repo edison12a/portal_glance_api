@@ -102,3 +102,34 @@ class Asset(Base):
         return "<Asset(id='%s', name='%s')>" % (
             self.id, self.name
         )
+
+
+class Footage(Base):
+    """Footage database structure, declarative"""
+    # TODO: Better repr
+    # TODO: IMP tags for footage? consider changing who the tag table works?
+    # TODO: IMP collections for footage? consider changing who the tag table works?
+    __tablename__ = 'footage'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    footage = Column(String)
+    image_thumb = Column(String)
+    flag = Column(Integer, default=0)
+    author = Column(String)
+    initdate = Column(DateTime, default=func.now())
+    moddate = Column(DateTime, default=func.now())
+    item_type = Column(String, default=__tablename__)
+    """
+    collections = relationship("Collection",
+        secondary=assignment
+    )
+    tags = relationship("Tag",
+        secondary=tag_table, back_populates='item'
+    )
+    """
+
+    def __repr__(self):
+        return "<Footage(id='%s', name='%s')>" % (
+            self.id, self.name
+        )

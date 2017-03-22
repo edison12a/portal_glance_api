@@ -7,7 +7,7 @@ from packages.functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
     del_collection, patch_asset, get_query_flag,
-    patch_collection, make_dict
+    patch_collection, make_dict, get_footages
     )
 
 from config import cred
@@ -67,6 +67,8 @@ def api():
             }, 'GET': {
                 '/asset': 'Retrieve list of assets',
                 '/asset/<int>': 'Retrieve single asset by ID',
+                '/footage': 'Retrieve list of assets',
+                '/footage/<int>': 'Retrieve single asset by ID',
                 '/collection': 'Retrieve list of collections',
                 '/collection/<int>': 'Retrieve single collection by ID',
                 '/query?query=<str>': 'Retrieve asset/collections that match query',
@@ -93,6 +95,76 @@ def api():
         }
     }
     return jsonify({'Glance WebAPI': info})
+
+
+@app.route('{}/footage'.format(ROUTE), methods=['POST', 'GET'])
+def footage():
+    """Endpoint that returns footageobjects"""
+    if request.method=='POST':
+        # TODO: IMP POST method
+        """
+        # build query from user args
+        query = {}
+        for x in request.args:
+            query[x] = x
+
+        try:
+            session = Session()
+            asset = post_asset(session, **query)
+
+            result = {
+                'responce': 'successful',
+                'location': ROUTE + '/asset/' + str(asset.id)
+            }
+
+            session.close()
+
+            return make_response(
+                jsonify(
+                    {
+                        'POST: /asset': result
+                    }
+                )
+            ), 200
+
+        except:
+            session.close()
+            fail = {'Action': 'failed'}
+            return make_response(
+                jsonify(
+                    {
+                        'POST /asset': fail
+                    }
+                )
+            ), 404
+        """
+        pass
+    elif request.method=='GET':
+        session = Session()
+        raw_footages = get_footages(session)
+        footages = make_dict(raw_footages)
+
+        if len(footages) == 0:
+            session.close()
+            return make_response(
+                jsonify(
+                    {
+                        'GET footage': {
+                            'Status': 'Successful',
+                            'Message': 'No footage in database'
+                        }
+                    }
+                )
+            ), 200
+
+        session.close()
+        return make_response(
+            jsonify(footages)
+        ), 200
+
+    else:
+        session.close()
+        return jsonify({'Footage': 'This endpoint only accepts POST, GET methods.'})
 
 
 @app.route('{}/asset'.format(ROUTE), methods=['POST', 'GET'])
@@ -160,6 +232,7 @@ def asset():
     else:
         session.close()
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
+
 
 
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
