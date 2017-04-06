@@ -176,7 +176,7 @@ def asset():
         # build query from user args
         query = {}
         for x in request.args:
-            query[x] = x
+            query[x] = request.args[x]
 
         try:
             session = Session()
@@ -236,13 +236,13 @@ def asset():
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
-
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
 def collection():
 
     if request.method=='POST':
 
         try:
+
             session = Session()
             collection = post_collection(session, **request.args)
 
@@ -309,7 +309,7 @@ def get_collection_id(collection_id):
     if request.method=='GET':
         session = Session()
         raw_collection = get_collection_by_id(session, collection_id)
-        collection = make_dict(raw_collection)
+        collection = make_dict((raw_collection,))
 
     else:
         session.close()

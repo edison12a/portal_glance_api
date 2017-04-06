@@ -3,9 +3,6 @@ import datetime
 from .models import assignment, tag_table, Collection, Tag, Asset, Base, Footage
 
 
-def __func_helper():
-    pass
-
 # dev functions
 def __reset_db(session, engine):
     """DEV: drops tables and rebuild"""
@@ -138,7 +135,7 @@ def post_collection(session, **kwarg):
     # validate payload agaisnt database columnns, automate None to empty fields
     for column in Collection.__table__.columns:
         if column.name in payload:
-            data[column.name] = payload[column.name]
+            data[column.name] = payload[column.name][0]
         elif column.name not in payload:
             data[column.name] = None
         else:
@@ -173,7 +170,11 @@ def post_asset(session, **kwarg):
 
     # process user input
     for k, v in kwarg.items():
-        payload[k] = v
+        if k == 'tag':
+            bla = v.split(' ')
+            payload[k] = bla
+        else:
+            payload[k] = v
 
     # remove attri that arnt in the database
     for column in Asset.__table__.columns:
@@ -197,10 +198,10 @@ def post_asset(session, **kwarg):
     # be needed?
     session.add(asset)
 
-    if 'tags' in payload:
-        tags = payload['tags'].split()
-        for term in tags:
-            newtag = Tag(name=term)
+    if 'tag' in payload:
+        for tag in payload['tag']:
+            newtag = Tag(name=str(tag))
+            session.add(newtag)
             asset.tags.append(newtag)
 
     # commit changes to database
