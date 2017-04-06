@@ -133,6 +133,9 @@ def post_collection(session, **kwarg):
         if k == 'tags':
             bla = v.split(' ')
             payload[k] = bla
+        elif k == 'assets':
+            bla = v.split(' ')
+            payload[k] = bla
         else:
             payload[k] = v
 
@@ -165,6 +168,13 @@ def post_collection(session, **kwarg):
             newtag = Tag(name=str(tag))
             session.add(newtag)
             collection.tags.append(newtag)
+
+    if 'assets' in payload:
+
+        for asset in payload['assets']:
+            bla = session.query(Asset).get(int(asset))
+            collection.assets.append(bla)
+
 
     session.commit()
 
