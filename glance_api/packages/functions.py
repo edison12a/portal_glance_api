@@ -130,12 +130,16 @@ def post_collection(session, **kwarg):
 
     # build POST data payload query from user data, **kwarg
     for k, v in kwarg.items():
-        payload[k] = v
+        if k == 'tags':
+            bla = v.split(' ')
+            payload[k] = bla
+        else:
+            payload[k] = v
 
     # validate payload agaisnt database columnns, automate None to empty fields
     for column in Collection.__table__.columns:
         if column.name in payload:
-            data[column.name] = payload[column.name][0]
+            data[column.name] = payload[column.name]
         elif column.name not in payload:
             data[column.name] = None
         else:
@@ -155,6 +159,13 @@ def post_collection(session, **kwarg):
 
     # commit new collection.
     session.add(collection)
+
+    if 'tags' in payload:
+        for tag in payload['tags']:
+            newtag = Tag(name=str(tag))
+            session.add(newtag)
+            collection.tags.append(newtag)
+
     session.commit()
 
     return collection

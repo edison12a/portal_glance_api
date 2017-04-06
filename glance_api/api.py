@@ -240,11 +240,13 @@ def asset():
 def collection():
 
     if request.method=='POST':
+        query = {}
+        for x in request.args:
+            query[x] = request.args[x]
 
         try:
-
             session = Session()
-            collection = post_collection(session, **request.args)
+            collection = post_collection(session, **query)
 
             result = {
                 'responce': 'successful',
@@ -262,7 +264,6 @@ def collection():
             ), 200
 
         except:
-
             fail = {'Action': 'failed'}
             session.close()
             return make_response(
