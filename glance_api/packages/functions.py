@@ -129,10 +129,12 @@ def post_collection(session, **kwarg):
     data = {}
 
     # build POST data payload query from user data, **kwarg
+    # TODO: issues between the name 'tag' coming from the frontend, and 'tags'
+    # in the backend. Make consistant.
     for k, v in kwarg.items():
-        if k == 'tags':
+        if k == 'tag':
             bla = v.split(' ')
-            payload[k] = bla
+            payload['tags'] = bla
         elif k == 'assets':
             bla = v.split(' ')
             payload[k] = bla
