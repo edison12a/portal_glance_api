@@ -125,6 +125,7 @@ def post_collection(session, **kwarg):
     """Posts collection to the database
     Return: collection; 'newly posted collection'
     """
+
     payload = {}
     data = {}
 
@@ -132,14 +133,15 @@ def post_collection(session, **kwarg):
     # TODO: issues between the name 'tag' coming from the frontend, and 'tags'
     # in the backend. Make consistant.
     for k, v in kwarg.items():
-        if k == 'tag':
+        if k == 'tags':
             bla = v.split(' ')
             payload['tags'] = bla
         elif k == 'assets':
             bla = v.split(' ')
-            payload[k] = bla
+            payload['assets'] = [int(i) for i in bla]
         else:
             payload[k] = v
+    del payload['tag']
 
     # validate payload agaisnt database columnns, automate None to empty fields
     for column in Collection.__table__.columns:
@@ -172,11 +174,8 @@ def post_collection(session, **kwarg):
             collection.tags.append(newtag)
 
     if 'assets' in payload:
-
         for asset in payload['assets']:
-            bla = session.query(Asset).get(int(asset))
-            collection.assets.append(bla)
-
+            collection.assets.append(asset)
 
     session.commit()
 
