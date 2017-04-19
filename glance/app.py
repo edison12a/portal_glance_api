@@ -1,10 +1,8 @@
 import os
 
-from flask import Flask, flash, redirect, render_template, request, session, abort, send_from_directory
-import boto3
+from flask import Flask, flash, redirect, render_template, request, session, abort
 
 from packages.function import LoggedIn, CheckLoginDetails, upload_handler
-from config  import cred
 
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -60,21 +58,8 @@ def uploading():
     if LoggedIn(session):
         if request.method == 'POST':
 
-            f = request.files['file']
-            filename = f.filename
-            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-            boto3_session = boto3.session.Session(
-                aws_access_key_id=cred.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=cred.AWS_SECRET_ACCESS_KEY,
-            )
-
-            s3 = boto3_session.resource('s3')
-
-            data = send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-            s3.Object(cred.AWS_BUCKET, filename).put(Body=open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'rb'))
-
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file = request.files['file']
+            upload_handler(file, app.config['UPLOAD_FOLDER'])
 
             return render_template('uploadcomplete.html')
     else:

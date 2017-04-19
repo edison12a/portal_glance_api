@@ -1,5 +1,9 @@
+import os
+
+from flask import send_from_directory
 import requests
 import boto3
+
 from config  import cred
 
 
@@ -31,21 +35,18 @@ def CheckLoginDetails(**data):
 
     return result
 
+def upload_handler(file, dst):
+    filename = file.filename
+    file.save(os.path.join(dst, filename))
 
-def get_bucket(access_key_id, secret_access_key, bucket_name):
-    conn = boto.connect_s3(access_key_id, secret_access_key)
-    return conn.get_bucket(bucket_name)
+    boto3_session = boto3.session.Session(
+        aws_access_key_id=cred.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=cred.AWS_SECRET_ACCESS_KEY,
+    )
 
+    s3 = boto3_session.resource('s3')
 
-def upload_handler(instance, file_obj):
-    # access our S3 bucket and create a new key to store the file data
-    bucket = get_bucket(cred.AWS_ACCESS_KEY_ID, cred.AWS_SECRET_ACCESS_KEY, cred.AWS_BUCKET)
-    key = bucket.new_key(instance.filename)
-    key.set_metadata('Content-Type', instance.mimetype())
+    data = send_from_directory(dst, filename)
+    s3.Object(cred.AWS_BUCKET, filename).put(Body=open(os.path.join(dst, filename), 'rb'))
 
-    # seek to the beginning of the file and read it into the key
-    file_obj.seek(0)
-    key.set_contents_from_file(file_obj)
-
-    # make the key publicly available
-    key.set_acl('public-read')
+    os.remove(os.path.join(dst, filename))
