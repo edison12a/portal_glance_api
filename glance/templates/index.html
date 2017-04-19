@@ -1,0 +1,24 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+</head>
+<body style="background-color: rgb(41, 128, 185);">
+
+{% if session['logged_in'] %}
+
+    <p>You're logged in already!</p>
+
+{% else %}
+
+    <div style="position:fixed;top:50%;left:50%;">
+        <form action="/login" method="POST">
+            <input type="username" class="form-control" name="username" placeholder="Username">
+            <input type="password" class="form-control" name="password" placeholder="Password">
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+    </div>
+
+{% endif %}
+
+</body>
+</html>

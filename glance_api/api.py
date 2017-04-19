@@ -7,7 +7,7 @@ from packages.functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
     del_collection, patch_asset, get_query_flag,
-    patch_collection, make_dict, get_footages
+    patch_collection, make_dict, get_footages, post_user, get_user
     )
 
 from config import cred
@@ -25,7 +25,7 @@ app = Flask(__name__)
 
 
 # config
-SERVER = 'http://127.0.0.1:5000'
+SERVER = 'http://127.0.0.1:5050'
 ROUTE = '/glance/api'
 
 # make function for checkcing/setting db
@@ -440,5 +440,39 @@ def patch_collection_id():
     return jsonify({'PATCH': patched_collection})
 
 
+@app.route('{}/user'.format(ROUTE), methods=['POST', 'GET'])
+def user():
+
+    if request.method=='POST':
+        post_data = {}
+
+        for x in request.args:
+            post_data[x] = request.args.get(x)
+
+        session = Session()
+        posted_user = post_user(session, **post_data)
+        session.close()
+
+        return jsonify({'user': 'posted_user'})
+
+    elif request.method=='GET':
+        user_details = {}
+
+        username = request.args.get('username')
+        password = request.args.get('password')
+
+        session = Session()
+
+        user_details['username'] = username
+        user_details['password'] = password
+
+        user_cred = get_user(session, **user_details)
+
+    session.close()
+
+    return jsonify({'user details': user_cred})
+
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5050)

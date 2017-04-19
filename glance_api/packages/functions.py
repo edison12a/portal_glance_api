@@ -1,6 +1,6 @@
 # TODO: classes needed?
 import datetime
-from .models import assignment, tag_table, Collection, Tag, Asset, Base, Footage
+from .models import assignment, tag_table, Collection, Tag, Asset, Base, Footage, User
 
 
 # dev functions
@@ -575,3 +575,36 @@ def del_collection(session, collection_id):
     session.commit()
 
     return True
+
+
+def post_user(session, **kwarg):
+    data = {}
+
+    # process user input
+    for k, v in kwarg.items():
+        data[k] = v
+
+    # Database entry
+    user = User(
+        username=data['username'], password=data['password']
+    )
+
+    session.add(user)
+    session.commit()
+
+    return user
+
+
+def get_user(session, **kwarg):
+
+    # TODO: if test == NONETYPE, return False
+
+    test = session.query(User).filter_by(username=kwarg['username']).first()
+
+    if test is not None and test.password == kwarg['password']:
+        result = True
+    else:
+        result = False
+
+    # returns raw db objects
+    return result
