@@ -36,6 +36,7 @@ def CheckLoginDetails(**data):
     return result
 
 def upload_handler(file, dst):
+    # TODO: Figure out where to handle auto thumbnailing.
     filename = file.filename
     file.save(os.path.join(dst, filename))
 

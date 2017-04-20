@@ -1,4 +1,5 @@
 import os
+import requests
 
 from flask import Flask, flash, redirect, render_template, request, session, abort
 
@@ -10,11 +11,21 @@ UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/tmp')
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# TODO: make a dev and production config, dont use secret_key in prob.
+app.secret_key = os.urandom(12)
+
+API = 'http://127.0.0.1:5050/glance/api'
+API_ASSET = 'http://127.0.0.1:5050/glance/api/asset'
 
 @app.route('/')
 def home():
     if LoggedIn(session):
-        return render_template('home.html')
+
+        r = requests.get('{}'.format(API_ASSET))
+
+
+
+        return render_template('home.html', items=r.json())
     else:
         return render_template('index.html')
 
@@ -57,15 +68,52 @@ def upload():
 def uploading():
     if LoggedIn(session):
         if request.method == 'POST':
+            # Init dict and append user data
+            upload_data = {}
+            upload_data['files'] = []
 
-            file = request.files['file']
-            upload_handler(file, app.config['UPLOAD_FOLDER'])
+            for form_input in request.form:
+                upload_data[form_input] = request.form[form_input]
+
+            # append files to dict, and hand files to the upload_handler
+            files = request.files.getlist('file')
+            for file in files:
+                if file.filename != '':
+                    upload_data['files'].append(file.filename)
+                    upload_handler(file, app.config['UPLOAD_FOLDER'])
+                else:
+                    pass
+
+            payload = {}
+            payload['name'] = 'IMP NAME'
+            payload['image'] = upload_data['files'][0]
+            payload['image_thumb'] = upload_data['files'][0]
+            payload['tag'] = upload_data['tag']
+
+            # post data to api
+            r = requests.post('{}'.format(API_ASSET), params=payload)
 
             return render_template('uploadcomplete.html')
     else:
         return home()
 
 
+@app.route('/item/<id>')
+def item(id):
+
+    r = requests.get('{}/{}'.format(API_ASSET, id))
+
+    return render_template('item.html', item=r.json())
+
+
+@app.route('/search')
+def search():
+    search_data = {}
+    search_term = request.args['search']
+    search_data['search_term'] = str(search_term)
+
+    return render_template('search.html', data=search_data)
+
+
 if __name__ == "__main__":
-    app.secret_key = os.urandom(12)
     app.run(debug=True, host='0.0.0.0', port=5000)

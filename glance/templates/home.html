@@ -1,6 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
 
-Welcome
+<br>
+{% for item in items %}
+<a href="/item/{{item.id}}">
+<div style=display:inline-block;width:10vw;height:10vw;background-color:lightgray;text-align:center;>
+{{ item.name }}
+</div>
+</a>
+{% endfor %}
+
+<div style=background-color:black;color:white;margin-top:100px;>
+    <small><small>
+        <strong>items</strong><br>
+        {{ items }}
+    </small></small>
+</div>
+
+
 
 {% endblock %}

@@ -82,11 +82,11 @@ def api():
             }, 'Parameters': {
                 'Asset': {
                     'name': 'string', 'image': 'string', 'image_thumb': 'string',
-                    'attached': 'string', 'tag': 'string, separate with comma (,) only.'
+                    'attached': 'string', 'tag': 'string',
                 },
                 'Collection': {
                     'name': 'string', 'image': 'string', 'image_thumb': 'string',
-                    'attached': 'string', 'tag': 'string, separate with comma (,) only.'
+                    'attached': 'string', 'tag': 'string, separate with a single space only.'
                 }
             }
         },

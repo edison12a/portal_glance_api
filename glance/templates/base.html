@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
@@ -7,9 +8,11 @@
         }
         a:link {
             color: rgb(134, 136, 136);
+            text-decoration: none;
         }
         a:visited {
             color: rgb(134, 136, 136);
+            text-decoration: none;
         }
         a:hover {
             color: black;
@@ -17,7 +20,25 @@
         }
         a:active {
             color: rgb(134, 136, 136);
+            text-decoration: none;
         }
+        .search input[type="text"] {
+            color: rgb(134, 136, 136);
+            background-color: rgb(237, 237, 236);
+            text-align: center;
+            margin: 10px;
+            padding-bottom:10px;
+            border: none;
+            border-bottom: solid 2px #c9c9c9;
+            transition: border 0.3s;
+            width:30%;
+        }
+        .search input[type="text"]:focus,
+        .search input[type="text"].focus {
+            outline-width: 0;
+            border-bottom: solid 2px #969696;
+        }
+
     </style>
 </head>
 <body>
@@ -32,22 +53,27 @@
         </div>
 
         <div style="clear:both;width:100%;height:1px;margin: 0 10% 0 10%;background-color: rgba(134, 136, 136, .5);"></div>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
 
     </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
 
-
-
-    <div style="width:100%;padding:10%;">
+    <div style="width:100%;padding-left:10%;padding-right:10%;">
         <div style="text-align:center;padding-bottom:60px;">
-            Search
+            <form action="/search">
+                <ul class="input-list search clearfix">
+                    <input type="text" name="search" placeholder="Search">
+                </ul>
+            </form>
         </div>
+    </div>
+    <div style="width:100%;">
         {% block content %}
         {% endblock %}
     </div>
+
 </body>
 </html>
