@@ -2,9 +2,11 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+
     <style>
         body {
             background-color: rgb(237, 237, 236);
+            margin: 0;
         }
         a:link {
             color: rgb(134, 136, 136);
@@ -38,8 +40,33 @@
             outline-width: 0;
             border-bottom: solid 2px #969696;
         }
-
+        .masonry {
+          /* Masonry container */
+          column-count: 5;
+          font-size: 0;
+        }
+        .item {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-border-radius: 0px;
+            -webkit-border-radius: 0px;
+        }
+        img, iframe {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            transition: .4s filter;
+            filter: grayscale(100%) opacity(75%);
+        }
+        .item:hover img:hover {
+        	filter: grayscale(0%) opacity(100%);
+        }
     </style>
+
+
 </head>
 <body>
     <div style="width:100%;height:40px;position:fixed;top:0;background-color: rgba(237, 237, 236, .95);">
@@ -70,10 +97,11 @@
             </form>
         </div>
     </div>
-    <div style="width:100%;">
+
+
         {% block content %}
         {% endblock %}
-    </div>
+
 
 </body>
 </html>

@@ -3,7 +3,7 @@ import requests
 
 from flask import Flask, flash, redirect, render_template, request, session, abort
 
-from packages.function import LoggedIn, CheckLoginDetails, upload_handler
+from packages.function import LoggedIn, CheckLoginDetails, upload_handler, process_raw_files
 
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -20,10 +20,7 @@ API_ASSET = 'http://127.0.0.1:5050/glance/api/asset'
 @app.route('/')
 def home():
     if LoggedIn(session):
-
         r = requests.get('{}'.format(API_ASSET))
-
-
 
         return render_template('home.html', items=r.json())
     else:
@@ -42,6 +39,7 @@ def login():
 
         if CheckLoginDetails(**data):
             session['logged_in'] = True
+            session['user'] = data['username']
         else:
             # TODO: Something here?
             pass
@@ -70,28 +68,33 @@ def uploading():
         if request.method == 'POST':
             # Init dict and append user data
             upload_data = {}
-            upload_data['files'] = []
 
             for form_input in request.form:
                 upload_data[form_input] = request.form[form_input]
 
-            # append files to dict, and hand files to the upload_handler
-            files = request.files.getlist('file')
-            for file in files:
-                if file.filename != '':
-                    upload_data['files'].append(file.filename)
-                    upload_handler(file, app.config['UPLOAD_FOLDER'])
-                else:
-                    pass
+            # process all uploaded files.
+            processed_files = process_raw_files(request.files.getlist('file'))
 
-            payload = {}
-            payload['name'] = 'IMP NAME'
-            payload['image'] = upload_data['files'][0]
-            payload['image_thumb'] = upload_data['files'][0]
-            payload['tag'] = upload_data['tag']
+            # build payload for api
+            for items in processed_files:
+                payload = {}
+                payload['name'] = items
+                payload['author'] = session['user']
+                payload['tag'] = upload_data['tag']
+                payload['collection'] = upload_data['collection']
 
-            # post data to api
-            r = requests.post('{}'.format(API_ASSET), params=payload)
+                for item in processed_files[items]:
+                    if item.filename.endswith('.jpg'):
+                        uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+
+                        payload['image'] = uploaded_file
+                        payload['image_thumb'] = uploaded_file
+                    else:
+                        uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                        payload['attached'] = uploaded_file
+
+                # post payload to api
+                r = requests.post('{}'.format(API_ASSET), params=payload)
 
             return render_template('uploadcomplete.html')
     else:

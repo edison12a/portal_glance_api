@@ -2,13 +2,25 @@
 {% block content %}
 
 <br>
-{% for item in items %}
-<a href="/item/{{item.id}}">
-<div style=display:inline-block;width:10vw;height:10vw;background-color:lightgray;text-align:center;>
-{{ item.name }}
-</div>
+
+
+
+<div class="masonry">
+
+    {% for item in items %}
+  <div class="item">
+      <a href="item/{{item.id}}">
+    <img src="https://s3.amazonaws.com/glancestore/{{item.image_thumb}}">
 </a>
+  </div>
 {% endfor %}
+
+</div>
+
+
+
+
+
 
 <div style=background-color:black;color:white;margin-top:100px;>
     <small><small>
