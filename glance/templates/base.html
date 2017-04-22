@@ -17,7 +17,7 @@
             text-decoration: none;
         }
         a:hover {
-            color: black;
+            color: rgb(46, 137, 176);;
             text-decoration: none;
         }
         a:active {
@@ -26,19 +26,19 @@
         }
         .search input[type="text"] {
             color: rgb(134, 136, 136);
-            background-color: rgb(237, 237, 236);
-            text-align: center;
-            margin: 10px;
+            background-color: rgba(0, 0, 0, 0);
+            text-align: right;
+            font-size: 20px;
             padding-bottom:10px;
             border: none;
-            border-bottom: solid 2px #c9c9c9;
+            border-bottom: solid 2px rgba(0, 0, 0, 0);
             transition: border 0.3s;
-            width:30%;
         }
         .search input[type="text"]:focus,
         .search input[type="text"].focus {
+            color: rgb(46, 137, 176);
             outline-width: 0;
-            border-bottom: solid 2px #969696;
+            border-bottom: solid 2px rgb(46, 137, 176);
         }
         .masonry {
           /* Masonry container */
@@ -64,39 +64,53 @@
         .item:hover img:hover {
         	filter: grayscale(0%) opacity(100%);
         }
-    </style>
+        /* enable absolute positioning */
+        .inner-addon {
+            position: relative;
+        }
 
+        /* style icon */
+        .inner-addon .glyphicon {
+            font-size: 15px;
+          color: rgb(46, 137, 176);
+          position: absolute;
+          padding: 5px;
+          pointer-events: none;
+        }
+
+        /* align icon */
+        .left-addon .glyphicon  { left:  0px;}
+        .right-addon .glyphicon { right: 0px;}
+
+        /* add padding  */
+        .left-addon input  { padding-left:  30px; }
+        .right-addon input { padding-right: 30px; }
+
+    </style>
 
 </head>
 <body>
-    <div style="width:100%;height:40px;position:fixed;top:0;background-color: rgba(237, 237, 236, .95);">
+    <div style="z-index:100;width:100%;height:53px;position:fixed;top:0;background-color: rgba(237, 237, 236, .96);padding-left:10%;padding-right:10%;padding-top:15px;padding-bottom:10px;">
 
-        <div style="float:left;padding-left:10%;padding-top:10px;padding-bottom:10px;">
-            <a href='/'>GLANCE</a>&emsp;<a href='/upload'>UPLOAD</a>
+        <div style="float:left;">
+            <a href='/'>GLANCE</a>&emsp;<a href='/upload'>UPLOAD</a>&emsp;<a href='/logout'>LOGOUT</a>
         </div>
 
-        <div style="float:right;padding-right:10%;padding-top:10px;padding-bottom:10px;">
-            <a href='/logout'>LOGOUT</a>
-        </div>
+            <div style="float:right;">
 
-        <div style="clear:both;width:100%;height:1px;margin: 0 10% 0 10%;background-color: rgba(134, 136, 136, .5);"></div>
-
-    </div>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-
-    <div style="width:100%;padding-left:10%;padding-right:10%;">
-        <div style="text-align:center;padding-bottom:60px;">
             <form action="/search">
                 <ul class="input-list search clearfix">
-                    <input type="text" name="search" placeholder="Search">
+                    <div class="inner-addon right-addon">
+                        <i class="glyphicon glyphicon-search"></i>
+                        <input type="text" name="search">
+                    </div>
                 </ul>
             </form>
+
         </div>
     </div>
+
+    <p style="height:25px;"></p>
 
 
         {% block content %}

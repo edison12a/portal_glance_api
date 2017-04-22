@@ -18,11 +18,9 @@ app = Flask(__name__)
 #app.config.from_object('config.config')
 #app.config.from_object('config')
 
-
 # TODO: Auth
 # TODO: api tests
 # TODO: catch/process no cred file error
-
 
 # config
 SERVER = 'http://127.0.0.1:5050'
