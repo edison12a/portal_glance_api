@@ -17,9 +17,12 @@ app.secret_key = os.urandom(12)
 API = 'http://127.0.0.1:5050/glance/api'
 API_ASSET = 'http://127.0.0.1:5050/glance/api/asset'
 
+
+
 @app.route('/')
 def home():
     if LoggedIn(session):
+
         r = requests.get('{}'.format(API_ASSET))
 
         return render_template('home.html', items=r.json())
@@ -113,9 +116,11 @@ def item(id):
 def search():
     search_data = {}
     search_term = request.args['search']
-    search_data['search_term'] = str(search_term)
+    search_data['query'] = str(search_term)
 
-    return render_template('search.html', data=search_data)
+    r = requests.get('{}/query'.format(API), params=search_data)
+
+    return render_template('search.html', data=search_data, items=r.json()['result'])
 
 
 if __name__ == "__main__":

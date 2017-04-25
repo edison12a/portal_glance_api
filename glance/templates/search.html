@@ -1,14 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
 
-    <div style="padding-left:10%;padding-right:10%">
-        {{ data }}
+    <div id="searchfilterbox">
+        <small><small><small>FILTER:&emsp;</small> <a href="">Images | Geometry | Footage | People</a></small></small>
+    </div>
+
+    <div class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": ".grid-sizer", "percentPosition": true }'>
+        {% for item in items %}
+            <div class="grid-sizer"></div>
+            <div class="grid-item">
+                <a href="item/{{ item.id }}">
+                    <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.image_thumb}}" />
+                </a>
+            </div>
+        {% endfor %}
     </div>
 
     <div style=background-color:black;color:white;margin-top:100px;>
         <small><small>
             <strong>data</strong><br>
-            {{ data }}
+            {{ data }}<br>
+            <strong>items</strong><br>
+            {{ items }}<br>
         </small></small>
     </div>
 

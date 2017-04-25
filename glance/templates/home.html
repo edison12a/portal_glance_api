@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 
+    <div id="searchfilterbox">
+        <small><small><small>FILTER:&emsp;</small> <a href="">Images | Geometry | Footage | People</a></small></small>
+    </div>
+
     <div class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": ".grid-sizer", "percentPosition": true }'>
         {% for item in items %}
             <div class="grid-sizer"></div>

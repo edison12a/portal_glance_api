@@ -19,7 +19,7 @@
             text-decoration: none;
         }
         a:hover {
-            color: rgb(46, 137, 176);;
+            color: rgb(46, 137, 176);
             text-decoration: none;
         }
         a:active {
@@ -30,7 +30,7 @@
         .search input[type="text"] {
             color: rgb(134, 136, 136);
             background-color: rgba(0, 0, 0, 0);
-            text-align: right;
+            text-align: left;
             font-size: 20px;
             padding-bottom:10px;
             border: none;
@@ -61,43 +61,73 @@
         /* Masonry CSS */
         .grid {
           width: 100%;
+          z-index:0;
         }
         .grid:after {
+          z-index:0;
           content: '';
           display: block;
           clear: both;
         }
         .grid-sizer,
-        .grid-item { width: 20%; float:left; }
+        .grid-item {
+            z-index:0;
+            width: 20%; float:left;
+        }
 
         .grid-item img {
+            z-index:0;
             transition: .4s filter;
             filter: grayscale(100%) opacity(75%);
         }
         .grid-item:hover img:hover {
+            z-index:0;
         	filter: grayscale(0%) opacity(100%);
+        }
+        #searchfilterbox {
+            z-index: 100;
+            padding-left:10%;
+            background-color: rgba(220, 220, 220, .96);
         }
     </style>
 </head>
 
 <body>
-    <div style="z-index:100;width:100%;height:53px;position:fixed;top:0;background-color: rgba(237, 237, 236, .96);padding-left:10%;padding-right:10%;">
+    <div style="z-index:100;width:100%;height:53px;position:fixed;top:0;background-color: rgba(220, 220, 220, .96);padding-left:10%;padding-right:10%;box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);">
 
         <div style="float:left;padding-top:17px;padding-bottom:10px;">
-            <a href='/'>GLANCE</a>&emsp;<a href='/upload'>UPLOAD</a>&emsp;<a href='/logout'>LOGOUT</a>
+            <a href='/'>GLANCE</a>&emsp;&emsp;&emsp;<a href='/upload'>UPLOAD</a>&emsp;<a href='/logout'>LOGOUT</a>
         </div>
+
+        {% if data is defined %}
 
         <div style="float:right;padding-top:12px;">
             <form action="/search">
                 <ul class="input-list search clearfix">
                     <div class="inner-addon right-addon">
                         <i class="glyphicon glyphicon-search"></i>
-                        <input type="text" name="search">
+                        <input type="text" name="search" placeholder="{{data.query}}">
                     </div>
                 </ul>
             </form>
-
         </div>
+
+        {% else %}
+
+        <div style="float:right;padding-top:12px;">
+            <form action="/search">
+                <ul class="input-list search clearfix">
+                    <div class="inner-addon right-addon">
+                        <i class="glyphicon glyphicon-search"></i>
+                        <input type="text" name="search" placeholder="">
+                    </div>
+                </ul>
+            </form>
+        </div>
+
+        {% endif %}
+
+
     </div>
 
     <p style="height:42px;"></p>
