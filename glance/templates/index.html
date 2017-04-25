@@ -5,21 +5,21 @@
 </head>
 <body style="background-color: rgb(237, 237, 236);">
 
-{% if session['logged_in'] %}
+    {% if session['logged_in'] %}
 
-    <p>You're logged in already!</p>
+        <p>You're logged in already!</p>
 
-{% else %}
+    {% else %}
 
-    <div style="position:fixed;top:50%;left:50%;">
-        <form action="/login" method="POST">
-            <input type="username" class="form-control" name="username" placeholder="Username">
-            <input type="password" class="form-control" name="password" placeholder="Password">
-            <button type="submit" class="btn btn-primary btn-block">Login</button>
-        </form>
-    </div>
+        <div style="position:fixed;top:50%;left:50%;">
+            <form action="/login" method="POST">
+                <input type="username" class="form-control" name="username" placeholder="Username">
+                <input type="password" class="form-control" name="password" placeholder="Password">
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+            </form>
+        </div>
 
-{% endif %}
+    {% endif %}
 
 </body>
 </html>

@@ -2,18 +2,20 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/masonry.pkgd.min.js') }}"></script>
 
     <style>
         body {
             background-color: rgb(237, 237, 236);
             margin: 0;
         }
+        /* Hyperlink CSS */
         a:link {
-            color: rgb(134, 136, 136);
+            color: rgb(46, 137, 176);
             text-decoration: none;
         }
         a:visited {
-            color: rgb(134, 136, 136);
+            color: rgb(46, 137, 176);
             text-decoration: none;
         }
         a:hover {
@@ -21,9 +23,10 @@
             text-decoration: none;
         }
         a:active {
-            color: rgb(134, 136, 136);
+            color: rgb(46, 137, 176);
             text-decoration: none;
         }
+        /* Search Bar CSS */
         .search input[type="text"] {
             color: rgb(134, 136, 136);
             background-color: rgba(0, 0, 0, 0);
@@ -40,36 +43,9 @@
             outline-width: 0;
             border-bottom: solid 2px rgb(46, 137, 176);
         }
-        .masonry {
-          /* Masonry container */
-          column-count: 5;
-          font-size: 0;
-        }
-        .item {
-            display: block;
-            width: 100%;
-            box-sizing: border-box;
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            -moz-border-radius: 0px;
-            -webkit-border-radius: 0px;
-        }
-        img, iframe {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            transition: .4s filter;
-            filter: grayscale(100%) opacity(75%);
-        }
-        .item:hover img:hover {
-        	filter: grayscale(0%) opacity(100%);
-        }
-        /* enable absolute positioning */
         .inner-addon {
             position: relative;
         }
-
-        /* style icon */
         .inner-addon .glyphicon {
             font-size: 15px;
           color: rgb(46, 137, 176);
@@ -77,27 +53,41 @@
           padding: 5px;
           pointer-events: none;
         }
-
-        /* align icon */
         .left-addon .glyphicon  { left:  0px;}
         .right-addon .glyphicon { right: 0px;}
-
-        /* add padding  */
         .left-addon input  { padding-left:  30px; }
         .right-addon input { padding-right: 30px; }
 
+        /* Masonry CSS */
+        .grid {
+          width: 100%;
+        }
+        .grid:after {
+          content: '';
+          display: block;
+          clear: both;
+        }
+        .grid-sizer,
+        .grid-item { width: 20%; float:left; }
+
+        .grid-item img {
+            transition: .4s filter;
+            filter: grayscale(100%) opacity(75%);
+        }
+        .grid-item:hover img:hover {
+        	filter: grayscale(0%) opacity(100%);
+        }
     </style>
-
 </head>
-<body>
-    <div style="z-index:100;width:100%;height:53px;position:fixed;top:0;background-color: rgba(237, 237, 236, .96);padding-left:10%;padding-right:10%;padding-top:15px;padding-bottom:10px;">
 
-        <div style="float:left;">
+<body>
+    <div style="z-index:100;width:100%;height:53px;position:fixed;top:0;background-color: rgba(237, 237, 236, .96);padding-left:10%;padding-right:10%;">
+
+        <div style="float:left;padding-top:17px;padding-bottom:10px;">
             <a href='/'>GLANCE</a>&emsp;<a href='/upload'>UPLOAD</a>&emsp;<a href='/logout'>LOGOUT</a>
         </div>
 
-            <div style="float:right;">
-
+        <div style="float:right;padding-top:12px;">
             <form action="/search">
                 <ul class="input-list search clearfix">
                     <div class="inner-addon right-addon">
@@ -110,7 +100,7 @@
         </div>
     </div>
 
-    <p style="height:25px;"></p>
+    <p style="height:42px;"></p>
 
 
         {% block content %}
