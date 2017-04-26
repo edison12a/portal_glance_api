@@ -6,25 +6,35 @@
         <form action="/uploading" method="POST" enctype="multipart/form-data">
 
             <div class="form-group">
-                <label for="file">*Asset(s)</label>
+                <label for="file">*Items(s)</label>
                 <input type="file" id="file" name="file" multiple>
                 <small><small><p class="help-block">Any number of Assets can be uploaded at a time.</p></small></small>
-            </div>
 
-            <div style="display:inline-block" class="form-group">
-                <label for="collection">Collection</label>
-                <input type="text" class="form-control" id="collection" name="collection">
-                <small><small><p class="help-block">Entering a Collection name, will make a new<br>Collection and append this assets to it.</p></small></small>
-            </div>
-
-            <div style="display:inline-block" class="form-group">
+                <label for="radio">*Item Type</label><br>
+                <label class="radio-inline">
+                  <input type="radio" name="itemradio" value="image">Image
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" name="itemradio" value="footage">Footage
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" name="itemradio" value="geometry">Geometry
+                </label>
+                <br>
+                <br>
                 <label for="tag">Tags</label>
-                <input type="text" class="form-control" id="tag" name="tag">
-                <small><small><p class="help-block">Separate tags with a space. <br>i.e. here are some tags</p></small></small>
-            </div>
+                <input style="width:300px;" type="text" class="form-control" id="tag" name="tag" />
+                <small><small><p class="help-block">Separate tags with a space. i.e. here are some tags</p></small></small>
+
+                <label for="collection">Collection</label>
+                <input style="width:300px;" type="text" class="form-control" id="collection" name="collection" />
+                <small><small><p class="help-block">Entering a Collection name, will make a new collection <br>and append this assets to it.</p></small></small>
+
 
             <br>
             <button type="submit" class="btn btn-default">Submit</button>
+
+            </div>
 
         </form>
         <p style="height:40px;" />

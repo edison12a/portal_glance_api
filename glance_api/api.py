@@ -7,8 +7,8 @@ from packages.functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
     del_collection, patch_asset, get_query_flag,
-    patch_collection, make_dict, get_footages, post_user, get_user, new_image, new_footage,
-    to_dict
+    patch_collection, make_dict, get_footages, post_user, get_user, post_image, post_footage,
+    to_dict, get_items, post_geometry
     )
 
 from packages.models import Item
@@ -98,78 +98,6 @@ def api():
     return jsonify({'Glance WebAPI': info})
 
 
-@app.route('{}/footage'.format(ROUTE), methods=['POST', 'GET'])
-def footage():
-    """Endpoint that returns footage objects"""
-    if request.method=='POST':
-        # TODO: IMP POST method
-        """
-        # build query from user args
-        query = {}
-        for x in request.args:
-            query[x] = x
-
-        try:
-            session = Session()
-            asset = post_asset(session, **query)
-
-            result = {
-                'responce': 'successful',
-                'location': ROUTE + '/asset/' + str(asset.id)
-            }
-
-            session.close()
-
-            return make_response(
-                jsonify(
-                    {
-                        'POST: /asset': result
-                    }
-                )
-            ), 200
-
-        except:
-            session.close()
-            fail = {'Action': 'failed'}
-            return make_response(
-                jsonify(
-                    {
-                        'POST /asset': fail
-                    }
-                )
-            ), 404
-        """
-        pass
-
-
-    elif request.method=='GET':
-        session = Session()
-        raw_footages = get_footages(session)
-        footages = make_dict(raw_footages)
-
-        if len(footages) == 0:
-            session.close()
-            return make_response(
-                jsonify(
-                    {
-                        'GET footage': {
-                            'Status': 'Successful',
-                            'Message': 'No footage in database'
-                        }
-                    }
-                )
-            ), 200
-
-        session.close()
-        return make_response(
-            jsonify(footages)
-        ), 200
-
-    else:
-        session.close()
-        return jsonify({'Footage': 'This endpoint only accepts POST, GET methods.'})
-
-
 @app.route('{}/asset'.format(ROUTE), methods=['POST', 'GET'])
 def asset():
     """Endpoint that returns asset objects"""
@@ -201,6 +129,7 @@ def asset():
         except:
             session.close()
             fail = {'Action': 'failed'}
+
             return make_response(
                 jsonify(
                     {
@@ -211,19 +140,6 @@ def asset():
 
     elif request.method=='GET':
         session = Session()
-
-        new_image(session)
-        new_footage(session)
-
-        bla = session.query(Item).all()
-        print('ALL ITEMS')
-        print(bla)
-        print('NAMES OF ALL ITEMS')
-        for x in bla:
-            if x.type == 'image':
-                print(x.image_name)
-            elif x.type == 'footage':
-                print(x.footage_name)
 
         raw_assets = get_assets(session)
         assets = make_dict(raw_assets)
@@ -255,19 +171,44 @@ def asset():
 def item():
     """Endpoint that returns asset objects"""
     if request.method=='POST':
-        pass
+        query = {}
+        for x in request.args:
+            query[x] = request.args[x]
+
+        try:
+            session = Session()
+            asset = post_image(session, **query)
+
+            result = {
+                'responce': 'successful',
+                'location': ROUTE + '/asset/' + str('asset.id')
+            }
+
+            session.close()
+
+            return make_response(
+                jsonify(
+                    {
+                        'POST: /asset': result
+                    }
+                )
+            ), 200
+
+        except:
+            session.close()
+            fail = {'Action': 'failed'}
+            return make_response(
+                jsonify(
+                    {
+                        'POST /asset': fail
+                    }
+                )
+            ), 404
 
     elif request.method=='GET':
         session = Session()
 
-        """
-        # quick db population
-        new_image(session)
-        new_footage(session)
-        """
-        
-        raw_result = session.query(Item).all()
-        result = to_dict(raw_result)
+        result = get_items(session)
 
         if len(result) == 0:
             session.close()
@@ -290,7 +231,6 @@ def item():
     else:
         session.close()
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
-
 
 
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
@@ -528,6 +468,206 @@ def user():
     session.close()
 
     return jsonify({'user details': user_cred})
+
+
+@app.route('{}/image'.format(ROUTE), methods=['POST', 'GET'])
+def image():
+    """Endpoint that returns asset objects"""
+    if request.method=='POST':
+        query = {}
+        for x in request.args:
+            query[x] = request.args[x]
+
+        try:
+            session = Session()
+            asset = post_image(session, **query)
+
+            result = {
+                'responce': 'successful',
+                'location': ROUTE + '/asset/' + str('asset.id')
+            }
+
+            session.close()
+
+            return make_response(
+                jsonify(
+                    {
+                        'POST: /asset': result
+                    }
+                )
+            ), 200
+
+        except:
+            session.close()
+            fail = {'Action': 'failed'}
+            return make_response(
+                jsonify(
+                    {
+                        'POST /asset': fail
+                    }
+                )
+            ), 404
+
+    elif request.method=='GET':
+        session = Session()
+
+        result = get_items(session)
+
+        if len(result) == 0:
+            session.close()
+            return make_response(
+                jsonify(
+                    {
+                        'GET assets': {
+                            'Status': 'Successful',
+                            'Message': 'No assets in database'
+                        }
+                    }
+                )
+            ), 200
+
+        session.close()
+        return make_response(
+            jsonify(result)
+        ), 200
+
+    else:
+        session.close()
+        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
+
+
+@app.route('{}/footage'.format(ROUTE), methods=['POST', 'GET'])
+def footage():
+    """Endpoint that returns asset objects"""
+    if request.method=='POST':
+        query = {}
+        for x in request.args:
+            query[x] = request.args[x]
+
+        try:
+            session = Session()
+            asset = post_footage(session, **query)
+
+            result = {
+                'responce': 'successful',
+                'location': ROUTE + '/asset/' + str('asset.id')
+            }
+
+            session.close()
+
+            return make_response(
+                jsonify(
+                    {
+                        'POST: /asset': result
+                    }
+                )
+            ), 200
+
+        except:
+            session.close()
+            fail = {'Action': 'failed'}
+            return make_response(
+                jsonify(
+                    {
+                        'POST /asset': fail
+                    }
+                )
+            ), 404
+
+    elif request.method=='GET':
+        session = Session()
+
+        result = get_items(session)
+
+        if len(result) == 0:
+            session.close()
+            return make_response(
+                jsonify(
+                    {
+                        'GET assets': {
+                            'Status': 'Successful',
+                            'Message': 'No assets in database'
+                        }
+                    }
+                )
+            ), 200
+
+        session.close()
+        return make_response(
+            jsonify(result)
+        ), 200
+
+    else:
+        session.close()
+        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
+
+
+@app.route('{}/geometry'.format(ROUTE), methods=['POST', 'GET'])
+def geometry():
+    """Endpoint that returns asset objects"""
+    if request.method=='POST':
+        query = {}
+        for x in request.args:
+            query[x] = request.args[x]
+
+        try:
+            session = Session()
+            asset = post_geometry(session, **query)
+
+            result = {
+                'responce': 'successful',
+                'location': ROUTE + '/asset/' + str('asset.id')
+            }
+
+            session.close()
+
+            return make_response(
+                jsonify(
+                    {
+                        'POST: /asset': result
+                    }
+                )
+            ), 200
+
+        except:
+            session.close()
+            fail = {'Action': 'failed'}
+            return make_response(
+                jsonify(
+                    {
+                        'POST /asset': fail
+                    }
+                )
+            ), 404
+
+    elif request.method=='GET':
+        session = Session()
+
+        result = get_items(session)
+
+        if len(result) == 0:
+            session.close()
+            return make_response(
+                jsonify(
+                    {
+                        'GET assets': {
+                            'Status': 'Successful',
+                            'Message': 'No assets in database'
+                        }
+                    }
+                )
+            ), 200
+
+        session.close()
+        return make_response(
+            jsonify(result)
+        ), 200
+
+    else:
+        session.close()
+        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
+
+
 
 
 

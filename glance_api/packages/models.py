@@ -173,6 +173,7 @@ class Image(Item):
     initdate = Column(DateTime, default=func.now())
     moddate = Column(DateTime, default=func.now())
     item_type = Column(String, default=__tablename__)
+    attached = Column(String, default=None)
 
     # TODO: IMP relationships with collections and tags
 
@@ -198,6 +199,7 @@ class Footage(Item):
     initdate = Column(DateTime, default=func.now())
     moddate = Column(DateTime, default=func.now())
     item_type = Column(String, default=__tablename__)
+    attached = Column(String, default=None)
 
     __mapper_args__ = {
         'polymorphic_identity': 'footage'
@@ -216,7 +218,7 @@ class Geometry(Item):
     initdate = Column(DateTime, default=func.now())
     moddate = Column(DateTime, default=func.now())
     item_type = Column(String, default=__tablename__)
-    attachment = Column(String)
+    attached = Column(String, default=None)
 
     __mapper_args__ = {
         'polymorphic_identity': 'geometry'

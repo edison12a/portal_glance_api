@@ -15,7 +15,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = os.urandom(12)
 
 API = 'http://127.0.0.1:5050/glance/api'
-API_ASSET = 'http://127.0.0.1:5050/glance/api/asset'
+API_ASSET = 'http://127.0.0.1:5050/glance/api/item'
+API_ITEM = 'http://127.0.0.1:5050/glance/api/item'
+API_IMAGE = 'http://127.0.0.1:5050/glance/api/image'
+API_FOOTAGE = 'http://127.0.0.1:5050/glance/api/footage'
+API_GEOMETRY = 'http://127.0.0.1:5050/glance/api/geometry'
 
 
 
@@ -78,26 +82,72 @@ def uploading():
             # process all uploaded files.
             processed_files = process_raw_files(request.files.getlist('file'))
 
-            # build payload for api
-            for items in processed_files:
-                payload = {}
-                payload['name'] = items
-                payload['author'] = session['user']
-                payload['tag'] = upload_data['tag']
-                payload['collection'] = upload_data['collection']
+            if upload_data['itemradio'] == 'image':
+                # build payload for api
+                for items in processed_files:
+                    payload = {}
+                    payload['name'] = items
+                    payload['author'] = session['user']
+                    # payload['tag'] = upload_data['tag']
+                    # payload['collection'] = upload_data['collection']
 
-                for item in processed_files[items]:
-                    if item.filename.endswith('.jpg'):
-                        uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                    for item in processed_files[items]:
+                        if item.filename.endswith('.jpg'):
+                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            payload['item_loc'] = uploaded_file
+                            payload['item_thumb'] = uploaded_file
 
-                        payload['image'] = uploaded_file
-                        payload['image_thumb'] = uploaded_file
-                    else:
-                        uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
-                        payload['attached'] = uploaded_file
+                        else:
+                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            payload['attached'] = uploaded_file
 
-                # post payload to api
-                r = requests.post('{}'.format(API_ASSET), params=payload)
+                    # post payload to api
+                    r = requests.post('{}'.format(API_IMAGE), params=payload)
+
+            elif upload_data['itemradio'] == 'footage':
+                # build payload for api
+                for items in processed_files:
+                    payload = {}
+                    payload['name'] = items
+                    payload['author'] = session['user']
+                    # payload['tag'] = upload_data['tag']
+                    # payload['collection'] = upload_data['collection']
+
+                    for item in processed_files[items]:
+                        if item.filename.endswith('.jpg'):
+                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            payload['item_loc'] = uploaded_file
+                            payload['item_thumb'] = uploaded_file
+
+                        else:
+                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            payload['attached'] = uploaded_file
+
+                    # post payload to api
+                    r = requests.post('{}'.format(API_FOOTAGE), params=payload)
+
+            elif upload_data['itemradio'] == 'geometry':
+                # build payload for api
+
+                for items in processed_files:
+                    payload = {}
+                    payload['name'] = items
+                    payload['author'] = session['user']
+                    # payload['tag'] = upload_data['tag']
+                    # payload['collection'] = upload_data['collection']
+
+                    for item in processed_files[items]:
+                        if item.filename.endswith('.jpg'):
+                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            payload['item_loc'] = uploaded_file
+                            payload['item_thumb'] = uploaded_file
+
+                        else:
+                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            payload['attached'] = uploaded_file
+
+                    # post payload to api
+                    r = requests.post('{}'.format(API_GEOMETRY), params=payload)
 
             return render_template('uploadcomplete.html')
     else:

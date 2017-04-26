@@ -1,6 +1,6 @@
 # TODO: classes needed?
 import datetime
-from .models import assignment, tag_table, Collection, Tag, Asset, Base, Footage, User, Item, Image
+from .models import assignment, tag_table, Collection, Tag, Asset, Base, Footage, User, Item, Image, Geometry
 
 
 # dev functions
@@ -139,7 +139,6 @@ def to_dict(item_list):
     return result
 
 
-
 # user functions
 def post_collection(session, **kwarg):
     """Posts collection to the database
@@ -273,6 +272,15 @@ def get_assets(session):
 
     # returns raw db objects
     return assets
+
+
+def get_items(session):
+    """Returns all asset objects"""
+    raw_items = session.query(Item).all()
+    result = to_dict(raw_items)
+
+    # returns raw db objects
+    return result
 
 
 def get_footages(session):
@@ -630,37 +638,100 @@ def get_user(session, **kwarg):
     return result
 
 
-def new_image(session):
+def post_image(session, **kwarg):
+    payload = {}
+    data = {}
+
+    # process user input
+    for k, v in kwarg.items():
+        payload[k] = v
+
+    # remove attri that arnt in the database
+    for column in Image.__table__.columns:
+        if column.name in payload:
+            data[column.name] = payload[column.name]
+        elif column.name not in payload:
+            data[column.name] = None
+        else:
+            pass
+
+    # Database entry
     item = Image(
-        name = 'test image name',
-        item_loc = 'test image',
-        item_thumb = 'test image thumb',
-        author = 'test author'
+        name = data['name'],
+        item_loc = data['item_loc'],
+        item_thumb = data['item_thumb'],
+        author = data['author']
     )
 
+    # TODO: sort out tags
     session.add(item)
+    # commit changes to database
     session.commit()
 
-
-def new_footage(session):
-    item = Footage(
-        name = 'test footage name',
-        item_loc = 'test item_loc',
-        item_thumb = 'test item_thumb',
-        author = 'test author'
-    )
-
-    session.add(item)
-    session.commit()
+    return item
 
 
-def new_geometry(session):
+def post_footage(session, **kwarg):
+        payload = {}
+        data = {}
+
+        # process user input
+        for k, v in kwarg.items():
+            payload[k] = v
+
+        # remove attri that arnt in the database
+        for column in Image.__table__.columns:
+            if column.name in payload:
+                data[column.name] = payload[column.name]
+            elif column.name not in payload:
+                data[column.name] = None
+            else:
+                pass
+
+        # Database entry
+        item = Footage(
+            name = data['name'],
+            item_loc = data['item_loc'],
+            item_thumb = data['item_thumb'],
+            author = data['author']
+        )
+
+        # TODO: sort out tags
+        session.add(item)
+        # commit changes to database
+        session.commit()
+
+        return item
+
+
+def post_geometry(session, **kwarg):
+    payload = {}
+    data = {}
+
+    # process user input
+    for k, v in kwarg.items():
+        payload[k] = v
+
+    # remove attri that arnt in the database
+    for column in Geometry.__table__.columns:
+        if column.name in payload:
+            data[column.name] = payload[column.name]
+        elif column.name not in payload:
+            data[column.name] = None
+        else:
+            pass
+
+    # Database entry
     item = Geometry(
-        name = 'test footage name',
-        item_loc = 'test item_loc',
-        item_thumb = 'test item_thumb',
-        author = 'test author'
+        name = data['name'],
+        item_loc = data['item_loc'],
+        item_thumb = data['item_thumb'],
+        author = data['author']
     )
 
+    # TODO: sort out tags
     session.add(item)
+    # commit changes to database
     session.commit()
+
+    return item
