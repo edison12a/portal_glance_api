@@ -5,7 +5,7 @@
         <small><small><small>FILTER:&emsp;</small> <a href="">Images | Geometry | Footage | People</a></small></small>
     </div>
 
-    <div class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": ".grid-sizer", "percentPosition": true }'>
+    <div class="grid">
         {% for item in items %}
             <div class="grid-sizer"></div>
             <div class="grid-item">
@@ -15,6 +15,22 @@
             </div>
         {% endfor %}
     </div>
+
+    <!-- Init masonry js -->
+    <script>
+    var grid = document.querySelector('.grid');
+    var msnry;
+
+    imagesLoaded( grid, function() {
+        // init Isotope after all images have loaded
+        msnry = new Masonry( grid, {
+            itemSelector: '.grid-item',
+            columnWidth: '.grid-sizer',
+            percentPosition: true,
+            transitionDuration: 0,
+        });
+    });
+    </script>
 
     <div style=background-color:black;color:white;margin-top:100px;>
         <small><small>
