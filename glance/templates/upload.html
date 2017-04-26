@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 
-    <div style="padding-left:10%;padding-right:10%">
+    <div style="padding-left:10%;padding-right:10%;background-color:lightgray;">
+        <p style="height:40px;" />
         <form action="/uploading" method="POST" enctype="multipart/form-data">
 
             <div class="form-group">
@@ -26,6 +27,7 @@
             <button type="submit" class="btn btn-default">Submit</button>
 
         </form>
+        <p style="height:40px;" />
     </div>
 
 {% endblock %}
