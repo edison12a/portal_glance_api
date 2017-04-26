@@ -22,7 +22,6 @@ API_FOOTAGE = 'http://127.0.0.1:5050/glance/api/footage'
 API_GEOMETRY = 'http://127.0.0.1:5050/glance/api/geometry'
 
 
-
 @app.route('/')
 def home():
     if LoggedIn(session):

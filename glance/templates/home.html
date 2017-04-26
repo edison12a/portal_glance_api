@@ -7,12 +7,40 @@
 
     <div class="grid">
         {% for item in items %}
-            <div class="grid-sizer"></div>
-            <div class="grid-item">
-                <a href="item/{{ item.id }}">
-                    <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
-                </a>
-            </div>
+            {% if item.item_type == 'image' %}
+                <div class="grid-sizer"></div>
+                <div class="grid-item">
+                    <div style="position:relative;">
+                        <a href="item/{{ item.id }}">
+                            <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                        </a>
+                    </div>
+                    <div style="position:absolute;top:0;width:50px;height:50px;background-color:red;">
+                    </div>
+                </div>
+            {% elif item.item_type == 'footage' %}
+                <div class="grid-sizer"></div>
+                <div class="grid-item">
+                    <div style="position:relative;">
+                        <a href="item/{{ item.id }}">
+                            <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                        </a>
+                    </div>
+                    <div style="position:absolute;top:0;width:50px;height:50px;background-color:red;">
+                    </div>
+                </div>
+            {% elif item.item_type == 'geometry' %}
+                <div class="grid-sizer"></div>
+                <div class="grid-item">
+                    <div style="position:relative;">
+                        <a href="item/{{ item.id }}">
+                            <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                        </a>
+                    </div>
+                    <div style="position:absolute;top:0;width:50px;height:50px;background-color:red;">
+                    </div>
+                </div>
+            {% endif %}
         {% endfor %}
     </div>
 
