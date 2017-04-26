@@ -103,9 +103,9 @@ class Asset(Base):
             self.id, self.name
         )
 
-
+"""
 class Footage(Base):
-    """Footage database structure, declarative"""
+    # Footage database structure, declarative
     # TODO: Better repr
     # TODO: IMP tags for footage? consider changing who the tag table works?
     # TODO: IMP collections for footage? consider changing who the tag table works?
@@ -120,20 +120,20 @@ class Footage(Base):
     initdate = Column(DateTime, default=func.now())
     moddate = Column(DateTime, default=func.now())
     item_type = Column(String, default=__tablename__)
-    """
+
     collections = relationship("Collection",
         secondary=assignment
     )
     tags = relationship("Tag",
         secondary=tag_table, back_populates='item'
     )
-    """
+
 
     def __repr__(self):
         return "<Footage(id='%s', name='%s')>" % (
             self.id, self.name
         )
-
+"""
 
 class User(Base):
     __tablename__ = "user"
@@ -147,3 +147,77 @@ class User(Base):
 
         self.username = username
         self.password = password
+
+
+# inherited tables test
+class Item(Base):
+    __tablename__ = 'item'
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'item',
+        'polymorphic_on': type
+    }
+
+
+class Image(Item):
+    __tablename__ = 'image'
+    id = Column(Integer, ForeignKey('item.id'), primary_key=True)
+    name = Column(String)
+    item_loc = Column(String)
+    item_thumb = Column(String)
+    flag = Column(Integer, default=0)
+    author = Column(String)
+    initdate = Column(DateTime, default=func.now())
+    moddate = Column(DateTime, default=func.now())
+    item_type = Column(String, default=__tablename__)
+
+    # TODO: IMP relationships with collections and tags
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'image'
+    }
+
+    def __repr__(self):
+        return "<Image(id='%s', name='%s')>" % (
+            self.id, self.name
+        )
+
+
+class Footage(Item):
+    __tablename__ = 'footage'
+
+    id = Column(Integer, ForeignKey('item.id'), primary_key=True)
+    name = Column(String)
+    item_loc = Column(String)
+    item_thumb = Column(String)
+    flag = Column(Integer, default=0)
+    author = Column(String)
+    initdate = Column(DateTime, default=func.now())
+    moddate = Column(DateTime, default=func.now())
+    item_type = Column(String, default=__tablename__)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'footage'
+    }
+
+
+class Geometry(Item):
+    __tablename__ = 'geometry'
+
+    id = Column(Integer, ForeignKey('item.id'), primary_key=True)
+    name = Column(String)
+    item_loc = Column(String)
+    item_thumb = Column(String)
+    flag = Column(Integer, default=0)
+    author = Column(String)
+    initdate = Column(DateTime, default=func.now())
+    moddate = Column(DateTime, default=func.now())
+    item_type = Column(String, default=__tablename__)
+    attachment = Column(String)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'geometry'
+    }

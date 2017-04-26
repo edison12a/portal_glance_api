@@ -7,8 +7,11 @@ from packages.functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
     del_collection, patch_asset, get_query_flag,
-    patch_collection, make_dict, get_footages, post_user, get_user
+    patch_collection, make_dict, get_footages, post_user, get_user, new_image, new_footage,
+    to_dict
     )
+
+from packages.models import Item
 
 from config import cred
 
@@ -97,7 +100,7 @@ def api():
 
 @app.route('{}/footage'.format(ROUTE), methods=['POST', 'GET'])
 def footage():
-    """Endpoint that returns footageobjects"""
+    """Endpoint that returns footage objects"""
     if request.method=='POST':
         # TODO: IMP POST method
         """
@@ -208,6 +211,20 @@ def asset():
 
     elif request.method=='GET':
         session = Session()
+
+        new_image(session)
+        new_footage(session)
+
+        bla = session.query(Item).all()
+        print('ALL ITEMS')
+        print(bla)
+        print('NAMES OF ALL ITEMS')
+        for x in bla:
+            if x.type == 'image':
+                print(x.image_name)
+            elif x.type == 'footage':
+                print(x.footage_name)
+
         raw_assets = get_assets(session)
         assets = make_dict(raw_assets)
 
@@ -232,6 +249,48 @@ def asset():
     else:
         session.close()
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
+
+
+@app.route('{}/item'.format(ROUTE), methods=['POST', 'GET'])
+def item():
+    """Endpoint that returns asset objects"""
+    if request.method=='POST':
+        pass
+
+    elif request.method=='GET':
+        session = Session()
+
+        """
+        # quick db population
+        new_image(session)
+        new_footage(session)
+        """
+        
+        raw_result = session.query(Item).all()
+        result = to_dict(raw_result)
+
+        if len(result) == 0:
+            session.close()
+            return make_response(
+                jsonify(
+                    {
+                        'GET assets': {
+                            'Status': 'Successful',
+                            'Message': 'No assets in database'
+                        }
+                    }
+                )
+            ), 200
+
+        session.close()
+        return make_response(
+            jsonify(result)
+        ), 200
+
+    else:
+        session.close()
+        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
+
 
 
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])

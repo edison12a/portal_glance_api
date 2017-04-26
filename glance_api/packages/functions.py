@@ -1,6 +1,6 @@
 # TODO: classes needed?
 import datetime
-from .models import assignment, tag_table, Collection, Tag, Asset, Base, Footage, User
+from .models import assignment, tag_table, Collection, Tag, Asset, Base, Footage, User, Item, Image
 
 
 # dev functions
@@ -119,6 +119,26 @@ def make_dict(item_list):
 
     # return database objects as dicts.
     return result
+
+
+def to_dict(item_list):
+    """ takes list of database objects, returns dict repr of objects. """
+    # TODO: using '__tablename__' on objects does the same jobs as 'item_type'
+    # any point in having it as column?
+    result = []
+
+    # for each database object, build dict, 'item', from data.
+    for item_object in item_list:
+        item = {}
+        for column in item_object.__table__.columns:
+            item[column.name] = str(getattr(item_object, column.name))
+
+        result.append(item)
+
+    # return database objects as dicts.
+    return result
+
+
 
 # user functions
 def post_collection(session, **kwarg):
@@ -608,3 +628,39 @@ def get_user(session, **kwarg):
 
     # returns raw db objects
     return result
+
+
+def new_image(session):
+    item = Image(
+        name = 'test image name',
+        item_loc = 'test image',
+        item_thumb = 'test image thumb',
+        author = 'test author'
+    )
+
+    session.add(item)
+    session.commit()
+
+
+def new_footage(session):
+    item = Footage(
+        name = 'test footage name',
+        item_loc = 'test item_loc',
+        item_thumb = 'test item_thumb',
+        author = 'test author'
+    )
+
+    session.add(item)
+    session.commit()
+
+
+def new_geometry(session):
+    item = Geometry(
+        name = 'test footage name',
+        item_loc = 'test item_loc',
+        item_thumb = 'test item_thumb',
+        author = 'test author'
+    )
+
+    session.add(item)
+    session.commit()
