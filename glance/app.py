@@ -3,7 +3,7 @@ import requests
 
 from flask import Flask, flash, redirect, render_template, request, session, abort
 
-from packages.function import LoggedIn, CheckLoginDetails, upload_handler, process_raw_files
+from packages.function import LoggedIn, CheckLoginDetails, upload_handler, process_raw_files, item_to_session
 
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))

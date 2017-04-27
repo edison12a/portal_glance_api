@@ -75,3 +75,9 @@ def process_raw_files(files):
             collector[filename].append(x)
 
     return collector
+
+
+def item_to_session(session, *args):
+    print(args)
+
+    return session

@@ -20,13 +20,17 @@
                             <small><strong>Image</strong></small>
                         </div>
                     </div>
-                    <a href="#">
+
                     <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
                         <div style="text-align:center;">
+                            <a href="#">
                             <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                        </a>
+                        <a href="#">
+                            <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                        </a>
                         </div>
                     </div>
-                </a>
                 </div>
             {% elif item.item_type == 'footage' %}
                 <div class="grid-sizer"></div>
@@ -41,13 +45,16 @@
                             <small><strong>Footage</strong></small>
                         </div>
                     </div>
-                    <a href="#">
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-                            <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                            <div style="text-align:center;">
+                                <a href="#">
+                                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                            </a>
+                            <a href="#">
+                                <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                            </a>
+                            </div>
                         </div>
-                    </div>
-                </a>
                 </div>
             {% elif item.item_type == 'geometry' %}
                 <div class="grid-sizer"></div>
@@ -62,13 +69,16 @@
                             <small><strong>Geometry</strong></small>
                         </div>
                     </div>
-                    <a href="#">
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-                                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                            </div>
+                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                        <div style="text-align:center;">
+                            <a href="#">
+                            <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                        </a>
+                        <a href="#">
+                            <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                        </a>
                         </div>
-                    </a>
+                    </div>
                 </div>
                 {% elif item.item_type == 'collection' %}
                     <div class="grid-sizer"></div>

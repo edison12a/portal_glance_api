@@ -143,7 +143,21 @@
         </div>
 
 
+        <!-- Init masonry js -->
+        <script>
+        var grid = document.querySelector('.grid');
+        var msnry;
 
+        imagesLoaded( grid, function() {
+            // init Isotope after all images have loaded
+            msnry = new Masonry( grid, {
+                itemSelector: '.grid-item',
+                columnWidth: '.grid-sizer',
+                percentPosition: true,
+                transitionDuration: 0,
+            });
+        });
+        </script>
 
     <div style=background-color:black;color:white;margin-top:50px;>
         <small><small>
