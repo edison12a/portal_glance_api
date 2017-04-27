@@ -452,9 +452,6 @@ def patch_item():
     for y in request.args:
         patch_data[y] = request.args[y]
 
-    print('ppppppppppppppp')
-    print(patch_data)
-
     session = Session()
     patched_asset = patch_item_by_id(session, **patch_data)
     session.close()

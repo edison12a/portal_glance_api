@@ -27,9 +27,15 @@ API_COLLECTION = 'http://127.0.0.1:5050/glance/api/collection'
 def home():
     if LoggedIn(session):
 
+        # process and reverse data so the latest uploaded items are first.
+        # Currently using the items `id`, but upload date would be better.
+        reversed_list = []
         r = requests.get('{}'.format(API_ASSET))
+        for x in r.json():
+            reversed_list.append(x)
+        data = reversed_list[::-1]
 
-        return render_template('home.html', items=r.json())
+        return render_template('home.html', items=data)
     else:
         return render_template('index.html')
 
@@ -180,12 +186,16 @@ def item(id):
 
     if r.json()['item'][0]['item_type'] == 'image':
         return render_template('image.html', item=r.json()['item'])
+
     elif r.json()['item'][0]['item_type'] == 'collection':
         return render_template('collection.html', item=r.json()['item'])
+
     elif r.json()['item'][0]['item_type'] == 'footage':
         return render_template('footage.html', item=r.json()['item'])
+
     elif r.json()['item'][0]['item_type'] == 'geometry':
         return render_template('geometry.html', item=r.json()['item'])
+
     else:
         return home()
 
