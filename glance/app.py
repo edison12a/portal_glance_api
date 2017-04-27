@@ -89,8 +89,6 @@ def uploading():
                     payload['name'] = items
                     payload['author'] = session['user']
                     payload['tags'] = upload_data['tags']
-                    # payload['tag'] = upload_data['tag']
-                    # payload['collection'] = upload_data['collection']
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
@@ -111,8 +109,7 @@ def uploading():
                     payload = {}
                     payload['name'] = items
                     payload['author'] = session['user']
-                    # payload['tag'] = upload_data['tag']
-                    # payload['collection'] = upload_data['collection']
+                    payload['tags'] = upload_data['tags']
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
@@ -134,8 +131,7 @@ def uploading():
                     payload = {}
                     payload['name'] = items
                     payload['author'] = session['user']
-                    # payload['tag'] = upload_data['tag']
-                    # payload['collection'] = upload_data['collection']
+                    payload['tags'] = upload_data['tags']
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
@@ -157,8 +153,7 @@ def uploading():
                     payload = {}
                     payload['name'] = items
                     payload['author'] = session['user']
-                    # payload['tag'] = upload_data['tag']
-                    # payload['collection'] = upload_data['collection']
+                    payload['tags'] = upload_data['tags']
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):

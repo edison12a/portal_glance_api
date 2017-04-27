@@ -850,6 +850,29 @@ def post_footage(session, **kwarg):
             author = data['author']
         )
 
+        # after entry is commited then hit the database with any new tags?
+        # is this the best way?
+        if 'tags' in payload:
+            tag_list = payload['tags'].split(' ')
+            for tag in tag_list:
+
+                # TODO: refactor the below its checking to see if the tags exists already
+                #if it does then just append that tag with the item object.
+                #else make a new tag object
+                test = session.query(Tag).filter_by(name=tag).first()
+
+                if test:
+                    test.items.append(item)
+                    session.add(test)
+                    session.commit()
+                else:
+                    newtag = Tag(name=str(tag))
+                    session.add(newtag)
+                    session.commit()
+
+                    item.tags.append(newtag)
+
+
         # TODO: sort out tags
         session.add(item)
         # commit changes to database
@@ -882,6 +905,29 @@ def post_geometry(session, **kwarg):
         item_thumb = data['item_thumb'],
         author = data['author']
     )
+
+    # after entry is commited then hit the database with any new tags?
+    # is this the best way?
+    if 'tags' in payload:
+        tag_list = payload['tags'].split(' ')
+        for tag in tag_list:
+
+            # TODO: refactor the below its checking to see if the tags exists already
+            #if it does then just append that tag with the item object.
+            #else make a new tag object
+            test = session.query(Tag).filter_by(name=tag).first()
+
+            if test:
+                test.items.append(item)
+                session.add(test)
+                session.commit()
+            else:
+                newtag = Tag(name=str(tag))
+                session.add(newtag)
+                session.commit()
+
+                item.tags.append(newtag)
+
 
     # TODO: sort out tags
     session.add(item)
@@ -916,6 +962,29 @@ def post_collection(session, **kwarg):
         item_thumb = data['item_thumb'],
         author = data['author']
     )
+
+    # after entry is commited then hit the database with any new tags?
+    # is this the best way?
+    if 'tags' in payload:
+        tag_list = payload['tags'].split(' ')
+        for tag in tag_list:
+
+            # TODO: refactor the below its checking to see if the tags exists already
+            #if it does then just append that tag with the item object.
+            #else make a new tag object
+            test = session.query(Tag).filter_by(name=tag).first()
+
+            if test:
+                test.items.append(item)
+                session.add(test)
+                session.commit()
+            else:
+                newtag = Tag(name=str(tag))
+                session.add(newtag)
+                session.commit()
+
+                item.tags.append(newtag)
+
 
     # TODO: sort out tags
     session.add(item)
