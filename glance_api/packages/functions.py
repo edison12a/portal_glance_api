@@ -140,8 +140,25 @@ def to_dict(item_list):
         for tag in assets_tags:
             item['tags'].append(str(tag.name))
 
+        # init collections
+        if item_object.item_type == 'collection':
+
+            item['items'] = {}
+            for x in item_object.items:
+                item['items'][x.id] = {
+                    'id': x.id,
+                    'item_thumb': x.item_thumb,
+                    'item_type': x.item_type
+                }
+
+        else:
+            item['collections'] = []
+            for x in item_object.collections:
+                item['collections']
 
         result.append(item)
+
+    # print(result)
 
     # return database objects as dicts.
     return result
@@ -491,29 +508,27 @@ def patch_item_by_id(session, **user_columns):
 
     # init query dict
     query = {}
+
     # asset id
     id = int(user_columns['id'])
 
     # build list of assets column names for validation
-    asset_columns = Item.__table__.columns.keys()
+    # asset_columns = Item.__table__.columns.keys()
+    # print(asset_columns)
 
     # validate user data and build query dict, from data.
     for k, v in user_columns.items():
-        if k in asset_columns:
-            query[k] = v
-
-        else:
-            pass
-
         # additional many-to-many data
         if k == 'collections':
+            query[k] = v.split()
+        elif k == 'items':
             query[k] = v.split()
 
         elif k == 'tags':
             query['tags'] = v.split()
 
         else:
-            pass
+            query[k] = v
 
     # once all user data is validated and ready to append, get asset object.
     asset = session.query(Item).get(id)
@@ -543,6 +558,13 @@ def patch_item_by_id(session, **user_columns):
                 session.add(newtag)
 
                 asset.tags.append(newtag)
+
+        elif k == 'items':
+            # process asset tags
+            for item in v:
+                item_to_collection = session.query(Item).get(int(item))
+                asset.items.append(item_to_collection)
+                session.add(asset)
 
         elif k == 'flag':
             # process flag field

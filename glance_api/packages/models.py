@@ -138,12 +138,17 @@ class Footage(Base):
         )
 """
 
-
+"""association tables"""
 tag_ass = Table('tag_association_table', Base.metadata,
     Column('tag_id', Integer, ForeignKey('tag.id')),
     Column('item_id', Integer, ForeignKey('item.id'))
 )
 
+# association table: Collection.id, Asset.id
+collect_ass = Table('collection_association_table', Base.metadata,
+    Column('collection_id', Integer, ForeignKey('collection.id')),
+    Column('item_id', Integer, ForeignKey('item.id'))
+)
 
 class User(Base):
     __tablename__ = "user"
@@ -170,9 +175,6 @@ class Tag(Base):
     items = relationship("Item",
                     secondary=tag_ass,
                     backref="tags")
-
-
-
 
     def __repr__(self):
         return "<Tag(name={})>".format(self.name)
@@ -270,6 +272,10 @@ class Collection(Item):
     moddate = Column(DateTime, default=func.now())
     item_type = Column(String, default=__tablename__)
     attached = Column(String, default=None)
+
+    items = relationship("Item",
+                    secondary=collect_ass,
+                    backref="collections")
 
     __mapper_args__ = {
         'polymorphic_identity': 'collection'

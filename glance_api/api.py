@@ -181,7 +181,7 @@ def item():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/asset/' + str('asset.id')
+                'location': ROUTE + '/item/' + str('item.id')
             }
 
             session.close()
@@ -189,7 +189,7 @@ def item():
             return make_response(
                 jsonify(
                     {
-                        'POST: /asset': result
+                        'POST: /item': result
                     }
                 )
             ), 200
@@ -200,7 +200,7 @@ def item():
             return make_response(
                 jsonify(
                     {
-                        'POST /asset': fail
+                        'POST /item': fail
                     }
                 )
             ), 404
@@ -217,7 +217,7 @@ def item():
                     {
                         'GET assets': {
                             'Status': 'Successful',
-                            'Message': 'No assets in database'
+                            'Message': 'No items in database'
                         }
                     }
                 )
@@ -230,7 +230,7 @@ def item():
 
     else:
         session.close()
-        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
+        return jsonify({'Item': 'This endpoint only accepts POST, GET methods.'})
 
 '''
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
@@ -349,7 +349,7 @@ def get_item(asset_id):
         return jsonify({'asset': 'failed - endpoint only accepts GET methods'})
 
     session.close()
-    return jsonify({'asset': asset})
+    return jsonify({'item': asset})
 
 
 @app.route('{}/query'.format(ROUTE), methods=['GET'])
@@ -452,14 +452,14 @@ def patch_item():
     for y in request.args:
         patch_data[y] = request.args[y]
 
+    print('ppppppppppppppp')
+    print(patch_data)
+
     session = Session()
     patched_asset = patch_item_by_id(session, **patch_data)
     session.close()
 
     return jsonify({'PATCH': patched_asset})
-
-
-
 
 
 

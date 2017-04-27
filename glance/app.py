@@ -173,12 +173,21 @@ def uploading():
         return home()
 
 
-@app.route('/item/<id>')
+@app.route('/item/<id>/')
 def item(id):
 
-    r = requests.get('{}/{}'.format(API_ASSET, id))
+    r = requests.get('{}/{}'.format(API_ITEM, id))
 
-    return render_template('item.html', item=r.json())
+    if r.json()['item'][0]['item_type'] == 'image':
+        return render_template('image.html', item=r.json()['item'])
+    elif r.json()['item'][0]['item_type'] == 'collection':
+        return render_template('collection.html', item=r.json()['item'])
+    elif r.json()['item'][0]['item_type'] == 'footage':
+        return render_template('footage.html', item=r.json()['item'])
+    elif r.json()['item'][0]['item_type'] == 'geometry':
+        return render_template('geometry.html', item=r.json()['item'])
+    else:
+        return home()
 
 
 @app.route('/search')
@@ -191,6 +200,23 @@ def search():
 
     return render_template('search.html', data=search_data, items=r.json()['result'])
 
+
+@app.route('/patch', methods=['POST'])
+def patch_item():
+
+    data = {}
+    if request.method == 'POST':
+        form = request.form
+        for k in form:
+            if k == 'append_collection':
+                data['items'] = form[k]
+            else:
+                data[k] = form[k]
+
+    r = requests.patch('{}/patch'.format(API_ITEM), params=data)
+    g = requests.get('{}/item/{}'.format(API, data['id']))
+
+    return render_template('item.html', item=g.json())
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
