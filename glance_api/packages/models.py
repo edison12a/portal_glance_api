@@ -10,6 +10,7 @@ from sqlalchemy.orm import relationship
 # Database models
 Base = declarative_base()
 
+'''
 """association tables"""
 # association table: Collection.id, Asset.id
 assignment = Table('assignment', Base.metadata,
@@ -25,8 +26,10 @@ tag_table = Table('tag_table', Base.metadata,
     Column('asset_id', Integer, ForeignKey('asset.id')),
     Column('collection_id', Integer, ForeignKey('collection.id'))
 )
-
+'''
 """declarative tables"""
+
+'''
 class Collection(Base):
     """Collection Database structure, declarative"""
     # TODO: Better repr
@@ -54,8 +57,8 @@ class Collection(Base):
         return "<Collection(name='%s', image='%s')>" % (
             self.name, self.image
         )
-
-
+'''
+'''
 class Tag(Base):
     """Tag database structure, declarative"""
     # TODO: I think all asset databases should be replaced with a 'all assets'
@@ -102,7 +105,7 @@ class Asset(Base):
         return "<Asset(id='%s', name='%s')>" % (
             self.id, self.name
         )
-
+'''
 """
 class Footage(Base):
     # Footage database structure, declarative
@@ -135,6 +138,13 @@ class Footage(Base):
         )
 """
 
+
+tag_ass = Table('tag_association_table', Base.metadata,
+    Column('tag_id', Integer, ForeignKey('tag.id')),
+    Column('item_id', Integer, ForeignKey('item.id'))
+)
+
+
 class User(Base):
     __tablename__ = "user"
 
@@ -149,8 +159,30 @@ class User(Base):
         self.password = password
 
 
+class Tag(Base):
+    """Tag database structure, declarative"""
+    # TODO: I think all asset databases should be replaced with a 'all assets'
+    # table.
+    __tablename__ = 'tag'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+
+    items = relationship("Item",
+                    secondary=tag_ass,
+                    backref="tags")
+
+
+
+
+    def __repr__(self):
+        return "<Tag(name={})>".format(self.name)
+
+
+
 # inherited tables test
 class Item(Base):
+    # This class also has a tags variable. From `class Tag:item` many to many
+    # relationship
     __tablename__ = 'item'
 
     id = Column(Integer, primary_key=True)
@@ -222,4 +254,23 @@ class Geometry(Item):
 
     __mapper_args__ = {
         'polymorphic_identity': 'geometry'
+    }
+
+
+class Collection(Item):
+    __tablename__ = 'collection'
+
+    id = Column(Integer, ForeignKey('item.id'), primary_key=True)
+    name = Column(String)
+    item_loc = Column(String)
+    item_thumb = Column(String)
+    flag = Column(Integer, default=0)
+    author = Column(String)
+    initdate = Column(DateTime, default=func.now())
+    moddate = Column(DateTime, default=func.now())
+    item_type = Column(String, default=__tablename__)
+    attached = Column(String, default=None)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'collection'
     }

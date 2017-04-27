@@ -1,6 +1,6 @@
 # TODO: classes needed?
 import datetime
-from .models import assignment, tag_table, Collection, Tag, Asset, Base, Footage, User, Item, Image, Geometry
+from .models import Collection, Base, Footage, User, Item, Image, Geometry, Collection, Tag, tag_ass
 
 
 # dev functions
@@ -132,6 +132,14 @@ def to_dict(item_list):
         item = {}
         for column in item_object.__table__.columns:
             item[column.name] = str(getattr(item_object, column.name))
+
+        # init tags
+        item['tags'] = []
+        assets_tags = item_object.tags
+
+        for tag in assets_tags:
+            item['tags'].append(str(tag.name))
+
 
         result.append(item)
 
@@ -303,6 +311,19 @@ def get_asset_by_id(session, id):
     return asset_by_id
 
 
+
+def get_item_by_id(session, id):
+    """Return asset object as a dict using Asset.id"""
+    # querys for asset object
+    asset_by_id = session.query(Item).get(id)
+
+    # returns raw asset
+    return asset_by_id
+
+
+
+
+
 def get_collection_by_id(session, id):
     """Returns collection object as dict using Collection.id"""
     # querys for collection object
@@ -332,9 +353,9 @@ def get_query(session, userquery):
         # for each tag
         for tag in taglists:
             # if one exists
-            if tag.item:
+            if tag.items:
                 # get asset assigned to tag and append to list, 'item_list'
-                for item in tag.item:
+                for item in tag.items:
                     item_list.append(item)
             # get collection assigned to tag and append to list, 'item_list'
             elif tag.collection_tags:
@@ -460,6 +481,113 @@ def patch_asset(session, **user_columns):
 
     # Returns asset object
     return result
+
+
+
+
+def patch_item_by_id(session, **user_columns):
+    """updates asset fields using user data"""
+    # TODO: This is a pretty heftly function... needs refactoring
+
+    # init query dict
+    query = {}
+    # asset id
+    id = int(user_columns['id'])
+
+    # build list of assets column names for validation
+    asset_columns = Item.__table__.columns.keys()
+
+    # validate user data and build query dict, from data.
+    for k, v in user_columns.items():
+        if k in asset_columns:
+            query[k] = v
+
+        else:
+            pass
+
+        # additional many-to-many data
+        if k == 'collections':
+            query[k] = v.split()
+
+        elif k == 'tags':
+            query['tags'] = v.split()
+
+        else:
+            pass
+
+    # once all user data is validated and ready to append, get asset object.
+    asset = session.query(Item).get(id)
+
+    # Process user data and update asset object fields.
+    # TODO: is there a better way to handle these sort of 'flags'?
+    for k, v in query.items():
+        if k == 'name':
+            asset.name = v
+
+        elif k == 'image':
+            asset.image = v
+
+        elif k == 'image_thumb':
+            asset.image_thumb = v
+
+        elif k == 'attached':
+            asset.attached = v
+
+        elif k == 'tags':
+            # process asset tags
+            for tag in v:
+                # create new Tag object and append to asset object
+                # TODO: Could this be a point to implement a 'set{}' for
+                # duplicutes
+                newtag = Tag(name=str(tag))
+                session.add(newtag)
+
+                asset.tags.append(newtag)
+
+        elif k == 'flag':
+            # process flag field
+            # if 'flag' is true value is increased
+            if int(query['flag']) == 1:
+                # TODO: is a try/except needed here?
+                try:
+                    asset.flag += 1
+
+                except TypeError:
+                    asset.flag = 0
+                    asset.flag += 1
+
+            # if 'flag' is false value is reduced
+            elif int(query['flag']) == 0:
+                asset.flag -= 1
+
+            # is the 'else:' 'pythonic'?
+            else:
+                pass
+
+        elif k == 'collections':
+            for collection_id in query['collections']:
+                # get Collection object using collection.id
+                existingcollection = session.query(Collection).get(collection_id)
+                # append existing collection to assets collections
+                asset.collections.append(existingcollection)
+
+        else:
+            pass
+
+    # Finish asset object
+    # append object moddate
+    asset.moddate = datetime.datetime.utcnow()
+
+    session.add(asset)
+    session.commit()
+
+    result = to_dict((asset,))
+
+    # Returns asset object
+    return result
+
+
+
 
 
 def patch_collection(session, id, **user_columns):
@@ -641,6 +769,7 @@ def get_user(session, **kwarg):
 def post_image(session, **kwarg):
     payload = {}
     data = {}
+    tag_ids = []
 
     # process user input
     for k, v in kwarg.items():
@@ -655,6 +784,7 @@ def post_image(session, **kwarg):
         else:
             pass
 
+
     # Database entry
     item = Image(
         name = data['name'],
@@ -663,7 +793,31 @@ def post_image(session, **kwarg):
         author = data['author']
     )
 
-    # TODO: sort out tags
+    session.add(item)
+    session.commit()
+
+    # after entry is commited then hit the database with any new tags?
+    # is this the best way?
+    if 'tags' in payload:
+        tag_list = payload['tags'].split(' ')
+        for tag in tag_list:
+
+            # TODO: refactor the below its checking to see if the tags exists already
+            #if it does then just append that tag with the item object.
+            #else make a new tag object
+            test = session.query(Tag).filter_by(name=tag).first()
+
+            if test:
+                test.items.append(item)
+                session.add(test)
+                session.commit()
+            else:
+                newtag = Tag(name=str(tag))
+                session.add(newtag)
+                session.commit()
+
+                item.tags.append(newtag)
+
     session.add(item)
     # commit changes to database
     session.commit()
@@ -723,6 +877,40 @@ def post_geometry(session, **kwarg):
 
     # Database entry
     item = Geometry(
+        name = data['name'],
+        item_loc = data['item_loc'],
+        item_thumb = data['item_thumb'],
+        author = data['author']
+    )
+
+    # TODO: sort out tags
+    session.add(item)
+    # commit changes to database
+    session.commit()
+
+    return item
+
+
+
+def post_collection(session, **kwarg):
+    payload = {}
+    data = {}
+
+    # process user input
+    for k, v in kwarg.items():
+        payload[k] = v
+
+    # remove attri that arnt in the database
+    for column in Collection.__table__.columns:
+        if column.name in payload:
+            data[column.name] = payload[column.name]
+        elif column.name not in payload:
+            data[column.name] = None
+        else:
+            pass
+
+    # Database entry
+    item = Collection(
         name = data['name'],
         item_loc = data['item_loc'],
         item_thumb = data['item_thumb'],

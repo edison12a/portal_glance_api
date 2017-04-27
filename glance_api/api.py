@@ -8,7 +8,7 @@ from packages.functions import (
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
     del_collection, patch_asset, get_query_flag,
     patch_collection, make_dict, get_footages, post_user, get_user, post_image, post_footage,
-    to_dict, get_items, post_geometry
+    to_dict, get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id
     )
 
 from packages.models import Item
@@ -232,7 +232,7 @@ def item():
         session.close()
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
-
+'''
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
 def collection():
 
@@ -299,7 +299,7 @@ def collection():
 
         session.close()
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
-
+'''
 
 @app.route('{}/collection/<int:collection_id>'.format(ROUTE), methods=['GET'])
 def get_collection_id(collection_id):
@@ -334,6 +334,24 @@ def get_asset_id(asset_id):
     return jsonify({'asset': asset})
 
 
+
+@app.route('{}/item/<int:asset_id>'.format(ROUTE), methods=['GET'])
+def get_item(asset_id):
+    # TODO: Doc string
+    if request.method=='GET':
+        session = Session()
+        raw_asset = get_item_by_id(session, asset_id)
+        asset = to_dict((raw_asset,))
+
+    else:
+
+        session.close()
+        return jsonify({'asset': 'failed - endpoint only accepts GET methods'})
+
+    session.close()
+    return jsonify({'asset': asset})
+
+
 @app.route('{}/query'.format(ROUTE), methods=['GET'])
 def query():
     """ returns results from querys
@@ -351,7 +369,7 @@ def query():
     elif 'query' in request.args:
         session = Session()
         raw_assets = get_query(session, request.args)
-        assets = make_dict(raw_assets)
+        assets = to_dict(raw_assets)
         session.close()
 
         return jsonify({'result': assets})
@@ -422,6 +440,27 @@ def patch_asset_id():
     session.close()
 
     return jsonify({'PATCH': patched_asset})
+
+
+
+
+@app.route('{}/item/patch'.format(ROUTE), methods=['PATCH'])
+def patch_item():
+    # TODO: dont use try/except here
+
+    patch_data = {}
+    for y in request.args:
+        patch_data[y] = request.args[y]
+
+    session = Session()
+    patched_asset = patch_item_by_id(session, **patch_data)
+    session.close()
+
+    return jsonify({'PATCH': patched_asset})
+
+
+
+
 
 
 @app.route('{}/collection/patch'.format(ROUTE), methods=['PATCH'])
@@ -668,6 +707,71 @@ def geometry():
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
+
+@app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
+def collection():
+    """Endpoint that returns asset objects"""
+    if request.method=='POST':
+        query = {}
+        for x in request.args:
+            query[x] = request.args[x]
+
+        try:
+            session = Session()
+            asset = post_collection(session, **query)
+
+            result = {
+                'responce': 'successful',
+                'location': ROUTE + '/asset/' + str('asset.id')
+            }
+
+            session.close()
+
+            return make_response(
+                jsonify(
+                    {
+                        'POST: /asset': result
+                    }
+                )
+            ), 200
+
+        except:
+            session.close()
+            fail = {'Action': 'failed'}
+            return make_response(
+                jsonify(
+                    {
+                        'POST /asset': fail
+                    }
+                )
+            ), 404
+
+    elif request.method=='GET':
+        session = Session()
+
+        result = get_items(session)
+
+        if len(result) == 0:
+            session.close()
+            return make_response(
+                jsonify(
+                    {
+                        'GET assets': {
+                            'Status': 'Successful',
+                            'Message': 'No assets in database'
+                        }
+                    }
+                )
+            ), 200
+
+        session.close()
+        return make_response(
+            jsonify(result)
+        ), 200
+
+    else:
+        session.close()
+        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
 
