@@ -181,7 +181,7 @@ def item():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/item/' + str('item.id')
+                'location': ROUTE + '/asset/' + str('asset.id')
             }
 
             session.close()
@@ -189,7 +189,7 @@ def item():
             return make_response(
                 jsonify(
                     {
-                        'POST: /item': result
+                        'POST: /asset': result
                     }
                 )
             ), 200
@@ -200,7 +200,7 @@ def item():
             return make_response(
                 jsonify(
                     {
-                        'POST /item': fail
+                        'POST /asset': fail
                     }
                 )
             ), 404
@@ -217,7 +217,7 @@ def item():
                     {
                         'GET assets': {
                             'Status': 'Successful',
-                            'Message': 'No items in database'
+                            'Message': 'No assets in database'
                         }
                     }
                 )
@@ -230,7 +230,7 @@ def item():
 
     else:
         session.close()
-        return jsonify({'Item': 'This endpoint only accepts POST, GET methods.'})
+        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 '''
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
@@ -346,7 +346,7 @@ def get_item(asset_id):
     else:
 
         session.close()
-        return jsonify({'asset': 'failed - endpoint only accepts GET methods'})
+        return jsonify({'item': 'failed - endpoint only accepts GET methods'})
 
     session.close()
     return jsonify({'item': asset})
@@ -457,6 +457,9 @@ def patch_item():
     session.close()
 
     return jsonify({'PATCH': patched_asset})
+
+
+
 
 
 

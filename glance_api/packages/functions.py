@@ -152,13 +152,15 @@ def to_dict(item_list):
                 }
 
         else:
-            item['collections'] = []
+            item['collections'] = {}
             for x in item_object.collections:
-                item['collections']
+                item['collections'][x.id] = {
+                    'id': x.id,
+                    'item_thumb': x.item_thumb,
+                    'name': x.name
+                }
 
         result.append(item)
-
-    # print(result)
 
     # return database objects as dicts.
     return result

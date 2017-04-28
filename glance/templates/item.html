@@ -1,9 +1,83 @@
 {% extends "base.html" %}
 {% block content %}
 
-    <div style="padding-left:10%;padding-right:10%">
-        {{ item }}
+
+    <div style="background-color: lightgray;width:100%;">
+
+        <p style="height:30px;"></p>
+        <div style="width:100%;box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);position: relative;z-index: 50;">
+            <div style="padding-left:10%;padding-right:10%;">
+        {% for k, v in item.0.items() %}
+        {% if k != 'items' %}
+        {{ k }} - {{ v }}<br>
+        {% endif %}
+        {% endfor %}
+<br>
+<br>
+<br>
+
+
+
+
+
     </div>
+
+
+<div style="background-color:darkgray;width:100%;">
+
+    {% for k, v in item.0.items() %}
+    {% if k == 'collections' %}
+    {% for x, g in v.items() %}
+    <a href="/item/{{ g.id }}">
+    <div style="text-align:center;">
+        <img style="max-width:200px; height: auto;" src="https://s3.amazonaws.com/glancestore/{{ g.item_thumb }}" />
+    </div>
+    </a>
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+
+
+</div>
+
+    </div>
+        <div class="img-wrap">
+
+        <img src="https://s3.amazonaws.com/glancestore/{{ item.0.item_loc }}" />
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <p style="height:30px;"></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <div style=background-color:black;color:white;margin-top:100px;>
         <small><small>
