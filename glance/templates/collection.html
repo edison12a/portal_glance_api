@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="max-width:100%;max-height:200px;overflow:hidden;position:relative;box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.3);">
+<div style="z-index:50;max-width:100%;max-height:200px;overflow:hidden;position:relative;box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.3);">
     <img style="width:100%;height:auto;" src="https://s3.amazonaws.com/glancestore/{{ item.0.item_loc }}" />
 
     <div style="padding-left:20px;padding-right:20px;border-radius:35px;position:absolute;bottom:0;right:0;height:45px;background-color:rgba(255, 255, 255, .5);margin:10px;">
@@ -10,39 +10,7 @@
     </div>
 </div>
 
-
-
-    <div style="background-color:lightgray;padding-left:10%;padding-right:10%">
-
-        <p style="height:30px;"></p>
-        {% for k, v in item.0.items() %}
-        {% if k != 'items' %}
-        {{ k }} - {{v}}<br>
-        {% endif %}
-        {% endfor %}
-<p style="height:30px;"></p>
-
-
-
-    <form action="/patch" method="POST">
-
-        <div class="form-group">
-
-            <label for="append_collection">Append Collection</label>
-            <input style="width:300px;" type="text" class="form-control" id="append_collection" name="append_collection" />
-            <input type="hidden" name="id" value="{{item.0.id}}">
-            <small><small><p class="help-block">Enter Item IDs to append this collection.</p></small></small>
-        <br>
-        <button type="submit" class="btn btn-default">Submit</button>
-
-        </div>
-
-    </form>
-    <p style="height:30px;"></p>
-
-
-</div>
-
+<div style="background-color: lightgray;">
 <div class="grid">
 
         {% for k, v in item.0.items() %}
@@ -141,6 +109,39 @@
         {% endfor %}
 
         </div>
+
+</div>
+    <div style="background-color:lightgray;padding-left:10%;padding-right:10%">
+
+        <p style="height:30px;"></p>
+        {% for k, v in item.0.items() %}
+        {% if k != 'items' %}
+        {{ k }} - {{v}}<br>
+        {% endif %}
+        {% endfor %}
+<p style="height:30px;"></p>
+
+
+
+    <form action="/patch" method="POST">
+
+        <div class="form-group">
+
+            <label for="append_collection">Append Collection</label>
+            <input style="width:300px;" type="text" class="form-control" id="append_collection" name="append_collection" />
+            <input type="hidden" name="id" value="{{item.0.id}}">
+            <small><small><p class="help-block">Enter Item IDs to append this collection.</p></small></small>
+        <br>
+        <button type="submit" class="btn btn-default">Submit</button>
+
+        </div>
+
+    </form>
+    <p style="height:30px;"></p>
+
+
+</div>
+
 
 
         <!-- Init masonry js -->

@@ -114,11 +114,11 @@ def uploading():
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
                     # collect uploaded item ids from respoce object.
+                    # TODO: Make this a helper
                     res = r.json()
                     for x in res:
                         item_id = res[x]['location'].split('/')[-1]
                         upload_data['items_for_collection'].append(item_id)
-
 
             elif upload_data['itemradio'] == 'footage':
                 # build payload for api
@@ -187,7 +187,6 @@ def uploading():
                     r = requests.post('{}'.format(API_COLLECTION), params=payload)
 
             # Runs if collection has been requested aswell as the uploading of files.
-
             if 'collection' in upload_data:
                 if upload_data['collection'] != '':
                     payload = {
@@ -196,12 +195,23 @@ def uploading():
                         'item_loc': 'site/default_cover.jpg',
                         'item_thumb': 'site/default_cover.jpg',
                         'tags': upload_data['tags'],
-                        'items': ' '.join(upload_data['items_for_collection'])
+                        'items': ' '.join(upload_data['items_for_collection']),
+                        'author': session['user']
                     }
 
-                    print(payload)
-
                     r = requests.post('{}'.format(API_ITEM), params=payload)
+
+                    res = r.json()
+                    for x in res:
+                        item_id = res[x]['location'].split('/')[-1]
+                        bla = requests.get('{}/{}'.format(API_ITEM, item_id))
+
+                        print('pppppppppppppp')
+                        print(bla.json())
+
+                        return render_template('collection.html', item=bla.json()['item'])
+
+                return home()
 
             return render_template('uploadcomplete.html')
     else:
