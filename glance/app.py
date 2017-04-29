@@ -81,6 +81,8 @@ def uploading():
         if request.method == 'POST':
             # Init dict and append user data
             upload_data = {}
+            upload_data['items_for_collection'] = []
+            items_for_collection = []
 
             for form_input in request.form:
                 upload_data[form_input] = request.form[form_input]
@@ -88,13 +90,16 @@ def uploading():
             # process all uploaded files.
             processed_files = process_raw_files(request.files.getlist('file'))
 
+            # Gather generic item data
+            payload = {}
+            payload['author'] = session['user']
+            payload['tags'] = upload_data['tags']
+            payload['item_type'] = upload_data['itemradio']
+
+            # process remaining item data
             if upload_data['itemradio'] == 'image':
-                # build payload for api
                 for items in processed_files:
-                    payload = {}
                     payload['name'] = items
-                    payload['author'] = session['user']
-                    payload['tags'] = upload_data['tags']
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
@@ -107,15 +112,18 @@ def uploading():
                             payload['attached'] = uploaded_file
 
                     # post payload to api
-                    r = requests.post('{}'.format(API_IMAGE), params=payload)
+                    r = requests.post('{}'.format(API_ITEM), params=payload)
+                    # collect uploaded item ids from respoce object.
+                    res = r.json()
+                    for x in res:
+                        item_id = res[x]['location'].split('/')[-1]
+                        upload_data['items_for_collection'].append(item_id)
+
 
             elif upload_data['itemradio'] == 'footage':
                 # build payload for api
                 for items in processed_files:
-                    payload = {}
                     payload['name'] = items
-                    payload['author'] = session['user']
-                    payload['tags'] = upload_data['tags']
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
@@ -128,16 +136,18 @@ def uploading():
                             payload['attached'] = uploaded_file
 
                     # post payload to api
-                    r = requests.post('{}'.format(API_FOOTAGE), params=payload)
+                    r = requests.post('{}'.format(API_ITEM), params=payload)
+                    # collect uploaded item ids from respoce object.
+                    res = r.json()
+                    for x in res:
+                        item_id = res[x]['location'].split('/')[-1]
+                        upload_data['items_for_collection'].append(item_id)
 
             elif upload_data['itemradio'] == 'geometry':
                 # build payload for api
 
                 for items in processed_files:
-                    payload = {}
                     payload['name'] = items
-                    payload['author'] = session['user']
-                    payload['tags'] = upload_data['tags']
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
@@ -150,16 +160,18 @@ def uploading():
                             payload['attached'] = uploaded_file
 
                     # post payload to api
-                    r = requests.post('{}'.format(API_GEOMETRY), params=payload)
+                    r = requests.post('{}'.format(API_ITEM), params=payload)
+                    # collect uploaded item ids from respoce object.
+                    res = r.json()
+                    for x in res:
+                        item_id = res[x]['location'].split('/')[-1]
+                        upload_data['items_for_collection'].append(item_id)
 
             elif upload_data['itemradio'] == 'collection':
                 # build payload for api
 
                 for items in processed_files:
-                    payload = {}
                     payload['name'] = items
-                    payload['author'] = session['user']
-                    payload['tags'] = upload_data['tags']
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
@@ -173,6 +185,23 @@ def uploading():
 
                     # post payload to api
                     r = requests.post('{}'.format(API_COLLECTION), params=payload)
+
+            # Runs if collection has been requested aswell as the uploading of files.
+
+            if 'collection' in upload_data:
+                if upload_data['collection'] != '':
+                    payload = {
+                        'name': upload_data['collection'],
+                        'item_type': 'collection',
+                        'item_loc': 'site/default_cover.jpg',
+                        'item_thumb': 'site/default_cover.jpg',
+                        'tags': upload_data['tags'],
+                        'items': ' '.join(upload_data['items_for_collection'])
+                    }
+
+                    print(payload)
+
+                    r = requests.post('{}'.format(API_ITEM), params=payload)
 
             return render_template('uploadcomplete.html')
     else:

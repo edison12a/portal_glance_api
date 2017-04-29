@@ -175,35 +175,15 @@ def item():
         for x in request.args:
             query[x] = request.args[x]
 
-        try:
-            session = Session()
-            asset = post_image(session, **query)
+        if query['item_type'] == 'image':
+            return image()
+        elif query['item_type'] == 'footage':
+            return footage()
+        elif query['item_type'] == 'geometry':
+            return geometry()
+        elif query['item_type'] == 'collection':
+            return collection()
 
-            result = {
-                'responce': 'successful',
-                'location': ROUTE + '/asset/' + str('asset.id')
-            }
-
-            session.close()
-
-            return make_response(
-                jsonify(
-                    {
-                        'POST: /asset': result
-                    }
-                )
-            ), 200
-
-        except:
-            session.close()
-            fail = {'Action': 'failed'}
-            return make_response(
-                jsonify(
-                    {
-                        'POST /asset': fail
-                    }
-                )
-            ), 404
 
     elif request.method=='GET':
         session = Session()
@@ -523,7 +503,7 @@ def image():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/asset/' + str('asset.id')
+                'location': ROUTE + '/item/' + str(asset.id)
             }
 
             session.close()
@@ -531,7 +511,7 @@ def image():
             return make_response(
                 jsonify(
                     {
-                        'POST: /asset': result
+                        'POST: /item': result
                     }
                 )
             ), 200
@@ -542,10 +522,12 @@ def image():
             return make_response(
                 jsonify(
                     {
-                        'POST /asset': fail
+                        'POST /item': fail
                     }
                 )
             ), 404
+
+
 
     elif request.method=='GET':
         session = Session()
@@ -589,7 +571,7 @@ def footage():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/asset/' + str('asset.id')
+                'location': ROUTE + '/item/' + str(asset.id)
             }
 
             session.close()
@@ -597,7 +579,7 @@ def footage():
             return make_response(
                 jsonify(
                     {
-                        'POST: /asset': result
+                        'POST: /item': result
                     }
                 )
             ), 200
@@ -655,7 +637,7 @@ def geometry():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/asset/' + str('asset.id')
+                'location': ROUTE + '/item/' + str(asset.id)
             }
 
             session.close()
@@ -663,7 +645,7 @@ def geometry():
             return make_response(
                 jsonify(
                     {
-                        'POST: /asset': result
+                        'POST: /item': result
                     }
                 )
             ), 200
@@ -674,7 +656,7 @@ def geometry():
             return make_response(
                 jsonify(
                     {
-                        'POST /asset': fail
+                        'POST /item': fail
                     }
                 )
             ), 404
@@ -722,7 +704,7 @@ def collection():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/asset/' + str('asset.id')
+                'location': ROUTE + '/item/' + str(asset.id)
             }
 
             session.close()
@@ -730,7 +712,7 @@ def collection():
             return make_response(
                 jsonify(
                     {
-                        'POST: /asset': result
+                        'POST: /item': result
                     }
                 )
             ), 200
@@ -741,7 +723,7 @@ def collection():
             return make_response(
                 jsonify(
                     {
-                        'POST /asset': fail
+                        'POST /item': fail
                     }
                 )
             ), 404

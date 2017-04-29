@@ -165,7 +165,7 @@ def to_dict(item_list):
     # return database objects as dicts.
     return result
 
-
+'''
 # user functions
 def post_collection(session, **kwarg):
     """Posts collection to the database
@@ -226,7 +226,7 @@ def post_collection(session, **kwarg):
     session.commit()
 
     return collection
-
+'''
 
 def post_asset(session, **kwarg):
     """Posts asset to the database
@@ -963,6 +963,7 @@ def post_geometry(session, **kwarg):
 
 
 def post_collection(session, **kwarg):
+    print('AM I HERE?!?!?!')
     payload = {}
     data = {}
 
@@ -1008,6 +1009,20 @@ def post_collection(session, **kwarg):
                 session.commit()
 
                 item.tags.append(newtag)
+
+    print('PAYLOADPAYLOADPAYLOAD')
+    print(payload)
+    print(payload['items'])
+
+    if 'items' in payload:
+
+        collection = session.query(Collection).get(item.id)
+
+        for item_id in payload['items'].split(' '):
+            item_to_append = session.query(Item).get(int(item_id))
+            collection.items.append(item_to_append)
+            session.add(collection)
+            session.commit()
 
 
     # TODO: sort out tags
