@@ -1,4 +1,5 @@
 import os
+import subprocess
 import requests
 
 from flask import Flask, flash, redirect, render_template, request, session, abort
@@ -34,6 +35,8 @@ def home():
         for x in r.json():
             reversed_list.append(x)
         data = reversed_list[::-1]
+
+
 
         return render_template('home.html', items=data)
     else:
@@ -121,19 +124,29 @@ def uploading():
                         upload_data['items_for_collection'].append(item_id)
 
             elif upload_data['itemradio'] == 'footage':
+                # TODO: IMP Uploading mp4s to footage, and extracting first
+                # frame as the `item_`
+
                 # build payload for api
                 for items in processed_files:
                     payload['name'] = items
 
                     for item in processed_files[items]:
-                        if item.filename.endswith('.jpg'):
+                        if item.filename.endswith('.mp4'):
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            item_thumb_filename, item_thumb_ext = os.path.splitext(uploaded_file)
+
+
                             payload['item_loc'] = uploaded_file
-                            payload['item_thumb'] = uploaded_file
+                            payload['item_thumb'] = '{}.jpg'.format(item_thumb_filename)
 
                         else:
+                            # Use to validate wether item is a valid format
+                            pass
+                            """
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
+                            """
 
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)

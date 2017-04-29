@@ -4,41 +4,12 @@
 
     <div style="background-color: lightgray;width:100%;">
 
-        <p style="height:30px;"></p>
+
         <div style="width:100%;box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);position: relative;z-index: 50;">
-            <div style="padding-left:10%;padding-right:10%;">
-        {% for k, v in item.0.items() %}
-        {% if k != 'items' %}
-        {{ k }} - {{ v }}<br>
-        {% endif %}
-        {% endfor %}
-<br>
-<br>
-<br>
 
 
 
 
-
-    </div>
-
-
-<div style="background-color:darkgray;width:100%;">
-
-    {% for k, v in item.0.items() %}
-    {% if k == 'collections' %}
-    {% for x, g in v.items() %}
-    <a href="/item/{{ g.id }}">
-    <div style="text-align:center;">
-        <img style="max-width:200px; height: auto;" src="https://s3.amazonaws.com/glancestore/{{ g.item_thumb }}" />
-    </div>
-    </a>
-    {% endfor %}
-    {% endif %}
-    {% endfor %}
-
-
-</div>
 
     </div>
         <div class="img-wrap">
@@ -47,19 +18,60 @@
         </div>
 
 
+
+
+        <div style="background-color:darkgray;width:100%;">
+
+            {% for k, v in item.0.items() %}
+            {% if k == 'collections' %}
+            {% for x, g in v.items() %}
+
+
+                <div style="position:relative;">
+
+                <a href="/item/{{ g.id }}">
+                <img style="max-width:300px; height: auto;" src="https://s3.amazonaws.com/glancestore/{{ g.item_thumb }}" />
+                </a>
+
+                <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                    <div style="text-align:center;">
+                        <small><strong>Collection</strong></small>
+                    </div>
+                </div>
+
+                </div>
+
+
+
+
+            {% endfor %}
+            {% endif %}
+            {% endfor %}
+
+
+        </div>
+
+
+
+                <p style="height:30px;"></p>
+
+
+
+
+
+
+
+
+            <div style="padding-left:10%;padding-right:10%;">
+        {% for k, v in item.0.items() %}
+        {% if k != 'items' %}
+        {{ k }} - {{ v }}<br>
+        {% endif %}
+        {% endfor %}
+
+
+
     </div>
-
-
-
-
-
-    <p style="height:30px;"></p>
-
-
-
-
-
-
 
 
 
