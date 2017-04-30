@@ -10,6 +10,28 @@
             background-color: black;
             margin: 0;
         }
+        .half-circle {
+            width: 50%;
+            height: inherit; /* as the half of the width */
+            border-top-right-radius: 100%;  /* 100px of height + 10px of border */
+            border-bottom-right-radius: 100%; /* 100px of height + 10px of border */
+            border: 5px solid gray;
+            border-left: 0;
+        }
+        ul {
+            height: inherit;
+            display: table;
+        }
+        li {
+            display: table-row;
+        }
+        li:before {
+            content:'•';
+            float: left;
+            width: 20px;
+            font-size: 1.8em;
+            line-height: 0.75em;
+        }
         div.stretchy-wrapper {
           	width: 100%;
           	padding-bottom: 56.25%; /* 16:9 */
