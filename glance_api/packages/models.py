@@ -259,6 +259,25 @@ class Geometry(Item):
     }
 
 
+class People(Item):
+    __tablename__ = 'people'
+
+    id = Column(Integer, ForeignKey('item.id'), primary_key=True)
+    name = Column(String)
+    item_loc = Column(String)
+    item_thumb = Column(String)
+    flag = Column(Integer, default=0)
+    author = Column(String)
+    initdate = Column(DateTime, default=func.now())
+    moddate = Column(DateTime, default=func.now())
+    item_type = Column(String, default=__tablename__)
+    attached = Column(String, default=None)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'people'
+    }
+
+
 class Collection(Item):
     __tablename__ = 'collection'
 

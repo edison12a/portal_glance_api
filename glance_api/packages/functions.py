@@ -1,6 +1,6 @@
 # TODO: classes needed?
 import datetime
-from .models import Collection, Base, Footage, User, Item, Image, Geometry, Collection, Tag, tag_ass
+from .models import Collection, Base, Footage, User, Item, Image, Geometry, Collection, Tag, tag_ass, People
 
 
 # dev functions
@@ -808,13 +808,14 @@ def post_image(session, **kwarg):
         else:
             pass
 
-
+    print(data)
     # Database entry
     item = Image(
         name = data['name'],
         item_loc = data['item_loc'],
         item_thumb = data['item_thumb'],
-        author = data['author']
+        author = data['author'],
+        attached = data['attached']
     )
 
     session.add(item)
@@ -871,15 +872,16 @@ def post_footage(session, **kwarg):
             name = data['name'],
             item_loc = data['item_loc'],
             item_thumb = data['item_thumb'],
-            author = data['author']
+            author = data['author'],
+            attached = data['attached']
         )
 
         # after entry is commited then hit the database with any new tags?
-        # is this the best way?
         if 'tags' in payload:
             tag_list = payload['tags'].split(' ')
             for tag in tag_list:
 
+                # is this the best way?
                 # TODO: refactor the below its checking to see if the tags exists already
                 #if it does then just append that tag with the item object.
                 #else make a new tag object
@@ -927,8 +929,75 @@ def post_geometry(session, **kwarg):
         name = data['name'],
         item_loc = data['item_loc'],
         item_thumb = data['item_thumb'],
-        author = data['author']
+        author = data['author'],
+        attached = data['attached']
     )
+
+    # after entry is commited then hit the database with any new tags?
+    # is this the best way?
+    if 'tags' in payload:
+        tag_list = payload['tags'].split(' ')
+        for tag in tag_list:
+
+            # TODO: refactor the below its checking to see if the tags exists already
+            #if it does then just append that tag with the item object.
+            #else make a new tag object
+            test = session.query(Tag).filter_by(name=tag).first()
+
+            if test:
+                test.items.append(item)
+                session.add(test)
+                session.commit()
+            else:
+                newtag = Tag(name=str(tag))
+                session.add(newtag)
+                session.commit()
+
+                item.tags.append(newtag)
+
+
+    # TODO: sort out tags
+    session.add(item)
+    # commit changes to database
+    session.commit()
+
+    return item
+
+
+def post_people(session, **kwarg):
+    payload = {}
+    data = {}
+
+    # process user input
+    for k, v in kwarg.items():
+        payload[k] = v
+
+
+    # remove attri that arnt in the database
+    for column in People.__table__.columns:
+        if column.name in payload:
+            data[column.name] = payload[column.name]
+        elif column.name not in payload:
+            data[column.name] = None
+        else:
+            pass
+
+    # Database entry
+    item = People(
+        name = data['name'],
+        item_loc = data['item_loc'],
+        item_thumb = data['item_thumb'],
+        author = data['author'],
+        # attached = data['attached']
+    )
+    session.add(item)
+    session.commit()
+
+
+    print('dsfsssssssssssssssssssssssssssssssssssssssssssss')
+    print('its people bab!')
+
+    print(item.name)
 
     # after entry is commited then hit the database with any new tags?
     # is this the best way?
@@ -986,6 +1055,7 @@ def post_collection(session, **kwarg):
         item_loc = data['item_loc'],
         item_thumb = data['item_thumb'],
         author = data['author']
+
     )
 
     # after entry is commited then hit the database with any new tags?

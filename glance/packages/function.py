@@ -64,7 +64,6 @@ def upload_handler(file, dst):
     s3.Object(cred.AWS_BUCKET, '{}{}'.format(filename, ext)).put(Body=open(os.path.join(dst, '{}{}'.format(filename, ext)), 'rb'))
 
     if ext == '.mp4':
-        print('DSFPISDFOISDFOISFSDFOSDFKOSKFSOFKSDF')
         # TODO: actual upload to aws needs to be refactored away
         # run subprocess
         # collector[filename`].append(SUBPROCESS RESULT)

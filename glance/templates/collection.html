@@ -11,104 +11,196 @@
 </div>
 
 <div style="background-color: lightgray;">
-<div class="grid">
 
-        {% for k, v in item.0.items() %}
-        {% if k == 'items' %}
-        {% for x, g in v.items() %}
 
-                    {% if g.item_type == 'image' %}
-                        <div class="grid-sizer"></div>
-                        <div class="grid-item">
-                            <div style="position:relative;">
-                                <a href="/item/{{ g.id }}">
-                                    <img width="100%" src="https://s3.amazonaws.com/glancestore/{{g.item_thumb}}" />
-                                </a>
 
-                            <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                <div style="text-align:center;">
-                                    <small><strong>Image</strong></small>
-                                </div>
-                            </div>
-                            <a href="#">
-                            <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                <div style="text-align:center;">
-                                    <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                                </div>
-                            </div>
-                        </a>
-                        </div>
-                        </div>
-                    {% elif g.item_type == 'footage' %}
-                        <div class="grid-sizer"></div>
-                        <div class="grid-item">
-                            <div style="position:relative;">
-                                <a href="/item/{{ g.id }}">
-                                    <img width="100%" src="https://s3.amazonaws.com/glancestore/{{g.item_thumb}}" />
-                                </a>
+  <div class="grid">
 
-                            <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                <div style="text-align:center;">
-                                    <small><strong>Footage</strong></small>
-                                </div>
-                            </div>
-                            <a href="#">
-                            <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                <div style="text-align:center;">
-                                    <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                                </div>
-                            </div>
-                        </a>
-                        </div>
-                        </div>
-                    {% elif g.item_type == 'geometry' %}
-                        <div class="grid-sizer"></div>
-                        <div class="grid-item">
-                            <div style="position:relative;">
-                                <a href="/item/{{ g.id }}">
-                                    <img width="100%" src="https://s3.amazonaws.com/glancestore/{{g.item_thumb}}" />
-                                </a>
+    {% for k, v in item.0.items() %}
+    {% if k == 'items' %}
 
-                            <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                <div style="text-align:center;">
-                                    <small><strong>Geometry</strong></small>
-                                </div>
-                            </div>
-                            <a href="#">
-                                <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                    <div style="text-align:center;">
-                                        <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+    {% for j,item in v.items() %}
+
+          {% if item.item_type == 'image' %}
+
+
+
+              <div class="grid-sizer"></div>
+              <div class="grid-item">
+                  <div style="position:relative;">
+                      <a href="/item/{{ item.id }}">
+                          <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                      </a>
+                  </div>
+                  <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                      <div style="text-align:center;">
+                          <small><strong>Image</strong></small>
+                      </div>
+                  </div>
+
+                  <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                      <div style="text-align:center;">
+                          <a href="#">
+                          <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                      </a>
+                      <a href="#">
+                          <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                      </a>
+                      </div>
+                  </div>
+              </div>
+
+
+              {% elif item.item_type == 'people' %}
+
+
+
+                  <div class="grid-sizer"></div>
+                  <div class="grid-item">
+                      <div style="position:relative;">
+                          <a href="/item/{{ item.id }}">
+                              <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                          </a>
+                      </div>
+                      <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                          <div style="text-align:center;">
+                              <small><strong>People</strong></small>
+                          </div>
+                      </div>
+
+                      <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                          <div style="text-align:center;">
+                              <a href="#">
+                              <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                          </a>
+                          <a href="#">
+                              <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                          </a>
+                          </div>
+                      </div>
+                  </div>
+
+
+
+
+                                {% elif item.item_type == 'footage' %}
+
+
+
+                                    <div class="grid-sizer"></div>
+                                    <div class="grid-item">
+                                        <div style="position:relative;">
+                                            <a href="/item/{{ item.id }}">
+                                                <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                                            </a>
+                                        </div>
+                                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                                            <div style="text-align:center;">
+                                                <small><strong>Footage</strong></small>
+                                            </div>
+                                        </div>
+
+                                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                                            <div style="text-align:center;">
+                                                <a href="#">
+                                                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                                            </a>
+                                            <a href="#">
+                                                <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                                            </a>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </a>
-                        </div>
-                        </div>
-                        {% elif g.item_type == 'collection' %}
-                            <div class="grid-sizer"></div>
-                            <div class="grid-item">
-                                <div style="position:relative;">
-                                    <a href="/item/{{ g.id }}">
-                                        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{g.item_thumb}}" />
-                                    </a>
 
-                                <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                    <div style="text-align:center;">
-                                        <small><strong>Collection</strong></small>
-                                    </div>
-                                </div>
-                                <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;right:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                    <div style="text-align:center;">
-                                        <small><strong>{{g.name}}</strong></small>
-                                    </div>
-                                </div>
-                                </div>
-                            </div>
-                            {% endif %}
-            {% endfor %}
-        {% endif %}
-        {% endfor %}
 
-        </div>
+                                                  {% elif item.item_type == 'geometry' %}
+
+
+
+                                                      <div class="grid-sizer"></div>
+                                                      <div class="grid-item">
+                                                          <div style="position:relative;">
+                                                              <a href="/item/{{ item.id }}">
+                                                                  <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                                                              </a>
+                                                          </div>
+                                                          <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                                                              <div style="text-align:center;">
+                                                                  <small><strong>Geometry</strong></small>
+                                                              </div>
+                                                          </div>
+
+                                                          <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                                                              <div style="text-align:center;">
+                                                                  <a href="#">
+                                                                  <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                                                              </a>
+                                                              <a href="#">
+                                                                  <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                                                              </a>
+                                                              </div>
+                                                          </div>
+                                                      </div>
+
+
+
+                                                                    {% elif item.item_type == 'collection' %}
+
+
+
+                                                                        <div class="grid-sizer"></div>
+                                                                        <div class="grid-item">
+                                                                            <div style="position:relative;">
+                                                                                <a href="/item/{{ item.id }}">
+                                                                                    <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                                                                                </a>
+                                                                            </div>
+                                                                            <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                                                                                <div style="text-align:center;">
+                                                                                    <small><strong>Collecton</strong></small>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                                                                                <div style="text-align:center;">
+                                                                                    <a href="#">
+                                                                                    <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                                                                                </a>
+                                                                                <a href="#">
+                                                                                    <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                                                                                </a>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+
+
+
+
+
+
+
+
+              {% endif %}
+              {% endfor %}
+              {% endif %}
+              {% endfor %}
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </div>
     <div style="background-color:lightgray;padding-left:10%;padding-right:10%">
@@ -123,6 +215,9 @@
 
 
 
+
+
+
     <form action="/patch" method="POST">
 
         <div class="form-group">
@@ -132,6 +227,10 @@
             <input type="hidden" name="id" value="{{item.0.id}}">
             <small><small><p class="help-block">Enter Item IDs to append this collection.</p></small></small>
         <br>
+        <label for="append_collection">Append Tags</label>
+        <input style="width:300px;" type="text" class="form-control" id="append_tags" name="append_tags" />
+        <input type="hidden" name="id" value="{{item.0.id}}">
+        <small><small><p class="help-block">Enter words, separated by spaces.</p></small></small>
         <button type="submit" class="btn btn-default">Submit</button>
 
         </div>

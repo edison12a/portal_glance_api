@@ -8,7 +8,7 @@ from packages.functions import (
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
     del_collection, patch_asset, get_query_flag,
     patch_collection, make_dict, get_footages, post_user, get_user, post_image, post_footage,
-    to_dict, get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id
+    to_dict, get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id, post_people
     )
 
 from packages.models import Item
@@ -183,6 +183,8 @@ def item():
             return geometry()
         elif query['item_type'] == 'collection':
             return collection()
+        elif query['item_type'] == 'people':
+            return people()
 
 
     elif request.method=='GET':
@@ -634,6 +636,72 @@ def geometry():
         try:
             session = Session()
             asset = post_geometry(session, **query)
+
+            result = {
+                'responce': 'successful',
+                'location': ROUTE + '/item/' + str(asset.id)
+            }
+
+            session.close()
+
+            return make_response(
+                jsonify(
+                    {
+                        'POST: /item': result
+                    }
+                )
+            ), 200
+
+        except:
+            session.close()
+            fail = {'Action': 'failed'}
+            return make_response(
+                jsonify(
+                    {
+                        'POST /item': fail
+                    }
+                )
+            ), 404
+
+    elif request.method=='GET':
+        session = Session()
+
+        result = get_items(session)
+
+        if len(result) == 0:
+            session.close()
+            return make_response(
+                jsonify(
+                    {
+                        'GET assets': {
+                            'Status': 'Successful',
+                            'Message': 'No assets in database'
+                        }
+                    }
+                )
+            ), 200
+
+        session.close()
+        return make_response(
+            jsonify(result)
+        ), 200
+
+    else:
+        session.close()
+        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
+
+
+@app.route('{}/people'.format(ROUTE), methods=['POST', 'GET'])
+def people():
+    """Endpoint that returns asset objects"""
+    if request.method=='POST':
+        query = {}
+        for x in request.args:
+            query[x] = request.args[x]
+
+        try:
+            session = Session()
+            asset = post_people(session, **query)
 
             result = {
                 'responce': 'successful',

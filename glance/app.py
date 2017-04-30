@@ -180,6 +180,37 @@ def uploading():
                         item_id = res[x]['location'].split('/')[-1]
                         upload_data['items_for_collection'].append(item_id)
 
+
+            elif upload_data['itemradio'] == 'people':
+                # build payload for api
+
+                for items in processed_files:
+                    payload['name'] = items
+
+                    for item in processed_files[items]:
+                        if item.filename.endswith('.jpg'):
+                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            payload['item_loc'] = uploaded_file
+                            payload['item_thumb'] = uploaded_file
+
+                        else:
+                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            payload['attached'] = uploaded_file
+
+                    # post payload to api
+                    r = requests.post('{}'.format(API_ITEM), params=payload)
+                    # collect uploaded item ids from respoce object.
+                    # TODO: Make this a helper
+                    res = r.json()
+                    for x in res:
+                        item_id = res[x]['location'].split('/')[-1]
+                        upload_data['items_for_collection'].append(item_id)
+
+
+
+
+
+
             elif upload_data['itemradio'] == 'collection':
                 # build payload for api
 
@@ -248,6 +279,10 @@ def item(id):
     elif r.json()['item'][0]['item_type'] == 'geometry':
         return render_template('geometry.html', item=r.json()['item'])
 
+    elif r.json()['item'][0]['item_type'] == 'people':
+        return render_template('people.html', item=r.json()['item'])
+
+
     else:
         return home()
 
@@ -272,13 +307,21 @@ def patch_item():
         for k in form:
             if k == 'append_collection':
                 data['items'] = form[k]
+
+            elif k == 'append_tags':
+                data['tags'] = form[k]
+
             else:
                 data[k] = form[k]
 
     r = requests.patch('{}/patch'.format(API_ITEM), params=data)
-    g = requests.get('{}/item/{}'.format(API, data['id']))
 
-    return render_template('item.html', item=g.json())
+    responce = r.json()['PATCH']
+    for x in responce:
+        if 'id' in x:
+            return item(x['id'])
+
+    return home()
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
