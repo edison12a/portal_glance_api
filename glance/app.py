@@ -1,6 +1,7 @@
 import os
 import subprocess
 import requests
+import random
 
 from flask import Flask, flash, redirect, render_template, request, session, abort
 
@@ -59,6 +60,47 @@ def product(id=0):
         return redirect(url_for('store.index'))
 
 """
+
+
+@app.route('/test/<int:id>', methods=['GET', 'POST'])
+def test(id=id):
+    # AddCart is a form from WTF forms. It has a prefix because there
+    # is more than one form on the page.
+    # cart = AddCart(prefix="cart")
+
+    # This is the product being viewed on the page.
+    product = random.choice(range(0, 100))
+
+
+
+    if 'cart' in session:
+        session['cart'].append({str(id): id})
+        session.modified = True
+        """
+        # If the product is not in the cart, then add it.
+        if not any(product in d for d in session['cart']):
+            session['cart'].append({'product {}'.format(product): product})
+
+        # If the product is already in the cart, update the quantity
+        elif any(product in d for d in session['cart']):
+            for d in session['cart']:
+                pass
+                # d.update((k, cart.quantity.data) for k, v in d.items() if k == product.name)
+        """
+    else:
+        session['cart'] = []
+        session['cart'].append({str(id): id})
+        # In this block, the user has not started a cart, so we start it for them and add the product.
+        # session['cart'] = [{'product_{}'.format(product): 'product'}]
+
+
+        # return redirect(url_for('store.index'))
+        return render_template('test.html')
+
+
+    return render_template('test.html')
+
+
 
 @app.route('/')
 def home():
