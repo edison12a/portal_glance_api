@@ -62,44 +62,23 @@ def product(id=0):
 """
 
 
-@app.route('/test/<int:id>', methods=['GET', 'POST'])
-def test(id=id):
-    # AddCart is a form from WTF forms. It has a prefix because there
-    # is more than one form on the page.
-    # cart = AddCart(prefix="cart")
-
-    # This is the product being viewed on the page.
-    product = random.choice(range(0, 100))
-
+@app.route('/test', methods=['GET', 'POST'])
+def test():
+    id = request.args.get('id')
+    item_thumb = request.args.get('item_thumb')
 
 
     if 'cart' in session:
-        session['cart'].append({str(id): id})
+        session['cart'].append({str(id): item_thumb})
         session.modified = True
-        """
-        # If the product is not in the cart, then add it.
-        if not any(product in d for d in session['cart']):
-            session['cart'].append({'product {}'.format(product): product})
 
-        # If the product is already in the cart, update the quantity
-        elif any(product in d for d in session['cart']):
-            for d in session['cart']:
-                pass
-                # d.update((k, cart.quantity.data) for k, v in d.items() if k == product.name)
-        """
     else:
         session['cart'] = []
-        session['cart'].append({str(id): id})
-        # In this block, the user has not started a cart, so we start it for them and add the product.
-        # session['cart'] = [{'product_{}'.format(product): 'product'}]
+        session['cart'].append({str(id): item_thumb})
 
-
-        # return redirect(url_for('store.index'))
         return render_template('test.html')
 
-
     return render_template('test.html')
-
 
 
 @app.route('/')
@@ -119,6 +98,21 @@ def home():
         return render_template('home.html', items=data)
     else:
         return render_template('index.html')
+
+
+@app.route('/favorite')
+def favorite():
+    # TODO: On fav click, redirect to current page, without re-loading page?
+    # Maybe look into AJAX?
+    # TODO: API needs to be able to serve, `item by author`.
+    if LoggedIn(session):
+        # data to send... collections made by user
+
+        data = ['test', 'test2']
+
+        return render_template('favorite.html', items=data)
+    else:
+        return home()
 
 
 @app.route('/login', methods=['POST'])
