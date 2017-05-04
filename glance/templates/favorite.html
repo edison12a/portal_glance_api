@@ -30,7 +30,8 @@
               <th>ID</th>
               <th>Thumbnail</th>
               <th>Item Type</th>
-              <th>Collection?</th>
+              <th>Allow in Collection</th>
+              <th>Remove from Favorites</th>
             </tr>
           </thead>
             <tbody>
@@ -49,13 +50,17 @@
               </td>
               <td>IMP</td>
               <td>[X]</td>
+              <td>[X]</td>
             </tr>
-
 
             {% endfor %}
         {% endfor %}
     </tbody>
   </table>
+
+<button type="button" class="btn btn-primary btn-block">Make Collection</button>
+
+
 </div>
 </div>
 

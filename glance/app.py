@@ -66,16 +66,21 @@ def product(id=0):
 
 @app.route('/_add_numbers')
 def add_numbers():
-    id = request.args.get('id', 0, type=int)
-    item_thumb = request.args.get('item_thumb', type=str)
+    id = request.args.get('id')
+    item_thumb = request.args.get('item_thumb')
+
     if 'cart' in session:
-        session['cart'].append({1: 'test_name.jpg'})
+        session['cart'].append({id: item_thumb})
+        session.modified = True
+    elif 'cart' not in session:
+        session['cart'] = []
+        session['cart'].append({id: item_thumb})
         session.modified = True
 
+    print(id)
     print(item_thumb)
-    a = request.args.get('a', 0, type=int)
-    b = request.args.get('b', 0, type=int)
-    return jsonify(result=a + b, item_thumb=item_thumb)
+
+    return jsonify(item_thumb=item_thumb)
 
 
 
