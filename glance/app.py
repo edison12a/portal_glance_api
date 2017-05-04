@@ -3,7 +3,7 @@ import subprocess
 import requests
 import random
 
-from flask import Flask, flash, redirect, render_template, request, session, abort
+from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify
 
 from packages.function import LoggedIn, CheckLoginDetails, upload_handler, process_raw_files, item_to_session
 
@@ -60,6 +60,25 @@ def product(id=0):
         return redirect(url_for('store.index'))
 
 """
+
+
+
+
+@app.route('/_add_numbers')
+def add_numbers():
+    id = request.args.get('id', 0, type=int)
+    item_thumb = request.args.get('item_thumb', type=str)
+    if 'cart' in session:
+        session['cart'].append({1: 'test_name.jpg'})
+        session.modified = True
+
+    print(item_thumb)
+    a = request.args.get('a', 0, type=int)
+    b = request.args.get('b', 0, type=int)
+    return jsonify(result=a + b, item_thumb=item_thumb)
+
+
+
 
 
 @app.route('/test', methods=['GET', 'POST'])

@@ -125,9 +125,44 @@
                     </div>
             {% endif %}
         {% endfor %}
+
+
     </div>
 
+
+    <br>
+
+
+        <div class="container">
+          <div class="header">
+            <h3 class="text-muted">How To Manage JSON Requests</h3>
+          </div>
+          <hr/>
+          <div>
+          <p>
+        id : <input type="hidden" name="id" value="test_id">
+        item_thumb : <input type="hidden" name="item_thumb" value="test_item_thumb">
+
+        <input type="text" size="5" name="a"> +
+        <input type="text" size="5" name="b"> =
+        <span id="result">?</span><br>
+        <br>
+        <p><a href="javascript:void();" id="calculate">calculate server side</a>
+          </form>
+          </div>
+        </div>
+    <br>
+
+
+
     <div style=background-color:black;color:white;margin-top:100px;>
+
+
+
+
+
+
+
         <small><small>
             <strong>items</strong><br>
             {{ items }}

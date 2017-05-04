@@ -5,6 +5,26 @@
     <script src="{{ url_for('static', filename='js/masonry.pkgd.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/imagesloaded.pkgd.min.js') }}"></script>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <script type=text/javascript>
+      $(function() {
+        $('a#calculate').bind('click', function() {
+          $.getJSON('/_add_numbers', {
+            id: $('input[name="id"]').val(),
+            item_thumb: $('input[name="item_thumb"]').text(),
+            a: $('input[name="a"]').val(),
+            b: $('input[name="b"]').val()
+          }, function(data) {
+            $("#result").text(data.result);
+            $("#bla").text(data.result);
+          });
+          return false;
+        });
+      });
+    </script>
+
+
     <style>
         body {
             background-color: black;
@@ -160,7 +180,8 @@
 
             <div style="padding-left:5px;padding-right:5px;border-radius:10px;position:absolute;top:-6px;right:4px;height:15px;background-color:red;text-align:center;color:white;">
                 <div style="position:relative;bottom:4px;">
-                    <small><small><strong>{{session.cart|length}}</strong></small></small>
+                  <span id="item_thumb"><small><small><strong>{{session.cart|length}}</strong></small></small></span>
+
                 </div>
             </div>
 
