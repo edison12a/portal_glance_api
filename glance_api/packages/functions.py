@@ -165,68 +165,17 @@ def to_dict(item_list):
     # return database objects as dicts.
     return result
 
-'''
-# user functions
-def post_collection(session, **kwarg):
-    """Posts collection to the database
-    Return: collection; 'newly posted collection'
-    """
 
-    payload = {}
-    data = {}
-
-    # build POST data payload query from user data, **kwarg
-    # TODO: issues between the name 'tag' coming from the frontend, and 'tags'
-    # in the backend. Make consistant.
-    for k, v in kwarg.items():
-        if k == 'tags':
-            bla = v.split(' ')
-            payload['tags'] = bla
-        elif k == 'assets':
-            bla = v.split(' ')
-            payload['assets'] = [int(i) for i in bla]
-        else:
-            payload[k] = v
-    del payload['tag']
-
-    # validate payload agaisnt database columnns, automate None to empty fields
-    for column in Collection.__table__.columns:
-        if column.name in payload:
-            data[column.name] = payload[column.name]
-        elif column.name not in payload:
-            data[column.name] = None
-        else:
-            pass
-
-    # init collection object
-    collection = Collection(
-        name=data['name'], image=data['image'], author=data['author']
-    )
-
-    # append default cover to Collection object, if 'None'
-    # TODO: can possibly do this during validation?
-    if data['image_thumb'] == None:
-        collection.image_thumb = 'default_cover.jpg'
+def get_tag(session, data):
+    if data == None:
+        result = [str(x.name) for x in session.query(Tag).all()]
+        return result
     else:
-        collection.image_thumb = data['image_thumb']
+        # TODO: IF data == 'id' return that ids tags.
+        return False
 
-    # commit new collection.
-    session.add(collection)
+    return Fales
 
-    if 'tags' in payload:
-        for tag in payload['tags']:
-            newtag = Tag(name=str(tag))
-            session.add(newtag)
-            collection.tags.append(newtag)
-
-    if 'assets' in payload:
-        for asset in payload['assets']:
-            collection.assets.append(asset)
-
-    session.commit()
-
-    return collection
-'''
 
 def post_asset(session, **kwarg):
     """Posts asset to the database

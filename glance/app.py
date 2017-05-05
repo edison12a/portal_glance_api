@@ -23,6 +23,7 @@ API_IMAGE = 'http://127.0.0.1:5050/glance/api/image'
 API_FOOTAGE = 'http://127.0.0.1:5050/glance/api/footage'
 API_GEOMETRY = 'http://127.0.0.1:5050/glance/api/geometry'
 API_COLLECTION = 'http://127.0.0.1:5050/glance/api/collection'
+API_TAG = 'http://127.0.0.1:5050/glance/api/tag'
 
 
 """
@@ -117,8 +118,10 @@ def home():
             reversed_list.append(x)
         data = reversed_list[::-1]
 
+        # Tag data
+        tags = [x for x in requests.get('{}'.format(API_TAG)).json()['tags']]
 
-        return render_template('home.html', items=data)
+        return render_template('home.html', items=data, tags=tags)
     else:
         return render_template('index.html')
 

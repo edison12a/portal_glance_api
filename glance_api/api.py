@@ -8,7 +8,7 @@ from packages.functions import (
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
     del_collection, patch_asset, get_query_flag,
     patch_collection, make_dict, get_footages, post_user, get_user, post_image, post_footage,
-    to_dict, get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id, post_people
+    to_dict, get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id, post_people, get_tag
     )
 
 from packages.models import Item
@@ -96,6 +96,17 @@ def api():
         }
     }
     return jsonify({'Glance WebAPI': info})
+
+
+@app.route('{}/tag'.format(ROUTE))
+def tag():
+    session = Session()
+
+    data = None
+    result = get_tag(session, data)
+    session.close()
+
+    return jsonify({'tags': result})
 
 
 @app.route('{}/asset'.format(ROUTE), methods=['POST', 'GET'])
@@ -214,74 +225,7 @@ def item():
         session.close()
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
-'''
-@app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
-def collection():
 
-    if request.method=='POST':
-        query = {}
-        for x in request.args:
-            query[x] = request.args[x]
-
-        try:
-            session = Session()
-            collection = post_collection(session, **query)
-
-            result = {
-                'responce': 'successful',
-                'location': ROUTE + '/collection/' + str(collection.id)
-            }
-
-            session.close()
-
-            return make_response(
-                jsonify(
-                    {
-                        'POST: /collection': result
-                    }
-                )
-            ), 200
-
-        except:
-            fail = {'Action': 'failed'}
-            session.close()
-            return make_response(
-                jsonify(
-                    {
-                        'POST /collection': fail
-                    }
-                )
-            ), 404
-
-    elif request.method=='GET':
-        session = Session()
-        raw_collections = get_collections(session)
-
-        collections = make_dict(raw_collections)
-
-        if len(collections) == 0:
-            session.close()
-            return make_response(
-                jsonify(
-                    {
-                        'GET collections': {
-                            'Status': 'Successful',
-                            'Message': 'No collections in database'
-                        }
-                    }
-                )
-            ), 200
-
-        session.close()
-        return make_response(
-            jsonify(collections)
-        ), 200
-
-    else:
-
-        session.close()
-        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
-'''
 
 @app.route('{}/collection/<int:collection_id>'.format(ROUTE), methods=['GET'])
 def get_collection_id(collection_id):
