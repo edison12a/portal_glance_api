@@ -44,8 +44,6 @@ def upload_handler(file, dst):
     """handles uploading of all files"""
     # TODO: Figure out where to handle auto thumbnailing.
     # process filenames and add random characters to avoid duplication
-    print('iiiiiiiiiiiiiiiiiiii')
-    print(file)
     salt = secrets.token_urlsafe(4)
     filename, ext = os.path.splitext(file.filename)
     filename = '{}_{}'.format(filename, salt)
@@ -65,19 +63,10 @@ def upload_handler(file, dst):
 
     if ext == '.mp4':
         # TODO: actual upload to aws needs to be refactored away
-        # run subprocess
-        # collector[filename`].append(SUBPROCESS RESULT)
-
 
         footage_loc = '{}/{}{}'.format(dst, filename, ext)
 
-        print('FOOTAGE_LOC')
-        print(footage_loc)
-
         frame_save_loc = '{}/{}.jpg'.format(dst, filename)
-
-        print('FRAME_SAVE_LOC')
-        print(frame_save_loc)
 
         subprocess.call(
             'ffmpeg -ss 0.5 -i {} -t 1 {}'.format(footage_loc, frame_save_loc),
@@ -91,8 +80,6 @@ def upload_handler(file, dst):
         )
 
         s3 = boto3_session.resource('s3')
-
-        #data = send_from_directory(dst, '{}.jpg'.format(filename))
 
         s3.Object(cred.AWS_BUCKET, '{}.jpg'.format(filename)).put(Body=open(os.path.join(dst, '{}.jpg'.format(filename)), 'rb'))
 
@@ -129,33 +116,29 @@ def item_to_session(session, *args):
 
 
 def rektest(data):
+    # TODO: Finish function
     # refactor below
+    # init session with cred
     boto3_session = boto3.session.Session(
         aws_access_key_id=cred.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=cred.AWS_SECRET_ACCESS_KEY,
     )
 
+    # init client
     client = boto3_session.client('rekognition', region_name='us-east-1')
-
 
     response = client.detect_labels(
         Image={
             'S3Object': {
                 'Bucket': 'glancestore',
-                'Name': 'guy_camping_hAeJeA.jpg',
+                'Name': data,
             },
         },
-        MaxLabels=123,
-        MinConfidence=70,
+        MaxLabels=100,
+        MinConfidence=60,
     )
 
-    print(response)
+    test = [x['Name'] for x in response['Labels']]
 
 
-
-    #data = send_from_directory(dst, '{}.jpg'.format(filename))
-
-    # s3.Object(cred.AWS_BUCKET, '{}.jpg'.format(filename)).put(Body=open(os.path.join(dst, '{}.jpg'.format(filename)), 'rb'))
-
-
-    return True
+    return test

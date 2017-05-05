@@ -117,11 +117,6 @@ def home():
             reversed_list.append(x)
         data = reversed_list[::-1]
 
-        goo = []
-        test = rektest(goo)
-        print(test)
-
-
 
         return render_template('home.html', items=data)
     else:
@@ -210,12 +205,17 @@ def uploading():
                             payload['item_loc'] = uploaded_file
                             payload['item_thumb'] = uploaded_file
 
+                            # AWS REKOGNITION
+                            for tag in rektest(uploaded_file):
+                                payload['tags'] += tag.lower() + ' '
+
                         else:
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
+                    payload['tags'] = ''
                     # collect uploaded item ids from respoce object.
                     # TODO: Make this a helper
                     res = r.json()
@@ -236,9 +236,12 @@ def uploading():
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
                             item_thumb_filename, item_thumb_ext = os.path.splitext(uploaded_file)
 
-
                             payload['item_loc'] = uploaded_file
                             payload['item_thumb'] = '{}.jpg'.format(item_thumb_filename)
+
+                            # AWS REKOGNITION
+                            for tag in rektest('{}.jpg'.format(item_thumb_filename)):
+                                payload['tags'] += tag.lower() + ' '
 
                         else:
                             # Use to validate wether item is a valid format
@@ -250,6 +253,7 @@ def uploading():
 
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
+                    payload['tags'] = ''
                     # collect uploaded item ids from respoce object.
                     res = r.json()
                     for x in res:
@@ -268,6 +272,10 @@ def uploading():
                             payload['item_loc'] = uploaded_file
                             payload['item_thumb'] = uploaded_file
 
+                            # AWS REKOGNITION
+                            for tag in rektest(uploaded_file):
+                                payload['tags'] += tag.lower() + ' '
+
                         else:
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
@@ -275,6 +283,7 @@ def uploading():
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
                     # collect uploaded item ids from respoce object.
+                    payload['tags'] = ''
                     res = r.json()
                     for x in res:
                         item_id = res[x]['location'].split('/')[-1]
@@ -293,22 +302,23 @@ def uploading():
                             payload['item_loc'] = uploaded_file
                             payload['item_thumb'] = uploaded_file
 
+                            # AWS REKOGNITION
+                            for tag in rektest(uploaded_file):
+                                payload['tags'] += tag.lower() + ' '
+
                         else:
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
+                    payload['tags'] = ''
                     # collect uploaded item ids from respoce object.
                     # TODO: Make this a helper
                     res = r.json()
                     for x in res:
                         item_id = res[x]['location'].split('/')[-1]
                         upload_data['items_for_collection'].append(item_id)
-
-
-
-
 
 
             elif upload_data['itemradio'] == 'collection':
