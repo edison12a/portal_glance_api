@@ -126,3 +126,36 @@ def item_to_session(session, *args):
     print(args)
 
     return session
+
+
+def rektest(data):
+    # refactor below
+    boto3_session = boto3.session.Session(
+        aws_access_key_id=cred.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=cred.AWS_SECRET_ACCESS_KEY,
+    )
+
+    client = boto3_session.client('rekognition', region_name='us-east-1')
+
+
+    response = client.detect_labels(
+        Image={
+            'S3Object': {
+                'Bucket': 'glancestore',
+                'Name': 'guy_camping_hAeJeA.jpg',
+            },
+        },
+        MaxLabels=123,
+        MinConfidence=70,
+    )
+
+    print(response)
+
+
+
+    #data = send_from_directory(dst, '{}.jpg'.format(filename))
+
+    # s3.Object(cred.AWS_BUCKET, '{}.jpg'.format(filename)).put(Body=open(os.path.join(dst, '{}.jpg'.format(filename)), 'rb'))
+
+
+    return True

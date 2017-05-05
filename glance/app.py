@@ -5,7 +5,7 @@ import random
 
 from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify
 
-from packages.function import LoggedIn, CheckLoginDetails, upload_handler, process_raw_files, item_to_session
+from packages.function import LoggedIn, CheckLoginDetails, upload_handler, process_raw_files, item_to_session, rektest
 
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -116,6 +116,10 @@ def home():
         for x in r.json():
             reversed_list.append(x)
         data = reversed_list[::-1]
+
+        goo = []
+        test = rektest(goo)
+        print(test)
 
 
 
