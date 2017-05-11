@@ -127,6 +127,9 @@ def to_dict(item_list):
     # any point in having it as column?
     result = []
 
+    # remove duplicate results
+    item_list = list(set(item_list))
+
     # for each database object, build dict, 'item', from data.
     for item_object in item_list:
         item = {}

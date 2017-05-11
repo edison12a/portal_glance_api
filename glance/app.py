@@ -59,16 +59,28 @@ def product(id=0):
 
 
         return redirect(url_for('store.index'))
-
+as
 """
 
+@app.route('/testt/', methods=['GET','POST'])
+def testt():
+    clicked=None
+    if request.method == "POST":
+        clicked=request.json['data']
+        print('wsasdasdha')
+
+        print(clicked)
+
+    return render_template('home.html')
 
 
-
-@app.route('/_add_numbers')
+@app.route('/_add_numbers', methods=['GET','POST'])
 def add_numbers():
     id = request.args.get('id')
     item_thumb = request.args.get('item_thumb')
+
+    print('----')
+    print(id, item_thumb)
 
     if 'cart' in session:
         session['cart'].append({id: item_thumb})
@@ -78,12 +90,7 @@ def add_numbers():
         session['cart'].append({id: item_thumb})
         session.modified = True
 
-    print(id)
-    print(item_thumb)
-
-    return jsonify(item_thumb=item_thumb)
-
-
+    return jsonify(result=len(session['cart']))
 
 
 
@@ -119,7 +126,7 @@ def home():
         data = reversed_list[::-1]
 
         # Tag data
-        tags = [x for x in requests.get('{}'.format(API_TAG)).json()['tags']]
+        tags = [x for x in requests.get('{}'.format(API_TAG)).json()['tags'] if x != '']
 
         return render_template('home.html', items=data, tags=tags)
     else:
@@ -362,9 +369,6 @@ def uploading():
                     for x in res:
                         item_id = res[x]['location'].split('/')[-1]
                         bla = requests.get('{}/{}'.format(API_ITEM, item_id))
-
-                        print('pppppppppppppp')
-                        print(bla.json())
 
                         return render_template('collection.html', item=bla.json()['item'])
 

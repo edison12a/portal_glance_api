@@ -296,6 +296,7 @@ def query():
         session = Session()
         raw_assets = get_query(session, request.args)
         assets = to_dict(raw_assets)
+
         session.close()
 
         return jsonify({'result': assets})
@@ -383,9 +384,6 @@ def patch_item():
     session.close()
 
     return jsonify({'PATCH': patched_asset})
-
-
-
 
 
 

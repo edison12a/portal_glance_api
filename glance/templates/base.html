@@ -7,6 +7,8 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
+
+
     <script type=text/javascript>
       $(function() {
         $('a#calculate').bind('click', function() {
@@ -15,9 +17,9 @@
             item_thumb: $('input[name="item_thumb"]').val()
           }, function(data) {
             $("#bla").text(data.result);
-          });
-          return false;
         });
+          return false;
+      });
       });
     </script>
 
@@ -177,7 +179,16 @@
 
             <div style="padding-left:5px;padding-right:5px;border-radius:10px;position:absolute;top:-6px;right:4px;height:15px;background-color:red;text-align:center;color:white;">
                 <div style="position:relative;bottom:4px;">
-                  <span id="item_thumb"><small><small><strong>{{session.cart|length}}</strong></small></small></span>
+                  <span id="bla"><small><small><strong>{{session.cart|length}}</strong></small></small></span>
+
+                </div>
+            </div>
+
+            {% else %}
+
+            <div style="font-size:5px;padding-left:5px;padding-right:5px;border-radius:10px;position:absolute;top:-6px;right:4px;height:15px;background-color:red;text-align:center;color:white;">
+                <div style="position:relative;bottom:4px;">
+                  <span id="bla"><small><small><strong>0</strong></small></small></span>
 
                 </div>
             </div>
