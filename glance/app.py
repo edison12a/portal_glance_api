@@ -62,16 +62,40 @@ def product(id=0):
 as
 """
 
-@app.route('/testt/', methods=['GET','POST'])
-def testt():
-    clicked=None
-    if request.method == "POST":
-        clicked=request.json['data']
-        print('wsasdasdha')
 
-        print(clicked)
+"""
+@app.route('/')
+def index():asdsad
+    return html_page
+"""
 
-    return render_template('home.html')
+@app.route('/ajax', methods = ['POST'])
+def ajax_request():
+    id = request.form['id']
+    item_thumb = request.form['item_thumb']
+
+    # id = request.args.get('id')
+    # item_thumb = request.args.get('item_thumb')
+
+    print('----')
+    print(id, item_thumb)
+
+
+
+    if 'cart' in session:
+        if id in session['cart'][0].keys():
+            print('pppppp')
+            print(id)
+            pass
+        else:
+            session['cart'].append({id: item_thumb})
+            session.modified = True
+    elif 'cart' not in session:
+        session['cart'] = []
+        session['cart'].append({id: item_thumb})
+        session.modified = True
+
+    return jsonify(username=len(session['cart']))
 
 
 @app.route('/_add_numbers', methods=['GET','POST'])
@@ -92,6 +116,35 @@ def add_numbers():
 
     return jsonify(result=len(session['cart']))
 
+
+@app.route('/newcollection', methods=['GET', 'POST'])
+def newcollection():
+    print('-------')
+    print('new collection')
+
+    """
+    payload = {
+        'name': 'IMP NAME',
+        'item_type': 'collection',
+        'item_loc': 'site/default_cover.jpg',
+        'item_thumb': 'site/default_cover.jpg',
+        'author': session['user']
+    }
+
+    r = requests.post('{}'.format(API_ITEM), params=payload)
+
+    res = r.json()
+    print('-----')
+    print('pppp')
+    print(res)
+    for x in res:
+        item_id = res[x]['location'].split('/')[-1]
+    """
+
+    bla = requests.get('{}/{}'.format(API_ITEM, 15))
+
+
+    return render_template('collection.html', item=bla.json())
 
 
 @app.route('/test', methods=['GET', 'POST'])

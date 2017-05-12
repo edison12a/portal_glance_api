@@ -32,9 +32,15 @@
 
 
 
-                        <input type="hidden" name="id" value="{{item.id}}">
-                        <input type="hidden" name="item_thumb" value="{{item.item_thumb}}">
-                        <a href="javascript:void();" id="calculate"><small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small></a>
+
+                        <form style="display:inline-block;" action="" method="POST">
+                        <input type="hidden" name="id" id="id" value="{{item.id}}">
+                        <input type="hidden" name="item_thumb" id="item_thumb" value="{{item.item_thumb}}">
+                        <a onclick="return loadXMLDoc()" href="#"><small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small></a>
+
+                        </form>
+
+
 
 
                         </div>
