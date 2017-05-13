@@ -166,6 +166,12 @@ def test():
     return render_template('test.html')
 
 
+
+################################################
+
+
+
+
 @app.route('/')
 def home():
     if LoggedIn(session):
@@ -173,7 +179,7 @@ def home():
         # process and reverse data so the latest uploaded items are first.
         # Currently using the items `id`, but upload date would be better.
         reversed_list = []
-        r = requests.get('{}'.format(API_ASSET))
+        r = requests.get('{}'.format(API_ITEM))
         for x in r.json():
             reversed_list.append(x)
         data = reversed_list[::-1]

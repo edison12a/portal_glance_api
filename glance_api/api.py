@@ -201,7 +201,10 @@ def item():
     elif request.method=='GET':
         session = Session()
 
-        result = get_items(session)
+        if 'filter' in request.args:
+            result = get_items(session, request.args['filter'])
+        else:
+            result = get_items(session)
 
         if len(result) == 0:
             session.close()

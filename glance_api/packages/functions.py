@@ -253,10 +253,15 @@ def get_assets(session):
     return assets
 
 
-def get_items(session):
+def get_items(session, filter='all'):
     """Returns all asset objects"""
+    # TODO: IMP filtering
     raw_items = session.query(Item).all()
-    result = to_dict(raw_items)
+
+    if filter == 'all':
+        result = to_dict([x for x in raw_items])
+    else:
+        result = to_dict([x for x in raw_items if x.item_type == filter])
 
     # returns raw db objects
     return result
