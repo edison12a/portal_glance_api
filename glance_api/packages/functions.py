@@ -310,10 +310,16 @@ def get_query(session, userquery):
     # TODO: currently searching every table with every query term, multiple
     # searches. gotta be a better way. look into postgres joins?
     result = {}
+    query = {}
 
     # makes users query a dict
     for k, v in userquery.items():
-        query = {k: str(v).split()}
+        query[k] = str(v).split()
+
+    if 'filter' not in query:
+        query['filter'] = 'all'
+    else:
+        query['filter'] = query['filter'][0]
 
     # querying through many-to-many relationships leaves us with an
     # instrumentedlist which needs to be exracted before using make_dict
@@ -321,13 +327,21 @@ def get_query(session, userquery):
     for term in query['query']:
         # return list of tags
         taglists = session.query(Tag).filter_by(name=term).all()
+
         # for each tag
         for tag in taglists:
             # if one exists
             if tag.items:
                 # get asset assigned to tag and append to list, 'item_list'
                 for item in tag.items:
-                    item_list.append(item)
+                    # return data according to the filter information
+                    if query['filter'] == 'all':
+                        item_list.append(item)
+                    else:
+                        if item.item_type == query['filter']:
+                            item_list.append(item)
+                        else:
+                            pass
             # get collection assigned to tag and append to list, 'item_list'
             elif tag.collection_tags:
                 for item in tag.collection_tags:

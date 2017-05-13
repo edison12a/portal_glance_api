@@ -283,7 +283,9 @@ def query():
     """ returns results from querys
     'flag': takes key/value, returns
     'query': takes list of string, returns list of dict;
+    'filter': takes str, affects 'query';
     """
+    print(request.args)
     if 'flag' in request.args:
         session = Session()
         flagged = get_query_flag(session, request.args['flag'])
@@ -293,6 +295,7 @@ def query():
 
 
     elif 'query' in request.args:
+        # TODO: For some reason `get_query()` only accepts a dict?
         session = Session()
         raw_assets = get_query(session, request.args)
         assets = to_dict(raw_assets)
@@ -301,6 +304,8 @@ def query():
 
         return jsonify({'result': assets})
 
+
+    return jsonify({'result': ''})
 
 @app.route(
     '{}/collection/delete/<int:collection_id>'.format(ROUTE), methods=['DELETE']
