@@ -475,6 +475,11 @@ def search():
     search_term = request.args['search']
     search_data['query'] = str(search_term)
 
+    if 'filter' in request.args:
+        search_data['filter'] = request.args['filter']
+    else:
+        search_data['filter'] = 'all'
+
     r = requests.get('{}/query'.format(API), params=search_data)
 
     return render_template('search.html', data=search_data, items=r.json()['result'])

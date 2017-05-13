@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 
-    <div id="searchfilterbox">
-        <small><small><small>FILTER:&emsp;</small> <a href="">Images | Geometry | Footage | People | Collection | Archive</a></small></small>
-    </div>
+<div id="searchfilterbox">
+    <small><small><small>FILTER:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a href="/search?search={{data.query}}&filter=collection">Collection</a> | Project | Archive</small></small>
+</div>
 
 
     <div class="grid">
