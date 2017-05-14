@@ -2,29 +2,45 @@
 {% block content %}
 
 
+<div style="width:100%;color:white;">
 
-<div style="z-index:50;position:relative;width:100%;height:auto;text-align:center;background-color:black;box-shadow: 0 2px -10px 0 rgba(0, 0, 0, 1);">
-        <div style="width:50%;position:relative;">
-          <div style="box-shadow: inset 0px 0px 10px rgba(0,0,0,1);">
-          <img style="width:100%;" src="https://s3.amazonaws.com/glancestore/{{ item.0.item_loc }}" />
-        </div>
+<div style="display:inline-block;">
+  <img style="height:400px;" src="https://s3.amazonaws.com/glancestore/{{ item.0.item_loc }}" />
+</div>
 
-        <div style="padding-left:25%;position:absolute;top:0;right:0;width:50%;height:100%;">
-          <img style="height:100%" src="https://s3.amazonaws.com/glancestore/site/camera_angle.png" />
-        </div>
+<div style="display:inline-block;">
+  Camera Position    <br>
+      <br>
+      above<br>
+      Upper 45 Degree <br>(Flat & At Subject)<br>
+      At Subject<br>
+      Eye Level<br>
+      At Subject<br>
+      Lower 45 Degree <br>(Flat & At Subject)<br>
+      Below<br>
+</div>
 
+<div style="display:inline-block;">
+  Major Light Source    <br>
+      <br>
+      above<br>
+      left<br>
+      Right<br>
+      Front<br>
+      Back<br>
+</div>
 
-        <div style="padding-left:50%;position:absolute;top:0;right:0;width:50%;height:100%;">
-          <img style="height:100%" src="https://s3.amazonaws.com/glancestore/site/light_angle.png" />
-        </div>
-
-        </div>
+<div style="display:inline-block;">
+  General Lighting    <br>
+      <br>
+      In Shadow<br>
+      OVercast<br>
+      Indirect<br>
+</div>
 
 
 </div>
 
-
-<div style="clear:both;"></div>
 
 
         <div style="background-color:darkgray;width:100%;">
@@ -61,39 +77,10 @@
         </div>
 
 
-
-
-
-
                 <div style="padding-left:10%;padding-right:10%;background-color:lightgray;">
                   <br>
                   <br>
-                 Camera Angles<br>
-            <ul>
-                <li>above</li>
-                <li>Upper 45 Degree (Flat & At Subject)</li>
-                <li>At Subject</li>
-                <li>Eye Level</li>
-                <li>At Subject</li>
-                <li>Lower 45 Degree (Flat & At Subject)</li>
-                <li>Below</li>
-            </ul>
 
-            Main light source<br>
-       <ul>
-           <li>above</li>
-           <li>Left</li>
-           <li>Right</li>
-           <li>Front</li>
-           <li>Back</li>
-       </ul>
-
-       General Lighting<br>
-  <ul>
-      <li>In Shadow</li>
-      <li>Overcast</li>
-      <li>Indirect</li>
-  </ul>
 
   Race<br>
 <ul>
