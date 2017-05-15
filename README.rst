@@ -1,5 +1,6 @@
 IN DEVELOPMENT
-Live App: http://104.131.19.137/
+
+Demo App: http://104.131.19.137/
 
 Glance Api
 =========================
