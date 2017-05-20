@@ -1,11 +1,29 @@
 IN DEVELOPMENT
 
-Demo App: http://104.131.19.137/
+Glance
+=====================
 
-Glance Api
-=========================
+Source code for hosting and utilising the Glance digital item management system.
 
-database and web api for digital asset management, storage and retrieval.
+Glance is a management system for digital items. Using images to represent
+various forms of data. Video files, images, documents, source code etc.
+Searching is done through the use of tagging each item.
+
+features:
+app
+
+portfolio style display of digital items.
+user collections and tagging for storage and retrival.
+
+api
+
+flask
+postgres database
+aws s3 storage
+aws rekcogntion
+
+machine learning features:
+automatic tag generation
 
 Code Examples
 ---
@@ -36,10 +54,14 @@ Run api.py to get the web api running.
 
 Entry point is **http://[localhost]/glance/api**
 
-Documentation & Tests
+Extended Documentation & Tests
 -------------
 
-Extended API docs
+User Guide_
+
+API docs_
+
+APP docs_
 
 Running tests, while in project root.
 
