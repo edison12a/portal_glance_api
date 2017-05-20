@@ -1,13 +1,13 @@
 import os
 import subprocess
-import requests
 import random
 
+import requests
 from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify
 
 from packages.function import LoggedIn, CheckLoginDetails, upload_handler, process_raw_files, item_to_session, rektest
 
-
+'''config'''
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/tmp')
 
@@ -25,72 +25,8 @@ API_GEOMETRY = 'http://127.0.0.1:5050/glance/api/geometry'
 API_COLLECTION = 'http://127.0.0.1:5050/glance/api/collection'
 API_TAG = 'http://127.0.0.1:5050/glance/api/tag'
 
-
-@app.route('/append_fav', methods=['GET','POST'])
-def append_fav():
-
-    item_id = request.args['item_id']
-    item_thumb = request.args['item_thumb']
-
-    if 'fav' in session:
-        session['fav'].append({item_id: item_thumb})
-        session.modified = True
-    elif 'fav' not in session:
-        session['fav'] = []
-        session['fav'].append({item_id: item_thumb})
-        session.modified = True
-
-    return jsonify(result=len(session['fav']))
-
-
-@app.route('/newcollection', methods=['GET', 'POST'])
-def newcollection():
-
-    bla = requests.get('{}/{}'.format(API_ITEM, 15))
-
-    return render_template('collection.html', item=bla.json())
-
-
-@app.route('/')
-def home():
-    if LoggedIn(session):
-
-        # process and reverse data so the latest uploaded items are first.
-        # Currently using the items `id`, but upload date would be better.
-        reversed_list = []
-
-        payload = {}
-        if 'filter' in request.args:
-            payload['filter'] = request.args['filter']
-
-        r = requests.get('{}'.format(API_ITEM), params=payload)
-        for x in r.json():
-            reversed_list.append(x)
-        data = reversed_list[::-1]
-
-        # Tag data
-        tags = [x for x in requests.get('{}'.format(API_TAG)).json()['tags'] if x != '']
-
-        return render_template('home.html', items=data, tags=tags)
-    else:
-        return render_template('index.html')
-
-
-@app.route('/favorite')
-def favorite():
-    # TODO: On fav click, redirect to current page, without re-loading page?
-    # Maybe look into AJAX?
-    # TODO: API needs to be able to serve, `item by author`.
-    if LoggedIn(session):
-        # data to send... collections made by user
-
-        data = ['test', 'test2']
-
-        return render_template('favorite.html', items=data)
-    else:
-        return home()
-
-
+'''routes'''
+# auth
 @app.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
@@ -118,12 +54,22 @@ def logout():
     return home()
 
 
-@app.route('/upload')
-def upload():
-    if LoggedIn(session):
-        return render_template('upload.html')
-    else:
-        return home()
+# utility
+@app.route('/append_fav', methods=['GET','POST'])
+def append_fav():
+
+    item_id = request.args['item_id']
+    item_thumb = request.args['item_thumb']
+
+    if 'fav' in session:
+        session['fav'].append({item_id: item_thumb})
+        session.modified = True
+    elif 'fav' not in session:
+        session['fav'] = []
+        session['fav'].append({item_id: item_thumb})
+        session.modified = True
+
+    return jsonify(result=len(session['fav']))
 
 
 @app.route('/uploading', methods=['POST'])
@@ -322,6 +268,89 @@ def uploading():
         return home()
 
 
+@app.route('/patch', methods=['POST'])
+def patch_item():
+
+    data = {}
+    if request.method == 'POST':
+        form = request.form
+        for k in form:
+            if k == 'append_collection':
+                data['items'] = form[k]
+
+            elif k == 'append_tags':
+                data['tags'] = form[k]
+
+            else:
+                data[k] = form[k]
+
+    r = requests.patch('{}/patch'.format(API_ITEM), params=data)
+
+    responce = r.json()['PATCH']
+    for x in responce:
+        if 'id' in x:
+            return item(x['id'])
+
+    return home()
+
+
+# display
+@app.route('/newcollection', methods=['GET', 'POST'])
+def newcollection():
+
+    bla = requests.get('{}/{}'.format(API_ITEM, 15))
+
+    return render_template('collection.html', item=bla.json())
+
+
+@app.route('/')
+def home():
+    if LoggedIn(session):
+
+        # process and reverse data so the latest uploaded items are first.
+        # Currently using the items `id`, but upload date would be better.
+        reversed_list = []
+
+        payload = {}
+        if 'filter' in request.args:
+            payload['filter'] = request.args['filter']
+
+        r = requests.get('{}'.format(API_ITEM), params=payload)
+        for x in r.json():
+            reversed_list.append(x)
+        data = reversed_list[::-1]
+
+        # Tag data
+        tags = [x for x in requests.get('{}'.format(API_TAG)).json()['tags'] if x != '']
+
+        return render_template('home.html', items=data, tags=tags)
+    else:
+        return render_template('index.html')
+
+
+@app.route('/favorite')
+def favorite():
+    # TODO: On fav click, redirect to current page, without re-loading page?
+    # Maybe look into AJAX?
+    # TODO: API needs to be able to serve, `item by author`.
+    if LoggedIn(session):
+        # data to send... collections made by user
+
+        data = ['test', 'test2']
+
+        return render_template('favorite.html', items=data)
+    else:
+        return home()
+
+
+@app.route('/upload')
+def upload():
+    if LoggedIn(session):
+        return render_template('upload.html')
+    else:
+        return home()
+
+
 @app.route('/item/<id>/')
 def item(id):
 
@@ -362,31 +391,6 @@ def search():
 
     return render_template('search.html', data=search_data, items=r.json()['result'])
 
-
-@app.route('/patch', methods=['POST'])
-def patch_item():
-
-    data = {}
-    if request.method == 'POST':
-        form = request.form
-        for k in form:
-            if k == 'append_collection':
-                data['items'] = form[k]
-
-            elif k == 'append_tags':
-                data['tags'] = form[k]
-
-            else:
-                data[k] = form[k]
-
-    r = requests.patch('{}/patch'.format(API_ITEM), params=data)
-
-    responce = r.json()['PATCH']
-    for x in responce:
-        if 'id' in x:
-            return item(x['id'])
-
-    return home()
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)
