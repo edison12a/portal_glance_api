@@ -11,7 +11,7 @@ Searching is done through the use of tagging each item.
 
 App Features:
 
-oortfolio style display of digital items.
+Portfolio style display of digital items.
 
 user collections and tagging for storage and retrieval.
 
