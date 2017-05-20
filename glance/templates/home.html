@@ -23,28 +23,29 @@
                         </div>
                     </div>
 
+
                     <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-                            <a href="#">
-                            <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                        </a>
+
+  <div class="yoo" style="display:inline-block;text-align:center;">
+
+
+
+    <form class="form-signin"  role="form">
+            <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
+            <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
+            fave
+
+</form>
 
 
 
 
-
-                        <form style="display:inline-block;" action="" method="POST">
-                        <input type="hidden" name="id" id="id" value="{{item.id}}">
-                        <input type="hidden" name="item_thumb" id="item_thumb" value="{{item.item_thumb}}">
-                        <a onclick="return loadXMLDoc()" href="#"><small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small></a>
-
-                        </form>
+</div>
 
 
 
-
-                        </div>
                     </div>
+
                 </div>
             {% elif item.item_type == 'footage' %}
                 <div class="grid-sizer"></div>
@@ -59,21 +60,32 @@
                             <small><strong>Footage</strong></small>
                         </div>
                     </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-                                <a href="#">
-                                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                            </a>
+
+
+                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+
+  <div class="yoo" style="display:inline-block;text-align:center;">
 
 
 
-                                                    <input type="hidden" name="id" value="{{item.id}}">
-                                                    <input type="hidden" name="item_thumb" value="{{item.item_thumb}}">
-                                                    <a href="javascript:void();" id="calculate"><small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small></a>
+    <form class="form-signin"  role="form">
+            <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
+            <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
+            fave
+
+</form>
 
 
-                            </div>
-                        </div>
+
+
+</div>
+
+
+
+                    </div>
+
+
+
                 </div>
             {% elif item.item_type == 'geometry' %}
                 <div class="grid-sizer"></div>
@@ -88,22 +100,31 @@
                             <small><strong>Geometry</strong></small>
                         </div>
                     </div>
+
                     <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-                            <a href="#">
-                            <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                        </a>
 
-
-                                                <input type="hidden" name="id" value="{{item.id}}">
-                                                <input type="hidden" name="item_thumb" value="{{item.item_thumb}}">
-                                                <a href="javascript:void();" id="calculate"><small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small></a>
+  <div class="yoo" style="display:inline-block;text-align:center;">
 
 
 
+    <form class="form-signin"  role="form">
+            <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
+            <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
+            fave
 
-                        </div>
+</form>
+
+
+
+
+</div>
+
+
+
                     </div>
+
+
+
                 </div>
                 {% elif item.item_type == 'people' %}
                     <div class="grid-sizer"></div>
@@ -167,6 +188,17 @@
 
 
 
+
+    <h1>jQuery Example</h1>
+    <p><input type=text size=5 name=a> +
+       <input type=text size=5 name=b> =
+       <span id=result>?</span>
+    <p><a href=# id=calculate>calculate server side</a>
+
+
+
+
+<br>
 
 <div style="width:100%;">
     {% for x in tags %}<a href="/search?search={{x}}" class="btn btn-default btn-xs">{{x}}</a>{% endfor %}

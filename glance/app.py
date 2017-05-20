@@ -100,22 +100,36 @@ def ajax_request():
 
 @app.route('/_add_numbers', methods=['GET','POST'])
 def add_numbers():
-    id = request.args.get('id')
-    item_thumb = request.args.get('item_thumb')
+    print('something')
+
+    item_id = request.args['item_id']
+    item_thumb = request.args['item_thumb']
 
     print('----')
-    print(id, item_thumb)
+    print(item_id)
+    print(item_thumb)
 
     if 'cart' in session:
-        session['cart'].append({id: item_thumb})
+        session['cart'].append({item_id: item_thumb})
         session.modified = True
     elif 'cart' not in session:
         session['cart'] = []
-        session['cart'].append({id: item_thumb})
+        session['cart'].append({item_id: item_thumb})
         session.modified = True
 
     return jsonify(result=len(session['cart']))
 
+
+
+"""
+@app.route('/_add_numbers')
+def add_numbers():
+    a = request.args.get('a', 0, type=int)
+    b = request.args.get('b', 0, type=int)
+    return jsonify(result=a + b)
+
+
+"""
 
 @app.route('/newcollection', methods=['GET', 'POST'])
 def newcollection():

@@ -8,40 +8,109 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
 
+    <script type=text/javascript>
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
 
-    <script>
-        function loadXMLDoc()
-        {
-            var req = new XMLHttpRequest()
-            req.onreadystatechange = function()
-            {
-                if (req.readyState == 4)
-                {
-                    if (req.status != 200)
-                    {
-                        //error handling code here
-                    }
-                    else
-                    {
-                        var response = JSON.parse(req.responseText)
-                        document.getElementById('myDiv').innerHTML = response.username
-                    }
-                }
-            }
+<!--
+    <script type=text/javascript>
+      $(function() {
+        $('a#calculate').on('click', function() {
+          $.getJSON($SCRIPT_ROOT + '/_add_numbers', {
+            id: $('#id').val(),
+            item_thumb: $('#item_thumb').val()
+          },
+          function(data) {
+            $("#myDiv").text(data.result);
+          });
+          return false;
+        });
+      });
+    </script>
+!-->
 
-            req.open('POST', '/ajax')
-            req.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
-            var un = document.getElementById('id').value
-            var sec = document.getElementById('item_thumb').value
-            var postVars = 'id='+un+'&item_thumb='+sec
-            req.send(postVars)
 
-            return false
-        }
+
+    <script type=text/javascript>
+    $(document).ready(function() {
+
+        $('a.calculate').click(function() {
+
+          $.getJSON("{{ url_for('add_numbers') }}", {
+            id: $('.id').val();,
+            item_thumb: $('.item_thumb').val();
+          },
+
+          function(data) {
+            $("#myDiv").text(data.result);
+          });
+          return false;
+        });
+
+
+      });
+
     </script>
 
 
 
+
+        <script type=text/javascript>
+        $(document).ready(function() {
+
+          $(".yoi").on('click', function () {
+            var id = $(".id").val()
+            alert('the id is' + id);
+          })
+
+          $(function(){
+          	$('.yoo').click(function(event){
+          		var user = $(event.target.item_id).val()
+          		var pass = $(event.target.item_thumb).val();
+
+
+
+              $.getJSON("{{ url_for('add_numbers') }}", {
+                item_id: user,
+                item_thumb: pass
+              },
+
+              function(data) {
+                $("#myDiv").text(data.result);
+              });
+
+          	});
+          });
+
+
+
+
+
+        });
+        </script>
+
+
+
+
+
+<!--
+
+        <script>
+
+            $.ajax({
+                        url: $SCRIPT_ROOT + '/_add_numbers',
+                        data: $('form').serialize(),
+                        type: 'POST',
+                        success: function(response) {
+                            console.log(response);
+                        },
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    })
+        </script>
+
+!-->
 
 
 
