@@ -31,6 +31,7 @@ def __reset_db(session, engine):
     # TODO: is return True 'pythonic', something better?
     return True
 
+
 # helper functions
 def make_dict(item_list):
     """ takes list of database objects, returns dict repr of objects. """
@@ -169,6 +170,9 @@ def to_dict(item_list):
     return result
 
 
+# query
+# TODO: Can all these get_query_* re refactored to a single methods? using
+# flags or something.
 def get_tag(session, data):
     if data == None:
         result = [str(x.name) for x in session.query(Tag).all()]
@@ -178,56 +182,6 @@ def get_tag(session, data):
         return False
 
     return Fales
-
-
-def post_asset(session, **kwarg):
-    """Posts asset to the database
-    Return: asset; 'new posted aset'
-    """
-
-    payload = {}
-    data = {}
-
-    # process user input
-    for k, v in kwarg.items():
-        if k == 'tag':
-            bla = v.split(' ')
-            payload[k] = bla
-        else:
-            payload[k] = v
-
-    # remove attri that arnt in the database
-    for column in Asset.__table__.columns:
-        if column.name in payload:
-            data[column.name] = payload[column.name]
-        elif column.name not in payload:
-            data[column.name] = None
-        else:
-            pass
-
-    # Database entry
-    asset = Asset(
-        name=data['name'], image=data['image'],
-        image_thumb=data['image_thumb'], attached=data['attached'],
-        author=data['author']
-    )
-
-    # I think i put this here because the asset had to be 'init' with
-    # session.add() because i needed to append new tags?
-    # TODO: understand before better, refactor, multiple session hits might not
-    # be needed?
-    session.add(asset)
-
-    if 'tag' in payload:
-        for tag in payload['tag']:
-            newtag = Tag(name=str(tag))
-            session.add(newtag)
-            asset.tags.append(newtag)
-
-    # commit changes to database
-    session.commit()
-
-    return asset
 
 
 def get_collections(session):
@@ -287,7 +241,6 @@ def get_asset_by_id(session, id):
     return asset_by_id
 
 
-
 def get_item_by_id(session, id):
     """Return asset object as a dict using Asset.id"""
     # querys for asset object
@@ -295,9 +248,6 @@ def get_item_by_id(session, id):
 
     # returns raw asset
     return asset_by_id
-
-
-
 
 
 def get_collection_by_id(session, id):
@@ -308,8 +258,6 @@ def get_collection_by_id(session, id):
     return collection_by_id
 
 
-# TODO: Can all these get_query_* re refactored to a single methods? using
-# flags or something.
 def get_query(session, userquery):
     """takes list of words and returns related objects"""
     # TODO: currently searching every table with every query term, multiple
@@ -369,6 +317,72 @@ def get_query_flag(session, flag):
         result.append(make_dict((x,))[0])
 
     return result
+
+
+def get_user(session, **kwarg):
+
+    # TODO: if test == NONETYPE, return False
+
+    test = session.query(User).filter_by(username=kwarg['username']).first()
+
+    if test is not None and test.password == kwarg['password']:
+        result = True
+    else:
+        result = False
+
+    # returns raw db objects
+    return result
+
+
+# crud
+def post_asset(session, **kwarg):
+    """Posts asset to the database
+    Return: asset; 'new posted aset'
+    """
+
+    payload = {}
+    data = {}
+
+    # process user input
+    for k, v in kwarg.items():
+        if k == 'tag':
+            bla = v.split(' ')
+            payload[k] = bla
+        else:
+            payload[k] = v
+
+    # remove attri that arnt in the database
+    for column in Asset.__table__.columns:
+        if column.name in payload:
+            data[column.name] = payload[column.name]
+        elif column.name not in payload:
+            data[column.name] = None
+        else:
+            pass
+
+    # Database entry
+    asset = Asset(
+        name=data['name'], image=data['image'],
+        image_thumb=data['image_thumb'], attached=data['attached'],
+        author=data['author']
+    )
+
+    # I think i put this here because the asset had to be 'init' with
+    # session.add() because i needed to append new tags?
+    # TODO: understand before better, refactor, multiple session hits might not
+    # be needed?
+    session.add(asset)
+
+    if 'tag' in payload:
+        for tag in payload['tag']:
+            newtag = Tag(name=str(tag))
+            session.add(newtag)
+            asset.tags.append(newtag)
+
+    # commit changes to database
+    session.commit()
+
+    return asset
 
 
 def patch_asset(session, **user_columns):
@@ -471,8 +485,6 @@ def patch_asset(session, **user_columns):
 
     # Returns asset object
     return result
-
-
 
 
 def patch_item_by_id(session, **user_columns):
@@ -580,9 +592,6 @@ def patch_item_by_id(session, **user_columns):
 
     # Returns asset object
     return result
-
-
-
 
 
 def patch_collection(session, id, **user_columns):
@@ -744,21 +753,6 @@ def post_user(session, **kwarg):
     session.commit()
 
     return user
-
-
-def get_user(session, **kwarg):
-
-    # TODO: if test == NONETYPE, return False
-
-    test = session.query(User).filter_by(username=kwarg['username']).first()
-
-    if test is not None and test.password == kwarg['password']:
-        result = True
-    else:
-        result = False
-
-    # returns raw db objects
-    return result
 
 
 def post_image(session, **kwarg):
@@ -999,7 +993,6 @@ def post_people(session, **kwarg):
     session.commit()
 
     return item
-
 
 
 def post_collection(session, **kwarg):

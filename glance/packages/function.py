@@ -7,15 +7,13 @@ import requests
 import boto3
 
 from config  import cred
-#from app import UPLOAD_FOLDER
 
 
-
-# CONFIG
+'''config'''
 BASEURI = 'http://127.0.0.1:5050'
 API = 'http://127.0.0.1:5050/glance/api'
 
-
+# auth
 def LoggedIn(session):
     if session.get('logged_in'):
 
@@ -40,6 +38,7 @@ def CheckLoginDetails(**data):
     return result
 
 
+# process
 def upload_handler(file, dst):
     """handles uploading of all files"""
     # TODO: Figure out where to handle auto thumbnailing.
