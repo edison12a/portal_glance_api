@@ -10,53 +10,44 @@ from packages.functions import (
     patch_collection, make_dict, get_footages, post_user, get_user, post_image, post_footage,
     to_dict, get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id, post_people, get_tag
     )
-
 from packages.models import Item
 
 from config import cred
 
 
 app = Flask(__name__)
-# TODO: Global config?
-#app.config.from_object('config.config')
-#app.config.from_object('config')
+
 
 # TODO: Auth
 # TODO: api tests
 # TODO: catch/process no cred file error
 
-# config
-SERVER = 'http://127.0.0.1:5050'
+'''auth and config'''
+'''api config'''
+# TODO: Global config?
+#app.config.from_object('config.config')
+#app.config.from_object('config')
 ROUTE = '/glance/api'
 
-# make function for checkcing/setting db
-"""
-Set up dev database, if False
-
-sudo -u postgres psql
-CREATE DATABASE glance;
-CREATE USER vhrender WITH PASSWORD 'vhrender2011';
-ALTER ROLE vhrender SET client_encoding TO 'utf8';
-ALTER ROLE vhrender SET default_transaction_isolation TO 'read committed';
-ALTER ROLE vhrender SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE glance TO vhrender;
-"""
+'''database config'''
+SERVER = 'http://127.0.0.1:5050'
 
 engine = create_engine(
     'postgresql://{}:{}@{}:5432/glance'.format(
         cred.username, cred.password, cred.ip_local
     ), echo=False
 )
-
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
 
-"""
+'''database tools'''
+'''
 # Dev functions
 session = Session()
 __reset_db(session, engine)
-"""
+'''
 
+# info
 @app.route('{}'.format(ROUTE))
 def api():
     """ Returns avaliable methods for the api """
@@ -98,86 +89,41 @@ def api():
     return jsonify({'Glance WebAPI': info})
 
 
-@app.route('{}/tag'.format(ROUTE))
-def tag():
-    session = Session()
+# auth
+@app.route('{}/user'.format(ROUTE), methods=['POST', 'GET'])
+def user():
 
-    data = None
-    result = get_tag(session, data)
-    session.close()
-
-    return jsonify({'tags': result})
-
-
-@app.route('{}/asset'.format(ROUTE), methods=['POST', 'GET'])
-def asset():
-    """Endpoint that returns asset objects"""
     if request.method=='POST':
-        # build query from user args
-        query = {}
+        post_data = {}
+
         for x in request.args:
-            query[x] = request.args[x]
+            post_data[x] = request.args.get(x)
 
-        try:
-            session = Session()
-            asset = post_asset(session, **query)
+        session = Session()
+        posted_user = post_user(session, **post_data)
+        session.close()
 
-            result = {
-                'responce': 'successful',
-                'location': ROUTE + '/asset/' + str(asset.id)
-            }
-
-            session.close()
-
-            return make_response(
-                jsonify(
-                    {
-                        'POST: /asset': result
-                    }
-                )
-            ), 200
-
-        except:
-            session.close()
-            fail = {'Action': 'failed'}
-
-            return make_response(
-                jsonify(
-                    {
-                        'POST /asset': fail
-                    }
-                )
-            ), 404
+        return jsonify({'user': 'posted_user'})
 
     elif request.method=='GET':
+        user_details = {}
+
+        username = request.args.get('username')
+        password = request.args.get('password')
+
         session = Session()
 
-        raw_assets = get_assets(session)
-        assets = make_dict(raw_assets)
+        user_details['username'] = username
+        user_details['password'] = password
 
-        if len(assets) == 0:
-            session.close()
-            return make_response(
-                jsonify(
-                    {
-                        'GET assets': {
-                            'Status': 'Successful',
-                            'Message': 'No assets in database'
-                        }
-                    }
-                )
-            ), 200
+        user_cred = get_user(session, **user_details)
 
-        session.close()
-        return make_response(
-            jsonify(assets)
-        ), 200
+    session.close()
 
-    else:
-        session.close()
-        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
+    return jsonify({'user details': user_cred})
 
 
+# process
 @app.route('{}/item'.format(ROUTE), methods=['POST', 'GET'])
 def item():
     """Endpoint that returns asset objects"""
@@ -229,6 +175,47 @@ def item():
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
+@app.route('{}/tag'.format(ROUTE))
+def tag():
+    session = Session()
+
+    data = None
+    result = get_tag(session, data)
+    session.close()
+
+    return jsonify({'tags': result})
+
+
+# queries
+@app.route('{}/query'.format(ROUTE), methods=['GET'])
+def query():
+    """ returns results from querys
+    'flag': takes key/value, returns
+    'query': takes list of string, returns list of dict;
+    'filter': takes str, affects 'query';
+    """
+    print(request.args)
+    if 'flag' in request.args:
+        session = Session()
+        flagged = get_query_flag(session, request.args['flag'])
+        session.close()
+
+        return jsonify({'flagged assets': flagged})
+
+
+    elif 'query' in request.args:
+        # TODO: For some reason `get_query()` only accepts a dict?
+        session = Session()
+        raw_assets = get_query(session, request.args)
+        assets = to_dict(raw_assets)
+
+        session.close()
+
+        return jsonify({'result': assets})
+
+
+    return jsonify({'result': ''})
+
 
 @app.route('{}/collection/<int:collection_id>'.format(ROUTE), methods=['GET'])
 def get_collection_id(collection_id):
@@ -263,7 +250,6 @@ def get_asset_id(asset_id):
     return jsonify({'asset': asset})
 
 
-
 @app.route('{}/item/<int:asset_id>'.format(ROUTE), methods=['GET'])
 def get_item(asset_id):
     # TODO: Doc string
@@ -281,35 +267,7 @@ def get_item(asset_id):
     return jsonify({'item': asset})
 
 
-@app.route('{}/query'.format(ROUTE), methods=['GET'])
-def query():
-    """ returns results from querys
-    'flag': takes key/value, returns
-    'query': takes list of string, returns list of dict;
-    'filter': takes str, affects 'query';
-    """
-    print(request.args)
-    if 'flag' in request.args:
-        session = Session()
-        flagged = get_query_flag(session, request.args['flag'])
-        session.close()
-
-        return jsonify({'flagged assets': flagged})
-
-
-    elif 'query' in request.args:
-        # TODO: For some reason `get_query()` only accepts a dict?
-        session = Session()
-        raw_assets = get_query(session, request.args)
-        assets = to_dict(raw_assets)
-
-        session.close()
-
-        return jsonify({'result': assets})
-
-
-    return jsonify({'result': ''})
-
+# crud
 @app.route(
     '{}/collection/delete/<int:collection_id>'.format(ROUTE), methods=['DELETE']
     )
@@ -377,8 +335,6 @@ def patch_asset_id():
     return jsonify({'PATCH': patched_asset})
 
 
-
-
 @app.route('{}/item/patch'.format(ROUTE), methods=['PATCH'])
 def patch_item():
     # TODO: dont use try/except here
@@ -394,7 +350,6 @@ def patch_item():
     return jsonify({'PATCH': patched_asset})
 
 
-
 @app.route('{}/collection/patch'.format(ROUTE), methods=['PATCH'])
 def patch_collection_id():
     patch_data = {}
@@ -408,39 +363,7 @@ def patch_collection_id():
     return jsonify({'PATCH': patched_collection})
 
 
-@app.route('{}/user'.format(ROUTE), methods=['POST', 'GET'])
-def user():
-
-    if request.method=='POST':
-        post_data = {}
-
-        for x in request.args:
-            post_data[x] = request.args.get(x)
-
-        session = Session()
-        posted_user = post_user(session, **post_data)
-        session.close()
-
-        return jsonify({'user': 'posted_user'})
-
-    elif request.method=='GET':
-        user_details = {}
-
-        username = request.args.get('username')
-        password = request.args.get('password')
-
-        session = Session()
-
-        user_details['username'] = username
-        user_details['password'] = password
-
-        user_cred = get_user(session, **user_details)
-
-    session.close()
-
-    return jsonify({'user details': user_cred})
-
-
+# item type templates
 @app.route('{}/image'.format(ROUTE), methods=['POST', 'GET'])
 def image():
     """Endpoint that returns asset objects"""
@@ -707,7 +630,6 @@ def people():
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
-
 @app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
 def collection():
     """Endpoint that returns asset objects"""
@@ -772,7 +694,6 @@ def collection():
     else:
         session.close()
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
-
 
 
 if __name__ == '__main__':

@@ -26,170 +26,34 @@ API_COLLECTION = 'http://127.0.0.1:5050/glance/api/collection'
 API_TAG = 'http://127.0.0.1:5050/glance/api/tag'
 
 
-"""
-### EXAMPLE 'cart' - reverse code for 'collections'
-
-from flask import Blueprint, render_template, abort, session, flash, redirect, url_for
-
-@store_blueprint.route('/product/<int:id>', methods=['GET', 'POST'])
-def product(id=0):
-    # AddCart is a form from WTF forms. It has a prefix because there
-    # is more than one form on the page.
-    cart = AddCart(prefix="cart")
-
-    # This is the product being viewed on the page.
-    product = Product.query.get(id)
-
-
-    if cart.validate_on_submit():
-        # Checks to see if the user has already started a cart.
-        if 'cart' in session:
-            # If the product is not in the cart, then add it.
-            if not any(product.name in d for d in session['cart']):
-                session['cart'].append({product.name: cart.quantity.data})
-
-            # If the product is already in the cart, update the quantity
-            elif any(product.name in d for d in session['cart']):
-                for d in session['cart']:
-                    d.update((k, cart.quantity.data) for k, v in d.items() if k == product.name)
-
-        else:
-            # In this block, the user has not started a cart, so we start it for them and add the product.
-            session['cart'] = [{product.name: cart.quantity.data}]
-
-
-        return redirect(url_for('store.index'))
-as
-"""
-
-
-"""
-@app.route('/')
-def index():asdsad
-    return html_page
-"""
-
-@app.route('/ajax', methods = ['POST'])
-def ajax_request():
-    id = request.form['id']
-    item_thumb = request.form['item_thumb']
-
-    # id = request.args.get('id')
-    # item_thumb = request.args.get('item_thumb')
-
-    print('----')
-    print(id, item_thumb)
-
-
-
-    if 'cart' in session:
-        if id in session['cart'][0].keys():
-            print('pppppp')
-            print(id)
-            pass
-        else:
-            session['cart'].append({id: item_thumb})
-            session.modified = True
-    elif 'cart' not in session:
-        session['cart'] = []
-        session['cart'].append({id: item_thumb})
-        session.modified = True
-
-    return jsonify(username=len(session['cart']))
-
-
-@app.route('/_add_numbers', methods=['GET','POST'])
-def add_numbers():
-    print('something')
+@app.route('/append_fav', methods=['GET','POST'])
+def append_fav():
 
     item_id = request.args['item_id']
     item_thumb = request.args['item_thumb']
 
-    print('----')
-    print(item_id)
-    print(item_thumb)
-
-    if 'cart' in session:
-        session['cart'].append({item_id: item_thumb})
+    if 'fav' in session:
+        session['fav'].append({item_id: item_thumb})
         session.modified = True
-    elif 'cart' not in session:
-        session['cart'] = []
-        session['cart'].append({item_id: item_thumb})
+    elif 'fav' not in session:
+        session['fav'] = []
+        session['fav'].append({item_id: item_thumb})
         session.modified = True
 
-    return jsonify(result=len(session['cart']))
+    return jsonify(result=len(session['fav']))
 
-
-
-"""
-@app.route('/_add_numbers')
-def add_numbers():
-    a = request.args.get('a', 0, type=int)
-    b = request.args.get('b', 0, type=int)
-    return jsonify(result=a + b)
-
-
-"""
 
 @app.route('/newcollection', methods=['GET', 'POST'])
 def newcollection():
-    print('-------')
-    print('new collection')
-
-    """
-    payload = {
-        'name': 'IMP NAME',
-        'item_type': 'collection',
-        'item_loc': 'site/default_cover.jpg',
-        'item_thumb': 'site/default_cover.jpg',
-        'author': session['user']
-    }
-
-    r = requests.post('{}'.format(API_ITEM), params=payload)
-
-    res = r.json()
-    print('-----')
-    print('pppp')
-    print(res)
-    for x in res:
-        item_id = res[x]['location'].split('/')[-1]
-    """
 
     bla = requests.get('{}/{}'.format(API_ITEM, 15))
 
-
     return render_template('collection.html', item=bla.json())
-
-
-@app.route('/test', methods=['GET', 'POST'])
-def test():
-    id = request.args.get('id')
-    item_thumb = request.args.get('item_thumb')
-
-
-    if 'cart' in session:
-        session['cart'].append({str(id): item_thumb})
-        session.modified = True
-
-    else:
-        session['cart'] = []
-        session['cart'].append({str(id): item_thumb})
-
-        return render_template('test.html')
-
-    return render_template('test.html')
-
-
-
-################################################
-
-
 
 
 @app.route('/')
 def home():
     if LoggedIn(session):
-        print(request.args)
 
         # process and reverse data so the latest uploaded items are first.
         # Currently using the items `id`, but upload date would be better.
