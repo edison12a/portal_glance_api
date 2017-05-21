@@ -127,6 +127,11 @@ def to_dict(item_list):
     # TODO: using '__tablename__' on objects does the same jobs as 'item_type'
     # any point in having it as column?
     result = []
+    # check if `item_list` is iterable
+    if isinstance(item_list, list) or isinstance(item_list, tuple):
+        pass
+    else:
+        item_list = (item_list,)
 
     # remove duplicate results
     item_list = list(set(item_list))
@@ -256,6 +261,11 @@ def get_collection_by_id(session, id):
     collection_by_id = session.query(Collection).get(id)
 
     return collection_by_id
+
+
+def get_collection_by_author(session, author):
+    collection_by_author = session.query(Collection).filter_by(author=author).all()
+    return collection_by_author
 
 
 def get_query(session, userquery):
@@ -1043,6 +1053,8 @@ def post_collection(session, **kwarg):
                 session.commit()
 
                 item.tags.append(newtag)
+    else:
+        payload['tags'] = ''
 
     print('PAYLOADPAYLOADPAYLOAD')
     print(payload)
@@ -1058,6 +1070,8 @@ def post_collection(session, **kwarg):
             session.add(collection)
             session.commit()
 
+    else:
+        payload['items'] = ''
 
     # TODO: sort out tags
     session.add(item)

@@ -294,15 +294,42 @@ def patch_item():
     return home()
 
 
+@app.route('/fav_to_collection', methods=['GET', 'POST'])
+def fav_to_collection():
+    if 'fav' in session:
+        items = []
+        for x in session['fav']:
+            items.append(list(x.keys())[0])
+
+    payload = {
+        'name': "upload_data['collection']",
+        'item_type': 'collection',
+        'item_loc': 'site/default_cover.jpg',
+        'item_thumb': 'site/default_cover.jpg',
+        'tags': "upload_data['tags']",
+        'items': ' '.join(items),
+        'author': session['user']
+    }
+
+    r = requests.post('{}'.format(API_ITEM), params=payload)
+
+    res = r.json()['POST: /item']
+    for x in res:
+        if x == 'responce':
+            if res['responce'] == 'successful':
+                collection_id = res['location'].split('/')[-1:][0]
+
+                session['fav'] = []
+                return item(collection_id)
+        else:
+            print('empty else')
+            pass
+
+
+    return home()
+
+
 # display
-@app.route('/newcollection', methods=['GET', 'POST'])
-def newcollection():
-
-    bla = requests.get('{}/{}'.format(API_ITEM, 15))
-
-    return render_template('collection.html', item=bla.json())
-
-
 @app.route('/')
 def home():
     if LoggedIn(session):
@@ -330,15 +357,16 @@ def home():
 
 @app.route('/favorite')
 def favorite():
-    # TODO: On fav click, redirect to current page, without re-loading page?
-    # Maybe look into AJAX?
     # TODO: API needs to be able to serve, `item by author`.
     if LoggedIn(session):
         # data to send... collections made by user
+        r = requests.get(
+            '{}/author/{}'.format(API_COLLECTION, session['user'])
+        )
 
         data = ['test', 'test2']
 
-        return render_template('favorite.html', items=data)
+        return render_template('favorite.html', collection=r.json(), items=data)
     else:
         return home()
 

@@ -6,9 +6,10 @@ from sqlalchemy import create_engine
 from packages.functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset, del_asset,
-    del_collection, patch_asset, get_query_flag,
-    patch_collection, make_dict, get_footages, post_user, get_user, post_image, post_footage,
-    to_dict, get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id, post_people, get_tag
+    del_collection, patch_asset, get_query_flag, patch_collection, make_dict,
+    get_footages, post_user, get_user, post_image, post_footage, to_dict,
+    get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id,
+    post_people, get_tag, get_collection_by_author
     )
 from packages.models import Item
 
@@ -217,7 +218,7 @@ def query():
     return jsonify({'result': ''})
 
 
-@app.route('{}/collection/<int:collection_id>'.format(ROUTE), methods=['GET'])
+@app.route('{}/collection/<int:collection_id>'.format(ROUTE))
 def get_collection_id(collection_id):
     # TODO : doc string
     if request.method=='GET':
@@ -231,6 +232,18 @@ def get_collection_id(collection_id):
 
     session.close()
     return jsonify({'collection': collection})
+
+
+@app.route('{}/collection/author/<author>'.format(ROUTE))
+def get_collection_author(author):
+    session = Session()
+
+    raw_result = get_collection_by_author(session, author)
+    result = to_dict(raw_result)
+
+    session.close()
+
+    return jsonify({'result': result})
 
 
 @app.route('{}/asset/<int:asset_id>'.format(ROUTE), methods=['GET'])
@@ -363,7 +376,7 @@ def patch_collection_id():
     return jsonify({'PATCH': patched_collection})
 
 
-# item type templates
+# item types
 @app.route('{}/image'.format(ROUTE), methods=['POST', 'GET'])
 def image():
     """Endpoint that returns asset objects"""
@@ -637,6 +650,9 @@ def collection():
         query = {}
         for x in request.args:
             query[x] = request.args[x]
+
+        print('ppppppppppppppppppppppppppppppppppppppppppppppppp')
+        print(query)
 
         try:
             session = Session()
