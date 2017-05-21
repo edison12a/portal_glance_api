@@ -5,11 +5,11 @@ from sqlalchemy import create_engine
 
 from packages.functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
-    get_asset_by_id, get_query, post_collection, post_asset, del_asset,
+    get_asset_by_id, get_query, post_collection, post_asset,
     del_collection, patch_asset, get_query_flag, patch_collection, make_dict,
     get_footages, post_user, get_user, post_image, post_footage, to_dict,
     get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id,
-    post_people, get_tag, get_collection_by_author
+    post_people, get_tag, get_collection_by_author, del_item
     )
 from packages.models import Item
 
@@ -42,11 +42,11 @@ engine = create_engine(
 Session = sessionmaker(bind=engine)
 
 '''database tools'''
-'''
+"""
 # Dev functions
 session = Session()
 __reset_db(session, engine)
-'''
+"""
 
 # info
 @app.route('{}'.format(ROUTE))
@@ -306,12 +306,12 @@ def delete_collection(collection_id):
             return jsonify({'DELETE collection/delete/': result})
 
 
-@app.route('{}/asset/delete/<int:asset_id>'.format(ROUTE), methods=['DELETE'])
+@app.route('{}/item/delete/<int:asset_id>'.format(ROUTE), methods=['DELETE'])
 def delete_asset(asset_id):
     # TODO: make better responce
     if request.method=='DELETE':
         session = Session()
-        asset = del_asset(session, asset_id)
+        asset = del_item(session, asset_id)
 
         if asset:
 

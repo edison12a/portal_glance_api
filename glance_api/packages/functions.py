@@ -719,15 +719,23 @@ def patch_collection(session, id, **user_columns):
     return result
 
 
-def del_asset(session, asset_id):
-    """deletes asset object"""
+def del_item(session, id):
+    """deletes item object"""
     # TODO: also delete physical files.
-    # TODO: IMP aset database?
-    # get collection
-    asset = session.query(Asset).filter(Asset.id=='{}'.format(asset_id)).first()
-    # delete collection
-    session.delete(asset)
-    # and commit to session.
+    # delete add item to session for deletion
+    item = session.query(Item).filter_by(id='{}'.format(int(id))).first()
+    session.delete(item)
+    session.commit()
+    # check if any assciations remain on `Tag` if None then delete it.
+    # TODO: this should problely be handled by something else tag related?
+    for x in item.tags:
+        if len(x.items) > 0:
+            pass
+        else:
+            # delete the tag
+            print('deleting {}'.format(x))
+            session.delete(x)
+
     session.commit()
 
     return True

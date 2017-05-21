@@ -1,11 +1,103 @@
 {% extends "base.html" %}
 {% block content %}
 
-
-
     <div style="background-color: lightgray;width:100%;">
 
         <div style="width:70%;margin:auto;">
+
+
+          {% if session.fav|length > 0 %}
+
+
+                      <div>
+
+
+                      <br><br>
+                                  <h1>Make Collection From Favorites</h1>
+                      <br><br>
+
+                  <table class="table table-hover">
+
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Thumbnail</th>
+                        <th>Item Type</th>
+                        <th>Allow in Collection</th>
+                        <th>Remove from Favorites</th>
+                      </tr>
+                    </thead>
+                      <tbody>
+
+
+          {% for x in session.fav %}
+          {% for j in x.items() %}
+
+
+                      <tr>
+                        <td>{{j.0}}</td>
+                        <td>
+                            <a href="/item/{{j.0}}">
+                                <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/glancestore/{{j.1}}">
+                          </a>
+                        </td>
+                        <td>IMP</td>
+                        <td>[X]</td>
+                        <td>[X]</td>
+                      </tr>
+
+                      {% endfor %}
+                  {% endfor %}
+              </tbody>
+            </table>
+
+
+
+
+
+
+          <form method="post" action="{{ url_for('fav_to_collection') }}">
+                            <button type="submit" class="btn btn-primary btn-block">Make Collection</button>
+                          </form>
+
+
+          </div>
+
+
+          {% else %}
+
+          {% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             <div>
 
@@ -15,73 +107,38 @@
             </div>
 
 
+            <table class="table table-hover">
 
-<div style="display:inline-block;">
-
-  {% for x in collection.result %}
-      <a href="/item/{{x.id}}"><img style="width:25%" src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" /></a>
-  {% endfor %}
-
-</div>
-
-
-
-
-
-
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Thumbnail</th>
+                  <th>Overview</th>
+                  <th>Manage Tags</th>
+                  <th>Tools</th>
+                </tr>
+              </thead>
+                <tbody>
 
 
-
-            <div>
-
-
-            <br><br>
-                        <h1>Make Collection From Favorites</h1>
-            <br><br>
-
-        <table class="table table-hover">
-
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Thumbnail</th>
-              <th>Item Type</th>
-              <th>Allow in Collection</th>
-              <th>Remove from Favorites</th>
-            </tr>
-          </thead>
-            <tbody>
+                  {% for x in collection.result %}
 
 
-{% for x in session.fav %}
-{% for j in x.items() %}
-
-
-            <tr>
-              <td>{{j.0}}</td>
-              <td>
-                  <a href="/item/{{j.0}}">
-                      <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/glancestore/{{j.1}}">
-                </a>
-              </td>
-              <td>IMP</td>
-              <td>[X]</td>
-              <td>[X]</td>
-            </tr>
+                <tr>
+                  <td>{{x.0}}</td>
+                  <td>
+                      <a href="/item/{{x.id}}">
+                          <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}">
+                    </a>
+                  </td>
+                  <td>IMP</td>
+                  <td>[X]</td>
+                  <td>[X]</td>
+                </tr>
 
             {% endfor %}
-        {% endfor %}
-    </tbody>
-  </table>
-
-
-
-
-
-
-<form method="post" action="{{ url_for('fav_to_collection') }}">
-                  <button type="submit" class="btn btn-primary btn-block">Make Collection</button>
-                </form>
+        </tbody>
+      </table>
 
 
 
@@ -89,16 +146,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-</div>
 </div>
 
 

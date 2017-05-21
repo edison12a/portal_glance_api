@@ -329,6 +329,13 @@ def fav_to_collection():
     return home()
 
 
+@app.route('/item/delete/<int:id>')
+def delete(id):
+    r = requests.delete('{}/delete/{}'.format(API_ITEM, id))
+    # print(r.json())
+
+    return home()
+
 # display
 @app.route('/')
 def home():
