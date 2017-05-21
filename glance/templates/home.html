@@ -6,6 +6,27 @@
         <small><small><small>FILTER:&emsp;</small> <a href="/">All</a> | <a href="/?filter=image">Images</a> | <a href="/?filter=geometry">Geometry</a> | <a href="/?filter=footage">Footage</a> | <a href="/?filter=peopl">People</a> | <a href="/?filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
     </div>
 
+
+    {% for x in items %}
+    {% if x == 'GET assets' %}
+    <br>
+    <h6 style='color:white;'>
+    Nothing in data base...
+
+    {{session}}
+  </h6>
+    {% endif %}
+    {% endfor %}
+
+
+
+
+
+
+
+
+
+
     <div class="grid">
         {% for item in items %}
             {% if item.item_type == 'image' %}
@@ -162,11 +183,6 @@
     {% for x in tags %}<a href="/search?search={{x}}" class="btn btn-default btn-xs">{{x}}</a>{% endfor %}
 
 </div>
-
-
-
-
-
 
 
 

@@ -27,7 +27,7 @@ API_TAG = 'http://127.0.0.1:5050/glance/api/tag'
 
 '''routes'''
 # auth
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         form = request.form
@@ -43,6 +43,8 @@ def login():
         else:
             # TODO: Something here?
             pass
+    elif request.method == 'GET':
+        return render_template('index.html')
 
     return home()
 
@@ -52,6 +54,11 @@ def logout():
     session['logged_in'] = False
 
     return home()
+
+
+@app.route("/signup")
+def signup():
+    return render_template('signup.html')
 
 
 # utility
@@ -339,27 +346,23 @@ def delete(id):
 # display
 @app.route('/')
 def home():
-    if LoggedIn(session):
+    # process and reverse data so the latest uploaded items are first.
+    # Currently using the items `id`, but upload date would be better.
+    reversed_list = []
 
-        # process and reverse data so the latest uploaded items are first.
-        # Currently using the items `id`, but upload date would be better.
-        reversed_list = []
+    payload = {}
+    if 'filter' in request.args:
+        payload['filter'] = request.args['filter']
 
-        payload = {}
-        if 'filter' in request.args:
-            payload['filter'] = request.args['filter']
+    r = requests.get('{}'.format(API_ITEM), params=payload)
+    for x in r.json():
+        reversed_list.append(x)
+    data = reversed_list[::-1]
 
-        r = requests.get('{}'.format(API_ITEM), params=payload)
-        for x in r.json():
-            reversed_list.append(x)
-        data = reversed_list[::-1]
+    # Tag data
+    tags = [x for x in requests.get('{}'.format(API_TAG)).json()['tags'] if x != '']
 
-        # Tag data
-        tags = [x for x in requests.get('{}'.format(API_TAG)).json()['tags'] if x != '']
-
-        return render_template('home.html', items=data, tags=tags)
-    else:
-        return render_template('index.html')
+    return render_template('home.html', items=data, tags=tags)
 
 
 @app.route('/favorite')

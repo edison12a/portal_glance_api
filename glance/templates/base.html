@@ -198,6 +198,7 @@
         #searchfilterbox {
             z-index: 100;
             padding-left:10%;
+            min-width:100%;
             background-color: rgba(220, 220, 220, .96);
         }
         .img-wrap {
@@ -215,14 +216,25 @@
 <body>
 
 
+
+
+
     <div style="z-index:100;width:100%;height:53px;position:fixed;top:0;background-color: rgba(30, 30, 30, .96);padding-left:10%;padding-right:10%;box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.4);">
+
+
+
 
         <div class="menu">
 
             <a href='/' style="font-size:20px;position:absolute;top:13px;left:5%;">GLANCE</a>&emsp;&emsp;&emsp;
 
 
-        </div>
+</div>
+
+
+  {% if session.logged_in == True %}
+
+
 
         <div class="menu">
         <a href='/upload'>UPLOAD</a>&emsp;
@@ -255,12 +267,22 @@
             </div>
         </div>
 
-                                    <div class="menu">
-
+       <div class="menu">
             <a href='/logout'>LOGOUT</a>
         </div>
 
+        {% else %}
 
+
+        <div class="menu">
+        <a href='/login'>LOGIN</a>
+      </div>
+
+        <div class="menu">
+        <a href='/signup'>SIGN UP</a>
+        </div>
+
+        {% endif %}
 
         {% if data is defined %}
 
@@ -274,31 +296,38 @@
                 </ul>
             </form>
         </div>
-
-        {% else %}
-
-        <div style="float:right;padding-top:12px;">
-            <form action="/search">
-                <ul class="input-list search clearfix">
-                    <div class="inner-addon right-addon">
-                        <i class="glyphicon glyphicon-search"></i>
-                        <input type="text" name="search" placeholder="">
-                    </div>
-                </ul>
-            </form>
-        </div>
-
-        {% endif %}
-
-
     </div>
+
+
+
+
+    {% else %}
+
+    <div style="float:right;padding-top:12px;">
+        <form action="/search">
+            <ul class="input-list search clearfix">
+                <div class="inner-addon right-addon">
+                    <i class="glyphicon glyphicon-search"></i>
+                    <input type="text" name="search" placeholder="">
+                </div>
+            </ul>
+        </form>
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+
+
 
     <p style="height:42px;"></p>
 
 
+
         {% block content %}
         {% endblock %}
-
 
 </body>
 </html>
