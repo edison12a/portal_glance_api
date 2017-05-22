@@ -1,25 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-</head>
-<body style="background-color: rgb(237, 237, 236);">
+{% extends "base.html" %}
+{% block content %}
+
+
+<div style="background-color: rgb(237, 237, 236);width:100%;">
+
 
     {% if session['logged_in'] %}
 
         <p>You're logged in already!</p>
 
     {% else %}
+<p style="height:30px;" />
+<div style="width:400px;margin:auto;">
+  <h1>Login</h1>
+  <p style="height:30px;" />
+  <form action="/login" method="POST">
+      <input type="username" class="form-control" name="username" placeholder="Username">
+      <input type="password" class="form-control" name="password" placeholder="Password">
+      <button type="submit" class="btn btn-primary btn-block">Login</button>
+  </form>
+            <p style="height:100px;" />
 
-        <div style="position:fixed;top:50%;left:50%;">
-            <form action="/login" method="POST">
-                <input type="username" class="form-control" name="username" placeholder="Username">
-                <input type="password" class="form-control" name="password" placeholder="Password">
-                <button type="submit" class="btn btn-primary btn-block">Login</button>
-            </form>
-        </div>
-
+</div>
     {% endif %}
 
-</body>
-</html>
+</div>
+
+    {% endblock %}

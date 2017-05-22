@@ -56,9 +56,12 @@ def logout():
     return home()
 
 
-@app.route("/signup")
+@app.route("/signup", methods=['GET', 'POST'])
 def signup():
-    return render_template('signup.html')
+    if request.method == 'POST':
+        return home()
+    elif request.method == 'GET':
+        return render_template('signup.html')
 
 
 # utility
