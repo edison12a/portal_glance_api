@@ -229,16 +229,20 @@
             <a href='/' style="font-size:20px;position:absolute;top:13px;left:5%;">GLANCE</a>&emsp;&emsp;&emsp;
 
 
-</div>
+        </div>
+
+
+
 
 
   {% if session.logged_in == True %}
 
 
-
         <div class="menu">
         <a href='/upload'>UPLOAD</a>&emsp;
     </div>
+
+
             <div class="menu">
                 <div style="position:relative;">
             <a href='/favorite'>MY COLLECTIONS</a>&emsp;
@@ -273,16 +277,24 @@
 
         {% else %}
 
+<!-- user not logged in !-->
 
         <div class="menu">
         <a href='/login'>LOGIN</a>
       </div>
-
+      <diV style="float:left;min-width:20px;">
+        &ensp;
+      </div>
         <div class="menu">
         <a href='/signup'>SIGN UP</a>
         </div>
 
         {% endif %}
+
+
+<!-- search bear !-->
+
+
 
         {% if data is defined %}
 
