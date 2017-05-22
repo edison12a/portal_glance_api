@@ -100,6 +100,8 @@ def user():
         for x in request.args:
             post_data[x] = request.args.get(x)
 
+        print(post_data)
+
         session = Session()
         posted_user = post_user(session, **post_data)
         session.close()

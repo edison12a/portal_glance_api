@@ -17,13 +17,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = os.urandom(12)
 
 API = 'http://127.0.0.1:5050/glance/api'
-API_ASSET = 'http://127.0.0.1:5050/glance/api/item'
+# API_ASSET = 'http://127.0.0.1:5050/glance/api/item'
 API_ITEM = 'http://127.0.0.1:5050/glance/api/item'
 API_IMAGE = 'http://127.0.0.1:5050/glance/api/image'
 API_FOOTAGE = 'http://127.0.0.1:5050/glance/api/footage'
 API_GEOMETRY = 'http://127.0.0.1:5050/glance/api/geometry'
 API_COLLECTION = 'http://127.0.0.1:5050/glance/api/collection'
 API_TAG = 'http://127.0.0.1:5050/glance/api/tag'
+API_USER = 'http://127.0.0.1:5050/glance/api/user'
+
 
 '''routes'''
 # auth
@@ -59,7 +61,15 @@ def logout():
 @app.route("/signup", methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
+        payload = {}
+        for form_input in request.form:
+            payload[form_input] = request.form[form_input]
+
+        r = requests.post('{}'.format(API_USER), params=payload)
+
+        print(payload)
         return home()
+
     elif request.method == 'GET':
         return render_template('signup.html')
 
@@ -323,6 +333,7 @@ def fav_to_collection():
 
     r = requests.post('{}'.format(API_ITEM), params=payload)
 
+
     res = r.json()['POST: /item']
     for x in res:
         if x == 'responce':
@@ -336,6 +347,7 @@ def fav_to_collection():
             pass
 
 
+
     return home()
 
 
@@ -345,6 +357,7 @@ def delete(id):
     # print(r.json())
 
     return home()
+
 
 # display
 @app.route('/')

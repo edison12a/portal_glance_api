@@ -40,15 +40,28 @@
 
                   <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
                       <div style="text-align:center;">
+
                           <a href="#">
                           <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
                       </a>
                       <a href="#">
                           <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
                       </a>
+
+                      <a href="#">
+                          <small><strong><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></strong></small>
+                      </a>
+
                       </div>
                   </div>
               </div>
+
+
+
+
+
+
+
 
 
               {% elif item.item_type == 'people' %}
@@ -221,7 +234,25 @@
   </div>
 </form>
 
+<form action="" method="PATCH">
+  <div class="form-group">
+      <label for="collection_rename">Rename Collection</label>
+    <input style="width:300px;" type="text" class="form-control" id="collection_rename" name="collection_rename" placeholder="{{item.0.name}}" />
+  <button type="submit" class="btn btn-default">Rename</button>
+  </div>
+</form>
 
+
+
+
+<form action="" method="POST" enctype="multipart/form-data">
+
+    <div class="form-group">
+        <label for="change_cover">Change Cover Image</label>
+        <input type="file" id="change_cover" name="change_cover" multiple>
+        <small><small><p class="help-block">Cover Image should be .jpg</p></small></small>
+    </div>
+</form>
 
 
     <form action="/patch" method="POST">
