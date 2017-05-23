@@ -141,3 +141,26 @@ def rektest(data):
 
 
     return test
+
+
+def delete_from_s3(data):
+    # refactor below
+    boto3_session = boto3.session.Session(
+        aws_access_key_id=cred.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=cred.AWS_SECRET_ACCESS_KEY,
+    )
+
+    s3 = boto3_session.resource('s3')
+    bucket = s3.Bucket(cred.AWS_BUCKET)
+
+    objects_to_delete = []
+    for obj in data:
+        objects_to_delete.append({'Key': obj})
+
+    bucket.delete_objects(
+        Delete={
+            'Objects': objects_to_delete
+        }
+    )
+
+    return True

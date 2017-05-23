@@ -5,7 +5,10 @@ import random
 import requests
 from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify
 
-from packages.function import LoggedIn, CheckLoginDetails, upload_handler, process_raw_files, item_to_session, rektest
+from packages.function import (
+    LoggedIn, CheckLoginDetails, upload_handler,
+    process_raw_files, item_to_session, rektest, delete_from_s3
+    )
 
 '''config'''
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -353,8 +356,22 @@ def fav_to_collection():
 
 @app.route('/item/delete/<int:id>')
 def delete(id):
+    g = requests.get('{}/{}'.format(API_ITEM, id))
+    resp = g.json()['item'][0]
     r = requests.delete('{}/delete/{}'.format(API_ITEM, id))
-    # print(r.json())
+    data = []
+    if 'item_loc' in resp:
+        data.append(resp['item_loc'])
+    if 'item_thumb' in resp:
+        data.append(resp['item_thumb'])
+    if 'attached' in resp:
+        data.append(resp['attached'])
+
+    # delete from s3 and database
+    # TODO: IMP something safer.
+    delete_from_s3(data)
+    r = requests.delete('{}/delete/{}'.format(API_ITEM, id))
+
 
     return home()
 
