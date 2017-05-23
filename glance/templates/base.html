@@ -217,9 +217,7 @@
 
 
 
-
-
-    <div style="z-index:100;width:100%;height:53px;position:fixed;top:0;background-color: rgba(30, 30, 30, .96);padding-left:10%;padding-right:10%;box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.4);">
+    <div style="z-index:100;width:100%;height:53px;position:fixed;top:0;background-color: rgba(44, 46, 48, .96);padding-left:10%;padding-right:10%;box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.4);">
 
 
 
@@ -336,6 +334,41 @@
 
     <p style="height:42px;"></p>
 
+
+<!-- surely this can be refactored? !-->
+
+{%if 'filter' in session%}
+  {%if session.filter == 'image'%}
+    <div id="searchfilterbox">
+        <small><small><small>FILTER:&emsp;</small> <a href="/?filter=all">All</a> | <a style='color:red;' href="/?filter=image">Images</a> | <a href="/?filter=geometry">Geometry</a> | <a href="/?filter=footage">Footage</a> | <a href="/?filter=people">People</a> | <a href="/?filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+    </div>
+  {%elif session.filter == 'geometry'%}
+  <div id="searchfilterbox">
+      <small><small><small>FILTER:&emsp;</small> <a href="/?filter=all">All</a> | <a href="/?filter=image">Images</a> | <a style='color:red;' href="/?filter=geometry">Geometry</a> | <a href="/?filter=footage">Footage</a> | <a href="/?filter=people">People</a> | <a href="/?filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+  </div>
+
+  {%elif session.filter == 'footage'%}
+  <div id="searchfilterbox">
+      <small><small><small>FILTER:&emsp;</small> <a href="/?filter=all">All</a> | <a href="/?filter=image">Images</a> | <a href="/?filter=geometry">Geometry</a> | <a style='color:red;' href="/?filter=footage">Footage</a> | <a href="/?filter=people">People</a> | <a href="/?filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+  </div>
+
+  {%elif session.filter == 'people'%}
+  <div id="searchfilterbox">
+      <small><small><small>FILTER:&emsp;</small> <a href="/?filter=all">All</a> | <a href="/?filter=image">Images</a> | <a href="/?filter=geometry">Geometry</a> | <a href="/?filter=footage">Footage</a> | <a style='color:red;' href="/?filter=people">People</a> | <a href="/?filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+  </div>
+
+  {%elif session.filter == 'collection'%}
+  <div id="searchfilterbox">
+      <small><small><small>FILTER:&emsp;</small> <a href="/?filter=all">All</a> | <a href="/?filter=image">Images</a> | <a href="/?filter=geometry">Geometry</a> | <a href="/?filter=footage">Footage</a> | <a href="/?filter=people">People</a> | <a style='color:red;' href="/?filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+  </div>
+
+  {%else %}
+  <div id="searchfilterbox">
+      <small><small><small>FILTER:&emsp;</small> <a style='color:red;' href="/?filter=all">All</a> | <a href="/?filter=image">Images</a> | <a href="/?filter=geometry">Geometry</a> | <a href="/?filter=footage">Footage</a> | <a href="/?filter=peopl">People</a> | <a href="/?filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+  </div>
+
+{%endif%}
+{%endif%}
 
 
         {% block content %}

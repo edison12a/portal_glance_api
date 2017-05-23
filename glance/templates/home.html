@@ -2,11 +2,6 @@
 {% block content %}
 
 
-    <div id="searchfilterbox">
-        <small><small><small>FILTER:&emsp;</small> <a href="/">All</a> | <a href="/?filter=image">Images</a> | <a href="/?filter=geometry">Geometry</a> | <a href="/?filter=footage">Footage</a> | <a href="/?filter=peopl">People</a> | <a href="/?filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
-    </div>
-
-
     {% for x in items %}
     {% if x == 'GET assets' %}
     <br>
@@ -184,7 +179,7 @@
 
 </div>
 
-
+{{session}}
 
 
     <div style=background-color:black;color:white;margin-top:100px;>

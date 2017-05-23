@@ -45,6 +45,10 @@ def login():
         if CheckLoginDetails(**data):
             session['logged_in'] = True
             session['user'] = data['username']
+            if 'filter' in session:
+                pass
+            else:
+                session['filter'] = 'all'
         else:
             # TODO: Something here?
             pass
@@ -57,6 +61,7 @@ def login():
 @app.route("/logout")
 def logout():
     session['logged_in'] = False
+    session.pop('filter', None)
 
     return home()
 
@@ -386,6 +391,7 @@ def home():
     payload = {}
     if 'filter' in request.args:
         payload['filter'] = request.args['filter']
+        session['filter'] = request.args['filter']
 
     r = requests.get('{}'.format(API_ITEM), params=payload)
     for x in r.json():
@@ -394,6 +400,7 @@ def home():
 
     # Tag data
     tags = [x for x in requests.get('{}'.format(API_TAG)).json()['tags'] if x != '']
+
 
     return render_template('home.html', items=data, tags=tags)
 
@@ -455,8 +462,10 @@ def search():
 
     if 'filter' in request.args:
         search_data['filter'] = request.args['filter']
+        session['filter'] = request.args['filter']
     else:
-        search_data['filter'] = 'all'
+        pass
+        # search_data['filter'] = 'all'
 
     r = requests.get('{}/query'.format(API), params=search_data)
 
