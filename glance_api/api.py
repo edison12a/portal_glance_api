@@ -33,11 +33,23 @@ ROUTE = '/glance/api'
 '''database config'''
 SERVER = 'http://127.0.0.1:5050'
 
+"""
+# development database
 engine = create_engine(
-    'postgresql://{}:{}@{}:5432/glance'.format(
-        cred.username, cred.password, cred.ip_local
+    'postgresql://{}:{}@{}:5432/{}'.format(
+        cred.username, cred.password, cred.ip_local, cred.dev_db_name
     ), echo=False
 )
+"""
+
+# production database
+engine = create_engine(
+    'postgresql://{}:{}@{}:5432/{}'.format(
+        cred.username, cred.password, cred.ip_prod, cred.prod_db_name
+    ), echo=False
+)
+
+
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
 
