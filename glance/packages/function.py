@@ -129,7 +129,7 @@ def rektest(data):
     response = client.detect_labels(
         Image={
             'S3Object': {
-                'Bucket': 'glancestore',
+                'Bucket': cred.AWS_BUCKET,
                 'Name': data,
             },
         },

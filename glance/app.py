@@ -389,9 +389,12 @@ def home():
     reversed_list = []
 
     payload = {}
-    if 'filter' in request.args:
-        payload['filter'] = request.args['filter']
-        session['filter'] = request.args['filter']
+    if session:
+        if 'filter' in request.args:
+            payload['filter'] = request.args['filter']
+            session['filter'] = request.args['filter']
+        else:
+            session['filter'] = 'all'
 
     r = requests.get('{}'.format(API_ITEM), params=payload)
     for x in r.json():
