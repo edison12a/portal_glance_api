@@ -62,6 +62,7 @@ def login():
 def logout():
     session['logged_in'] = False
     session.pop('filter', None)
+    session.pop('user', None)
 
     return home()
 
@@ -75,7 +76,6 @@ def signup():
 
         r = requests.post('{}'.format(API_USER), params=payload)
 
-        print(payload)
         return home()
 
     elif request.method == 'GET':
