@@ -134,7 +134,7 @@ def uploading():
 
                             # AWS REKOGNITION
                             for tag in rektest(uploaded_file):
-                                payload['tags'] += tag.lower() + ' '
+                                payload['tags'] +=  ' ' + tag.lower()
 
                         else:
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
@@ -143,7 +143,10 @@ def uploading():
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
                     payload['tags'] = ''
-                    # collect uploaded item ids from respoce object.
+                    # collect uploaded item ids from respoce object in a list
+                    # incase its this also a collection...
+                    # TODO: above comment makes no sence... can i check if its a
+                    # collection at the beginning? does it matter? Its not dry.
                     # TODO: Make this a helper
                     res = r.json()
                     for x in res:
@@ -168,7 +171,7 @@ def uploading():
 
                             # AWS REKOGNITION
                             for tag in rektest('{}.jpg'.format(item_thumb_filename)):
-                                payload['tags'] += tag.lower() + ' '
+                                payload['tags'] +=  ' ' + tag.lower()
 
                         else:
                             # Use to validate wether item is a valid format
@@ -201,7 +204,7 @@ def uploading():
 
                             # AWS REKOGNITION
                             for tag in rektest(uploaded_file):
-                                payload['tags'] += tag.lower() + ' '
+                                payload['tags'] +=  ' ' + tag.lower()
 
                         else:
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
@@ -231,7 +234,7 @@ def uploading():
 
                             # AWS REKOGNITION
                             for tag in rektest(uploaded_file):
-                                payload['tags'] += tag.lower() + ' '
+                                payload['tags'] +=  ' ' + tag.lower()
 
                         else:
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
