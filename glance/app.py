@@ -131,8 +131,6 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            print('ggggggggggggggggggggggg')
-                            print(uploaded_file)
                             payload['item_loc'] = uploaded_file[0]
                             payload['item_thumb'] = uploaded_file[1]
 
@@ -146,7 +144,6 @@ def uploading():
 
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
-                    payload['tags'] = ''
                     # collect uploaded item ids from respoce object in a list
                     # incase its this also a collection...
                     # TODO: above comment makes no sence... can i check if its a
@@ -158,9 +155,6 @@ def uploading():
                         upload_data['items_for_collection'].append(item_id)
 
             elif upload_data['itemradio'] == 'footage':
-                # TODO: IMP Uploading mp4s to footage, and extracting first
-                # frame as the `item_`
-
                 # build payload for api
                 for items in processed_files:
                     payload['name'] = items
@@ -203,11 +197,11 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload['item_loc'] = uploaded_file
-                            payload['item_thumb'] = uploaded_file
+                            payload['item_loc'] = uploaded_file[0]
+                            payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in rektest(uploaded_file):
+                            for tag in rektest(uploaded_file[0]):
                                 payload['tags'] +=  ' ' + tag.lower()
 
                         else:
@@ -217,7 +211,7 @@ def uploading():
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
                     # collect uploaded item ids from respoce object.
-                    payload['tags'] = ''
+                    # payload['tags'] = ''
                     res = r.json()
                     for x in res:
                         item_id = res[x]['location'].split('/')[-1]

@@ -49,10 +49,10 @@ def upload_handler(file, dst):
     filename = '{}_{}'.format(filename, salt)
 
     items = []
+    result = []
     file.save(os.path.join(dst, '{}{}'.format(filename, ext)))
     items.append('{}{}'.format(filename, ext))
-    thumbnail = thumb('{}{}'.format(filename, ext), dst)
-    items.append(thumbnail)
+    result.append('{}{}'.format(filename, ext))
 
     # refactor below
     boto3_session = boto3.session.Session(
@@ -66,7 +66,20 @@ def upload_handler(file, dst):
         filename, ext = os.path.splitext(item)
 
         if ext == '.jpg':
+            thumbnail = thumb('{}{}'.format(filename, ext), dst)
+            result.append(thumbnail)
 
+            # upload image
+            data = send_from_directory(dst, item)
+            s3.Object(cred.AWS_BUCKET, item).put(Body=open(os.path.join(dst, item), 'rb'))
+            # upload thumbnail
+            data = send_from_directory(dst, thumbnail)
+            s3.Object(cred.AWS_BUCKET, thumbnail).put(Body=open(os.path.join(dst, thumbnail), 'rb'))
+            # delete thumbnail from local
+            os.remove(os.path.join(dst, thumbnail))
+
+
+        elif ext == '.zip':
             data = send_from_directory(dst, item)
             s3.Object(cred.AWS_BUCKET, item).put(Body=open(os.path.join(dst, item), 'rb'))
 
@@ -95,7 +108,7 @@ def upload_handler(file, dst):
 
         os.remove(os.path.join(dst, item))
 
-    return items
+    return result
 
 
 def process_raw_files(files):
