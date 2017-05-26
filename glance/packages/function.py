@@ -7,6 +7,7 @@ import requests
 import boto3
 
 from config  import cred
+from .thumbnail import thumb
 
 
 '''config'''
@@ -47,7 +48,11 @@ def upload_handler(file, dst):
     filename, ext = os.path.splitext(file.filename)
     filename = '{}_{}'.format(filename, salt)
 
+    items = []
     file.save(os.path.join(dst, '{}{}'.format(filename, ext)))
+    items.append('{}{}'.format(filename, ext))
+    thumbnail = thumb('{}{}'.format(filename, ext), dst)
+    items.append(thumbnail)
 
     # refactor below
     boto3_session = boto3.session.Session(
@@ -57,37 +62,40 @@ def upload_handler(file, dst):
 
     s3 = boto3_session.resource('s3')
 
-    data = send_from_directory(dst, '{}{}'.format(filename, ext))
-    s3.Object(cred.AWS_BUCKET, '{}{}'.format(filename, ext)).put(Body=open(os.path.join(dst, '{}{}'.format(filename, ext)), 'rb'))
+    for item in items:
+        filename, ext = os.path.splitext(item)
 
-    if ext == '.mp4':
-        # TODO: actual upload to aws needs to be refactored away
+        if ext == '.jpg':
 
-        footage_loc = '{}/{}{}'.format(dst, filename, ext)
+            data = send_from_directory(dst, item)
+            s3.Object(cred.AWS_BUCKET, item).put(Body=open(os.path.join(dst, item), 'rb'))
 
-        frame_save_loc = '{}/{}.jpg'.format(dst, filename)
+        elif ext == '.mp4':
+            # TODO: actual upload to aws needs to be refactored away
 
-        subprocess.call(
-            'ffmpeg -ss 0.5 -i {} -t 1 {}'.format(footage_loc, frame_save_loc),
-            shell=True
-        )
+            footage_loc = '{}/{}'.format(dst, item)
+            frame_save_loc = '{}/{}.jpg'.format(dst, filename)
 
-        # refactor below
-        boto3_session = boto3.session.Session(
-            aws_access_key_id=cred.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=cred.AWS_SECRET_ACCESS_KEY,
-        )
+            subprocess.call(
+                'ffmpeg -ss 0.5 -i {} -t 1 {}'.format(footage_loc, frame_save_loc),
+                shell=True
+            )
 
-        s3 = boto3_session.resource('s3')
+            # refactor below
+            boto3_session = boto3.session.Session(
+                aws_access_key_id=cred.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=cred.AWS_SECRET_ACCESS_KEY,
+            )
 
-        s3.Object(cred.AWS_BUCKET, '{}.jpg'.format(filename)).put(Body=open(os.path.join(dst, '{}.jpg'.format(filename)), 'rb'))
+            # s3 = boto3_session.resource('s3')
 
-        os.remove(os.path.join(dst, '{}.jpg'.format(filename)))
+            s3.Object(cred.AWS_BUCKET, '{}.jpg'.format(filename)).put(Body=open(os.path.join(dst, '{}.jpg'.format(filename)), 'rb'))
+            os.remove(os.path.join(dst, '{}.jpg'.format(filename)))
 
 
-    os.remove(os.path.join(dst, '{}{}'.format(filename, ext)))
+        os.remove(os.path.join(dst, item))
 
-    return '{}{}'.format(filename, ext)
+    return items
 
 
 def process_raw_files(files):
@@ -101,20 +109,16 @@ def process_raw_files(files):
         else:
             collector[filename].append(x)
 
-
-    print('pppppppppp')
-    print(collector)
-
     return collector
 
 
 def item_to_session(session, *args):
-    print(args)
-
     return session
 
 
 def rektest(data):
+    print('=============== rekdata')
+    print(data)
     # TODO: Finish function
     # refactor below
     # init session with cred

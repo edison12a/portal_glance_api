@@ -10,6 +10,8 @@ from packages.function import (
     process_raw_files, item_to_session, rektest, delete_from_s3
     )
 
+from packages.thumbnail import thumb
+
 '''config'''
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/tmp')
@@ -129,11 +131,13 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload['item_loc'] = uploaded_file
-                            payload['item_thumb'] = uploaded_file
+                            print('ggggggggggggggggggggggg')
+                            print(uploaded_file)
+                            payload['item_loc'] = uploaded_file[0]
+                            payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in rektest(uploaded_file):
+                            for tag in rektest(uploaded_file[0]):
                                 payload['tags'] +=  ' ' + tag.lower()
 
                         else:

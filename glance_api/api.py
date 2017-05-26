@@ -328,7 +328,6 @@ def delete_asset(asset_id):
         asset = del_item(session, asset_id)
 
         if asset:
-
             result = {
                 'Action': 'successful',
                 'asset id': 'IMP'
@@ -345,6 +344,9 @@ def delete_asset(asset_id):
             session.close()
 
             return jsonify({'DELETE asset/delete/': result})
+
+    session.close()
+    return jsonify({'DELETE asset/delete/': 'error?'})
 
 
 @app.route('{}/asset/patch'.format(ROUTE), methods=['PATCH'])
