@@ -1,3 +1,11 @@
+"""
+This module contains functions for ...
+"""
+
+__author__ = ""
+__version__ = ""
+__license__ = ""
+
 # TODO: classes needed?
 import datetime
 from .models import Collection, Base, Footage, User, Item, Image, Geometry, Collection, Tag, tag_ass, People

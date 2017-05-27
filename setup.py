@@ -1,3 +1,11 @@
+"""
+Setup tools
+"""
+
+__author__ = ""
+__version__ = ""
+__license__ = ""
+
 from setuptools import setup
 
 # example

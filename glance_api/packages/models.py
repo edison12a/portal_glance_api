@@ -1,3 +1,11 @@
+"""
+sqlalchemy models
+"""
+
+__author__ = ""
+__version__ = ""
+__license__ = ""
+
 # TODO: Implement proper config, include auth to replace 'import cred'
 from sqlalchemy import (
     Column, func, Integer, Table, String, ForeignKey, DateTime

@@ -1,3 +1,11 @@
+"""
+glance api
+"""
+
+__author__ = ""
+__version__ = ""
+__license__ = ""
+
 from flask import Flask, jsonify, request, make_response
 
 from sqlalchemy.orm import sessionmaker

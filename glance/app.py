@@ -1,26 +1,35 @@
+f"""
+glance web app
+"""
+
+__author__ = ""
+__version__ = ""
+__license__ = ""
+
 import os
 import subprocess
 import random
 
 import requests
-from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify
+from flask import Flask, render_template, request, session, jsonify
 
-from packages.function import (
-    LoggedIn, CheckLoginDetails, upload_handler,
-    process_raw_files, item_to_session, rektest, delete_from_s3
-    )
+from modules.file import upload_handler, process_raw_files
+from modules.image import generate_tags
+from modules.auth import LoggedIn, CheckLoginDetails, delete_from_s3
 
-from packages.thumbnail import thumb
 
-'''config'''
+'''Local Directories'''
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/tmp')
 
+'''Flask Config'''
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# TODO: make a dev and production config, dont use secret_key in prob.
+# assign `secret_key` to string on production.
 app.secret_key = os.urandom(12)
 
+'''Hard Coded API Routes'''
+# TODO: Remove.
 API = 'http://127.0.0.1:5050/glance/api'
 # API_ASSET = 'http://127.0.0.1:5050/glance/api/item'
 API_ITEM = 'http://127.0.0.1:5050/glance/api/item'
@@ -32,7 +41,7 @@ API_TAG = 'http://127.0.0.1:5050/glance/api/tag'
 API_USER = 'http://127.0.0.1:5050/glance/api/user'
 
 
-'''routes'''
+'''Routes'''
 # auth
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -104,6 +113,7 @@ def append_fav():
 
 @app.route('/uploading', methods=['POST'])
 def uploading():
+    #TODO:  refactor.
     if LoggedIn(session):
         if request.method == 'POST':
             # Init dict and append user data
@@ -135,7 +145,7 @@ def uploading():
                             payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in rektest(uploaded_file[0]):
+                            for tag in generate_tags(uploaded_file[0]):
                                 payload['tags'] +=  ' ' + tag.lower()
 
                         else:
@@ -161,15 +171,18 @@ def uploading():
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.mp4'):
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            item_thumb_filename, item_thumb_ext = os.path.splitext(uploaded_file)
 
-                            payload['item_loc'] = uploaded_file
-                            payload['item_thumb'] = '{}.jpg'.format(item_thumb_filename)
+                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            print('-------------------')
+                            print(uploaded_file)
+                            item_thumb_filename, item_thumb_ext = os.path.splitext(uploaded_file[0])
+
+                            payload['item_loc'] = uploaded_file[0]
+                            payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in rektest('{}.jpg'.format(item_thumb_filename)):
-                                payload['tags'] +=  ' ' + tag.lower()
+                            #for tag in generate_tags(uploaded_file[0]):
+                            #    payload['tags'] +=  ' ' + tag.lower()
 
                         else:
                             # Use to validate wether item is a valid format
@@ -201,7 +214,7 @@ def uploading():
                             payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in rektest(uploaded_file[0]):
+                            for tag in generate_tags(uploaded_file[0]):
                                 payload['tags'] +=  ' ' + tag.lower()
 
                         else:
@@ -231,7 +244,7 @@ def uploading():
                             payload['item_thumb'] = uploaded_file
 
                             # AWS REKOGNITION
-                            for tag in rektest(uploaded_file):
+                            for tag in generate_tags(uploaded_file):
                                 payload['tags'] +=  ' ' + tag.lower()
 
                         else:
