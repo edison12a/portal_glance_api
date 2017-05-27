@@ -12,6 +12,8 @@ from PIL import Image, ImageOps
 import subprocess
 import boto3
 
+import modules.auth as auth
+
 
 '''Globals'''
 API = 'http://127.0.0.1:5050/glance/api'
@@ -20,7 +22,7 @@ API = 'http://127.0.0.1:5050/glance/api'
 # AWS Rekognition
 def generate_tags(data):
     client = auth.boto3_res_rek()
-    response = auth.boto3_rek_tag(data)
+    response = auth.boto3_rek_tag(client, data)
 
     result = [x['Name'] for x in response['Labels']]
 

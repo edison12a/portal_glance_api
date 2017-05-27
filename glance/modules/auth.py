@@ -65,7 +65,7 @@ def boto3_res_rek():
     return client
 
 
-def boto3_rek_tag(data, confidence=60):
+def boto3_rek_tag(client, data, confidence=60):
     result = client.detect_labels(
         Image={
             'S3Object': {
@@ -96,7 +96,14 @@ def delete_from_s3(data):
 
     objects_to_delete = []
     for obj in data:
-        objects_to_delete.append({'Key': obj})
+        print(obj)
+        if obj == 'site/default_cover.jpg':
+            print('CCCCCCCCCCOOOOOOOOOVVVVVVVVVEEEEEEEEERRRRRRRRRR')
+
+            return True
+        else:
+            objects_to_delete.append({'Key': obj})
+
 
     bucket.delete_objects(
         Delete={
