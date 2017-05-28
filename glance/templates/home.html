@@ -1,212 +1,100 @@
 {% extends "base.html" %}
 {% block content %}
-
-
-    {% for x in items %}
-    {% if x == 'GET assets' %}
-    <br>
-    <h6 style='color:white;'>
-    Nothing in data base...
-
-    {{session}}
-  </h6>
-    {% endif %}
-    {% endfor %}
-
-
-
-
-
-
-
-
-
-
-    <div class="grid">
-        {% for item in items %}
-            {% if item.item_type == 'image' %}
-                <div class="grid-sizer"></div>
-                <div class="grid-item">
-                    <div style="position:relative;">
-                        <a href="/item/{{ item.id }}">
-                            <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
-                        </a>
-                    </div>
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-                            <small><strong>Image</strong></small>
-                        </div>
-                    </div>
-
-
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-
-                      <div class="yoo" style="display:inline-block;text-align:center;">
-                        <form class="form-signin"  role="form">
-                                <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
-                                <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
-                                fave
-                        </form>
-                      </div>
-                    </div>
-
-                </div>
-            {% elif item.item_type == 'footage' %}
-                <div class="grid-sizer"></div>
-                <div class="grid-item">
-                    <div style="position:relative;">
-                        <a href="/item/{{ item.id }}">
-                            <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
-                        </a>
-                    </div>
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-                            <small><strong>Footage</strong></small>
-                        </div>
-                    </div>
-
-
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-
-                      <div class="yoo" style="display:inline-block;text-align:center;">
-
-
-
-                        <form class="form-signin"  role="form">
-                                <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
-                                <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
-                                fave
-
-                        </form>
-
-                      </div>
-                    </div>
-
-
-
-                </div>
-            {% elif item.item_type == 'geometry' %}
-                <div class="grid-sizer"></div>
-                <div class="grid-item">
-                    <div style="position:relative;">
-                        <a href="/item/{{ item.id }}">
-                            <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
-                        </a>
-                    </div>
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-                            <small><strong>Geometry</strong></small>
-                        </div>
-                    </div>
-
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-
-                      <div class="yoo" style="display:inline-block;text-align:center;">
-                        <form class="form-signin"  role="form">
-                                <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
-                                <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
-                                fave
-                        </form>
-                      </div>
-                    </div>
-
-                </div>
-                {% elif item.item_type == 'people' %}
-                    <div class="grid-sizer"></div>
-                    <div class="grid-item">
-                        <div style="position:relative;">
-                            <a href="/item/{{ item.id }}">
-                                <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
-                            </a>
-                        </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-                                <small><strong>People</strong></small>
-                            </div>
-                        </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-
-                                <div class="yoo" style="display:inline-block;text-align:center;">
-
-
-
-                                  <form class="form-signin"  role="form">
-                                          <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
-                                          <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
-                                          fave
-
-                              </form>
-
-
-
-
-                              </div>
-
-
-
-                        </div>
-                    </div>
-                {% elif item.item_type == 'collection' %}
-                    <div class="grid-sizer"></div>
-                    <div class="grid-item">
-                        <div style="position:relative;">
-                            <a href="item/{{ item.id }}">
-                                <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
-                            </a>
-                        </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-                                <small><strong>Collection</strong></small>
-                            </div>
-                        </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;right:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-                                <small><strong>{{item.name}}</strong></small>
-                            </div>
-                        </div>
-                    </div>
-            {% endif %}
-        {% endfor %}
-
-
-    </div>
-
-
 <br>
 
-<div style="width:100%;">
-    {% for x in tags %}<a href="/search?search={{x}}" class="btn btn-default btn-xs">{{x}}</a>{% endfor %}
+Latest Collections
+<br>
+{% for x in collections %}
+{% for k,v in x.items() %}
 
+{% if k == 'item_thumb'%}
+<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
+{% endif %}
+
+{%endfor%}
+{%endfor%}
+<br>
+<br>
+Latest Images
+<br>
+{% for x in images %}
+{% for k,v in x.items() %}
+
+{% if k == 'item_thumb'%}
+<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
+{% endif %}
+
+{%endfor%}
+{%endfor%}
+<br>
+<br>
+Latest Footage
+<br>
+{% for x in footage %}
+{% for k,v in x.items() %}
+
+{% if k == 'item_thumb'%}
+<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
+{% endif %}
+
+{%endfor%}
+{%endfor%}
+<br>
+<br>
+Latest Geometry
+<br>
+{% for x in geometry %}
+{% for k,v in x.items() %}
+
+{% if k == 'item_thumb'%}
+<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
+{% endif %}
+
+{%endfor%}
+{%endfor%}
+<br>
+<br>
+Latest People
+<br>
+{% for x in people %}
+{% for k,v in x.items() %}
+
+{% if k == 'item_thumb'%}
+<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
+{% endif %}
+
+{%endfor%}
+{%endfor%}
+<br>
+<br>
+
+
+<!--
+
+<div style="position:relative;width:100%;background-color:blue;">
+
+  <div style="padding:20px;position:absolute;height:100%;width:30px;background-color:red;">
+    <div style="-ms-transform: rotate(90deg);-webkit-transform: rotate(90deg);transform: rotate(90deg);">
+      Latest&nbsp;Collections
+    </div>
+  </div>
+
+
+<div style="display:inline-block;min-width:30px;">
 </div>
 
-{{session}}
+{% for x in items %}
+{% if x.item_type == 'collection' %}
+<div style="display:inline-block;width:18.8%;">
+<img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
+</div>
+{% endif %}
+{% endfor %}
+</div>
 
 
-    <div style=background-color:black;color:white;margin-top:100px;>
+<div style="position:relative;z-index:100;background-color: rgba(44, 46, 48, .96);min-height:5px;width:100%;box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2);">
+</div>
 
-
-
-
-        <small><small>
-            <strong>items</strong><br>
-            {{ items }}
-        </small></small>
-    </div>
-
-    <!-- Init masonry js -->
-    <script>
-    var grid = document.querySelector('.grid');
-    var msnry;
-
-    imagesLoaded( grid, function() {
-        // init Isotope after all images have loaded
-        msnry = new Masonry( grid, {
-            itemSelector: '.grid-item',
-            columnWidth: '.grid-sizer',
-            percentPosition: true,
-            transitionDuration: 0,
-        });
-    });
-    </script>
-
+!-->
 {% endblock %}

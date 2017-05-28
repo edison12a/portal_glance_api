@@ -30,15 +30,17 @@ app.secret_key = os.urandom(12)
 
 '''Hard Coded API Routes'''
 # TODO: Remove.
-API = 'http://127.0.0.1:5050/glance/api'
-# API_ASSET = 'http://127.0.0.1:5050/glance/api/item'
-API_ITEM = 'http://127.0.0.1:5050/glance/api/item'
-API_IMAGE = 'http://127.0.0.1:5050/glance/api/image'
-API_FOOTAGE = 'http://127.0.0.1:5050/glance/api/footage'
-API_GEOMETRY = 'http://127.0.0.1:5050/glance/api/geometry'
-API_COLLECTION = 'http://127.0.0.1:5050/glance/api/collection'
-API_TAG = 'http://127.0.0.1:5050/glance/api/tag'
-API_USER = 'http://127.0.0.1:5050/glance/api/user'
+api_ip = 'localhost'
+API_HOST = 'http://{}:5050/'.format(api_ip)
+
+API = '{}glance/api'.format(API_HOST)
+API_ITEM = '{}glance/api/item'.format(API_HOST)
+API_IMAGE = '{}glance/api/image'.format(API_HOST)
+API_FOOTAGE = '{}glance/api/footage'.format(API_HOST)
+API_GEOMETRY = '{}glance/api/geometry'.format(API_HOST)
+API_COLLECTION = '{}glance/api/collection'.format(API_HOST)
+API_TAG = '{}glance/api/tag'.format(API_HOST)
+API_USER = '{}glance/api/user'.format(API_HOST)
 
 
 '''Routes'''
@@ -407,19 +409,34 @@ def home():
         if 'filter' in request.args:
             payload['filter'] = request.args['filter']
             session['filter'] = request.args['filter']
+
+            return search()
         else:
-            session['filter'] = 'all'
+            session['filter'] = None
 
-    r = requests.get('{}'.format(API_ITEM), params=payload)
-    for x in r.json():
-        reversed_list.append(x)
-    data = reversed_list[::-1]
+    g = requests.get('{}'.format(API_ITEM))
+    res = g.json()
 
-    # Tag data
-    tags = [x for x in requests.get('{}'.format(API_TAG)).json()['tags'] if x != '']
+    # latest ten collections
+    collections = [x for x in res if x['item_type'] == 'collection'][0:9]
+
+    # latest ten image
+    images = [x for x in res if x['item_type'] == 'image'][0:9]
+
+    # latest ten collections
+    footage = [x for x in res if x['item_type'] == 'footage'][0:9]
+
+    # latest ten people
+    people = [x for x in res if x['item_type'] == 'people'][0:9]
+
+    # latest ten geometry
+    geometry = [x for x in res if x['item_type'] == 'geometry'][0:9]
 
 
-    return render_template('home.html', items=data, tags=tags)
+    return render_template(
+        'home.html', collections=collections, images=images, footage=footage,
+        people=people, geometry=geometry
+        )
 
 
 @app.route('/favorite')

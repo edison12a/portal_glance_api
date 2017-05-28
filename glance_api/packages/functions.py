@@ -297,7 +297,11 @@ def get_query(session, userquery):
     item_list = []
     for term in query['query']:
         # return list of tags
-        taglists = session.query(Tag).filter_by(name=term).all()
+        if term == '**':
+            # TODO: This is suuuuper slow. query item table directly.
+            taglists = session.query(Tag).all()
+        else:
+            taglists = session.query(Tag).filter_by(name=term).all()
 
         # for each tag
         for tag in taglists:

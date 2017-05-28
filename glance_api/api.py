@@ -217,7 +217,6 @@ def query():
     'query': takes list of string, returns list of dict;
     'filter': takes str, affects 'query';
     """
-    print(request.args)
     if 'flag' in request.args:
         session = Session()
         flagged = get_query_flag(session, request.args['flag'])
