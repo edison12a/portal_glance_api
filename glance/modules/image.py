@@ -30,7 +30,8 @@ def generate_tags(data):
     return result
 
 
-def thumb(filename, dir):
+def thumb(dir, filename):
+    """returns filename"""
     im = Image.open('{}/{}'.format(dir, filename))
     file, ext = os.path.splitext(filename)
     # correct jpg naming to jpeg
@@ -49,6 +50,7 @@ def thumb(filename, dir):
 
 
 def save_frame(dst, file):
+    """returns filename"""
     filename, ext = os.path.splitext(file)
     saved_frame_loc = '{}/{}.jpg'.format(dst, filename)
 
@@ -60,6 +62,5 @@ def save_frame(dst, file):
     )
 
     file_saved_frame = saved_frame_loc.split('/')[-1:][0]
-
 
     return file_saved_frame

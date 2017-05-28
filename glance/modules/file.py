@@ -51,7 +51,7 @@ def upload_handler(file, dst):
 
         if ext == '.jpg':
             # Make thumbnail and upload items to s3
-            thumbnail = image.thumb('{}{}'.format(filename, ext), dst)
+            thumbnail = image.thumb(dst, '{}{}'.format(filename, ext))
             auth.boto3_s3_upload(s3, dst, item)
             auth.boto3_s3_upload(s3, dst, thumbnail)
 
@@ -80,14 +80,17 @@ def upload_handler(file, dst):
         elif ext == '.mp4':
             # get frame from  video file and upload all
             saved_frame = image.save_frame(dst, '{}{}'.format(filename, ext))
+            thumbnail_from_saved_frame = image.thumb(dst, saved_frame)
+
             auth.boto3_s3_upload(s3, dst, item)
-            auth.boto3_s3_upload(s3, dst, saved_frame)
+            auth.boto3_s3_upload(s3, dst, thumbnail_from_saved_frame)
 
             result.append(item)
-            result.append(saved_frame)
+            result.append(thumbnail_from_saved_frame)
             # Clean up
             os.remove(os.path.join(dst, item))
             os.remove(os.path.join(dst, saved_frame))
+            os.remove(os.path.join(dst, thumbnail_from_saved_frame))
 
 
             return result
