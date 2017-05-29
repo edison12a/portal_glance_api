@@ -1,100 +1,475 @@
 {% extends "base.html" %}
 {% block content %}
-<br>
 
-Latest Collections
-<br>
+<!-- Collections !-->
+
+<div style="display:flex;width:100%;position:relative;">
+
 {% for x in collections %}
-{% for k,v in x.items() %}
+  {% if loop.index < 6 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
+      </a>
 
-{% if k == 'item_thumb'%}
-<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
-{% endif %}
 
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.item_loc}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
+</div>
+
+<div style="display:flex; width:100%;position:relative;">
+
+{% for x in collections %}
+  {% if loop.index > 5 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
+      </a>
+
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.attached}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
-<br>
-<br>
-Latest Images
-<br>
+</div>
+
+
+
+
+
+<!-- latest images !-->
+
+<div style="display:flex;width:100%;position:relative;">
+
 {% for x in images %}
-{% for k,v in x.items() %}
+  {% if loop.index < 6 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
+      </a>
 
-{% if k == 'item_thumb'%}
-<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
-{% endif %}
 
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.item_loc}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
+</div>
+
+<div style="display:flex; width:100%;position:relative;">
+
+{% for x in images %}
+  {% if loop.index > 5 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_loc}}" />
+      </a>
+
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.item_loc}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
-<br>
-<br>
-Latest Footage
-<br>
+</div>
+
+
+
+
+
+
+
+<!-- latest footage -->
+
+
+
+<div style="display:flex;width:100%;position:relative;">
+
 {% for x in footage %}
-{% for k,v in x.items() %}
+  {% if loop.index < 6 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
+      </a>
 
-{% if k == 'item_thumb'%}
-<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
-{% endif %}
 
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.item_loc}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
+</div>
+
+<div style="display:flex; width:100%;position:relative;">
+
+{% for x in footage %}
+  {% if loop.index > 5 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_loc}}" />
+      </a>
+
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.item_loc}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
-<br>
-<br>
-Latest Geometry
-<br>
+</div>
+
+
+
+
+
+
+
+
+<!-- latest geometry !-->
+
+
+<div style="display:flex;width:100%;position:relative;">
+
 {% for x in geometry %}
-{% for k,v in x.items() %}
+  {% if loop.index < 6 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
+      </a>
 
-{% if k == 'item_thumb'%}
-<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
-{% endif %}
 
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.attached}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
+</div>
+
+<div style="display:flex; width:100%;position:relative;">
+
+{% for x in geometry %}
+  {% if loop.index > 5 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_loc}}" />
+      </a>
+
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.attached}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
-<br>
-<br>
-Latest People
-<br>
+</div>
+
+
+
+
+
+
+
+
+
+
+<!-- latest people !-->
+
+
+
+
+<div style="display:flex;width:100%;position:relative;">
+
 {% for x in people %}
-{% for k,v in x.items() %}
+  {% if loop.index < 6 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
+      </a>
 
-{% if k == 'item_thumb'%}
-<img src="https://s3.amazonaws.com/glancestore/{{v}}" />
-{% endif %}
 
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.item_loc}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
+</div>
+
+<div style="display:flex; width:100%;position:relative;">
+
+{% for x in people %}
+  {% if loop.index > 5 %}
+      <div style="display:inline-block; width:20%">
+        <a href="/item/{{x.id}}">
+        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_loc}}" />
+      </a>
+
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+                <small><strong>{{ x.item_type|capitalize }}</strong></small>
+            </div>
+        </div>
+
+        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+            <div style="text-align:center;">
+
+
+              <div class="yoo" style="display:inline-block;text-align:center;">
+                <form class="form-signin"  role="form">
+                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
+                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
+                        ❤
+                </form>
+              </div>
+
+                <a href="https://s3.amazonaws.com/glancestore/{{x.item_loc}}">
+                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+            </a>
+
+            </div>
+        </div>
+
+
+
+      </div>
+  {% endif %}
 {%endfor%}
-<br>
-<br>
-
-
-<!--
-
-<div style="position:relative;width:100%;background-color:blue;">
-
-  <div style="padding:20px;position:absolute;height:100%;width:30px;background-color:red;">
-    <div style="-ms-transform: rotate(90deg);-webkit-transform: rotate(90deg);transform: rotate(90deg);">
-      Latest&nbsp;Collections
-    </div>
-  </div>
-
-
-<div style="display:inline-block;min-width:30px;">
-</div>
-
-{% for x in items %}
-{% if x.item_type == 'collection' %}
-<div style="display:inline-block;width:18.8%;">
-<img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
-</div>
-{% endif %}
-{% endfor %}
 </div>
 
 
-<div style="position:relative;z-index:100;background-color: rgba(44, 46, 48, .96);min-height:5px;width:100%;box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2);">
-</div>
 
-!-->
+
+
 {% endblock %}

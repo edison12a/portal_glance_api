@@ -430,7 +430,7 @@ def home():
     people = [x for x in res if x['item_type'] == 'people'][0:9]
 
     # latest ten geometry
-    geometry = [x for x in res if x['item_type'] == 'geometry'][0:9]
+    geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
 
 
     return render_template(
