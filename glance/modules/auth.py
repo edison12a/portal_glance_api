@@ -13,11 +13,8 @@ import boto3
 from config import cred
 
 
-'''Globals'''
-API = 'http://127.0.0.1:5050/glance/api'
-
 # basic unencrypted user auth using the api and flasks `session`.
-def LoggedIn(session):
+def logged_in(session):
     if session.get('logged_in'):
 
         return True
@@ -26,8 +23,8 @@ def LoggedIn(session):
         return False
 
 
-def CheckLoginDetails(**data):
-    r = requests.get('{}/user'.format(API), params=data)
+def check_login_details(**data):
+    r = requests.get('{}/glance/api/user'.format(cred.API_HOST), params=data)
 
     if 'user details' in r.json():
         if r.json()['user details']:

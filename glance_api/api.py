@@ -11,6 +11,7 @@ from flask import Flask, jsonify, request, make_response
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
+from config import settings
 from packages.functions import (
     __reset_db, get_collections, get_assets, get_collection_by_id,
     get_asset_by_id, get_query, post_collection, post_asset,
@@ -20,9 +21,6 @@ from packages.functions import (
     post_people, get_tag, get_collection_by_author, del_item
     )
 from packages.models import Item
-
-from config import cred
-
 
 app = Flask(__name__)
 
@@ -36,27 +34,14 @@ app = Flask(__name__)
 # TODO: Global config?
 #app.config.from_object('config.config')
 #app.config.from_object('config')
-ROUTE = '/glance/api'
 
-'''database config'''
-SERVER = 'http://127.0.0.1:5050'
-
-"""
 # development database
-engine = create_engine(
-    'postgresql://{}:{}@{}:5432/{}'.format(
-        cred.username, cred.password, cred.ip_local, cred.dev_db_name
-    ), echo=False
-)
+engine = create_engine(settings.DEV_POSTGRES_DATABASE, echo=False)
+
 """
-
 # production database
-engine = create_engine(
-    'postgresql://{}:{}@{}:5432/{}'.format(
-        cred.username, cred.password, cred.ip_prod, cred.prod_db_name
-    ), echo=False
-)
-
+engine = create_engine(settings.PROD_POSTGRES_DATABASE, echo=False)
+"""
 
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
@@ -69,7 +54,7 @@ __reset_db(session, engine)
 """
 
 # info
-@app.route('{}'.format(ROUTE))
+@app.route('{}'.format(settings.ROUTE))
 def api():
     """ Returns avaliable methods for the api """
     info = {
@@ -111,7 +96,7 @@ def api():
 
 
 # auth
-@app.route('{}/user'.format(ROUTE), methods=['POST', 'GET'])
+@app.route('{}/user'.format(settings.ROUTE), methods=['POST', 'GET'])
 def user():
 
     if request.method=='POST':
@@ -147,7 +132,7 @@ def user():
 
 
 # process
-@app.route('{}/item'.format(ROUTE), methods=['POST', 'GET'])
+@app.route('{}/item'.format(settings.ROUTE), methods=['POST', 'GET'])
 def item():
     """Endpoint that returns asset objects"""
     if request.method=='POST':
@@ -198,7 +183,7 @@ def item():
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
-@app.route('{}/tag'.format(ROUTE))
+@app.route('{}/tag'.format(settings.ROUTE))
 def tag():
     session = Session()
 
@@ -210,7 +195,7 @@ def tag():
 
 
 # queries
-@app.route('{}/query'.format(ROUTE), methods=['GET'])
+@app.route('{}/query'.format(settings.ROUTE), methods=['GET'])
 def query():
     """ returns results from querys
     'flag': takes key/value, returns
@@ -239,7 +224,7 @@ def query():
     return jsonify({'result': ''})
 
 
-@app.route('{}/collection/<int:collection_id>'.format(ROUTE))
+@app.route('{}/collection/<int:collection_id>'.format(settings.ROUTE))
 def get_collection_id(collection_id):
     # TODO : doc string
     if request.method=='GET':
@@ -255,7 +240,7 @@ def get_collection_id(collection_id):
     return jsonify({'collection': collection})
 
 
-@app.route('{}/collection/author/<author>'.format(ROUTE))
+@app.route('{}/collection/author/<author>'.format(settings.ROUTE))
 def get_collection_author(author):
     session = Session()
 
@@ -267,7 +252,7 @@ def get_collection_author(author):
     return jsonify({'result': result})
 
 
-@app.route('{}/asset/<int:asset_id>'.format(ROUTE), methods=['GET'])
+@app.route('{}/asset/<int:asset_id>'.format(settings.ROUTE), methods=['GET'])
 def get_asset_id(asset_id):
     # TODO: Doc string
     if request.method=='GET':
@@ -284,7 +269,7 @@ def get_asset_id(asset_id):
     return jsonify({'asset': asset})
 
 
-@app.route('{}/item/<int:asset_id>'.format(ROUTE), methods=['GET'])
+@app.route('{}/item/<int:asset_id>'.format(settings.ROUTE), methods=['GET'])
 def get_item(asset_id):
     # TODO: Doc string
     if request.method=='GET':
@@ -303,7 +288,7 @@ def get_item(asset_id):
 
 # crud
 @app.route(
-    '{}/collection/delete/<int:collection_id>'.format(ROUTE), methods=['DELETE']
+    '{}/collection/delete/<int:collection_id>'.format(settings.ROUTE), methods=['DELETE']
     )
 def delete_collection(collection_id):
     # TODO: make better responce
@@ -327,7 +312,7 @@ def delete_collection(collection_id):
             return jsonify({'DELETE collection/delete/': result})
 
 
-@app.route('{}/item/delete/<int:asset_id>'.format(ROUTE), methods=['DELETE'])
+@app.route('{}/item/delete/<int:asset_id>'.format(settings.ROUTE), methods=['DELETE'])
 def delete_asset(asset_id):
     # TODO: make better responce
     if request.method=='DELETE':
@@ -340,7 +325,6 @@ def delete_asset(asset_id):
                 'asset id': 'IMP'
             }
             session.close()
-
             return jsonify({'DELETE asset/delete/': result})
 
         else:
@@ -356,7 +340,7 @@ def delete_asset(asset_id):
     return jsonify({'DELETE asset/delete/': 'error?'})
 
 
-@app.route('{}/asset/patch'.format(ROUTE), methods=['PATCH'])
+@app.route('{}/asset/patch'.format(settings.ROUTE), methods=['PATCH'])
 def patch_asset_id():
     # TODO: dont use try/except here
 
@@ -371,7 +355,7 @@ def patch_asset_id():
     return jsonify({'PATCH': patched_asset})
 
 
-@app.route('{}/item/patch'.format(ROUTE), methods=['PATCH'])
+@app.route('{}/item/patch'.format(settings.ROUTE), methods=['PATCH'])
 def patch_item():
     # TODO: dont use try/except here
 
@@ -386,7 +370,7 @@ def patch_item():
     return jsonify({'PATCH': patched_asset})
 
 
-@app.route('{}/collection/patch'.format(ROUTE), methods=['PATCH'])
+@app.route('{}/collection/patch'.format(settings.ROUTE), methods=['PATCH'])
 def patch_collection_id():
     patch_data = {}
     for x in request.args:
@@ -400,7 +384,7 @@ def patch_collection_id():
 
 
 # item types
-@app.route('{}/image'.format(ROUTE), methods=['POST', 'GET'])
+@app.route('{}/image'.format(settings.ROUTE), methods=['POST', 'GET'])
 def image():
     """Endpoint that returns asset objects"""
     if request.method=='POST':
@@ -414,7 +398,7 @@ def image():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/item/' + str(asset.id)
+                'location': settings.ROUTE + '/item/' + str(asset.id)
             }
 
             session.close()
@@ -468,7 +452,7 @@ def image():
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
-@app.route('{}/footage'.format(ROUTE), methods=['POST', 'GET'])
+@app.route('{}/footage'.format(settings.ROUTE), methods=['POST', 'GET'])
 def footage():
     """Endpoint that returns asset objects"""
     if request.method=='POST':
@@ -482,7 +466,7 @@ def footage():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/item/' + str(asset.id)
+                'location': settings.ROUTE + '/item/' + str(asset.id)
             }
 
             session.close()
@@ -534,7 +518,7 @@ def footage():
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
-@app.route('{}/geometry'.format(ROUTE), methods=['POST', 'GET'])
+@app.route('{}/geometry'.format(settings.ROUTE), methods=['POST', 'GET'])
 def geometry():
     """Endpoint that returns asset objects"""
     if request.method=='POST':
@@ -548,7 +532,7 @@ def geometry():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/item/' + str(asset.id)
+                'location': settings.ROUTE + '/item/' + str(asset.id)
             }
 
             session.close()
@@ -600,7 +584,7 @@ def geometry():
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
-@app.route('{}/people'.format(ROUTE), methods=['POST', 'GET'])
+@app.route('{}/people'.format(settings.ROUTE), methods=['POST', 'GET'])
 def people():
     """Endpoint that returns asset objects"""
     if request.method=='POST':
@@ -614,7 +598,7 @@ def people():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/item/' + str(asset.id)
+                'location': settings.ROUTE + '/item/' + str(asset.id)
             }
 
             session.close()
@@ -666,7 +650,7 @@ def people():
         return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
 
 
-@app.route('{}/collection'.format(ROUTE), methods=['POST', 'GET'])
+@app.route('{}/collection'.format(settings.ROUTE), methods=['POST', 'GET'])
 def collection():
     """Endpoint that returns asset objects"""
     if request.method=='POST':
@@ -683,7 +667,7 @@ def collection():
 
             result = {
                 'responce': 'successful',
-                'location': ROUTE + '/item/' + str(asset.id)
+                'location': settings.ROUTE + '/item/' + str(asset.id)
             }
 
             session.close()

@@ -247,24 +247,30 @@
 
 <form action="" method="POST" enctype="multipart/form-data">
 
-    <div class="form-group">
-        <label for="change_cover">Change Cover Image</label>
-        <input type="file" id="change_cover" name="change_cover" multiple>
-        <small><small><p class="help-block">Cover Image should be .jpg</p></small></small>
-    </div>
+
+
 </form>
 
 
-    <form action="/patch" method="POST">
+    <form action="/patch" method="POST" enctype="multipart/form-data">
+
+
+
+
 
         <div class="form-group">
+
+          <label for="change_cover">Change Cover Image</label>
+          <input type="file" id="change_cover" name="change_cover">
+          <small><small><p class="help-block">Cover Image should be .jpg</p></small></small>
+          <br>
 
             <label for="append_collection">Append Collection</label>
             <input style="width:300px;" type="text" class="form-control" id="append_collection" name="append_collection" />
             <input type="hidden" name="id" value="{{item.0.id}}">
             <small><small><p class="help-block">Enter Item IDs to append this collection.</p></small></small>
         <br>
-        <label for="append_collection">Append Tags</label>
+        <label for="append_tags">Append Tags</label>
         <input style="width:300px;" type="text" class="form-control" id="append_tags" name="append_tags" />
         <input type="hidden" name="id" value="{{item.0.id}}">
         <small><small><p class="help-block">Enter words, separated by spaces.</p></small></small>

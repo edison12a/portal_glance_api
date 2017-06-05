@@ -7,9 +7,11 @@
 
 {% for x in collections %}
   {% if loop.index < 6 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
+
         <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
+
       </a>
 
 
@@ -24,20 +26,12 @@
 
 
               <div class="yoo" style="display:inline-block;text-align:center;">
-                <form class="form-signin"  role="form">
-                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
-                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
-                        ❤
-                </form>
+                <small><strong>{{x.name}}</strong></small>
               </div>
 
-                <a href="https://s3.amazonaws.com/glancestore/{{x.item_loc}}">
-                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-            </a>
 
             </div>
         </div>
-
 
 
 
@@ -50,7 +44,7 @@
 
 {% for x in collections %}
   {% if loop.index > 5 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
         <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
       </a>
@@ -67,16 +61,9 @@
 
 
               <div class="yoo" style="display:inline-block;text-align:center;">
-                <form class="form-signin"  role="form">
-                        <input type="hidden" id="item_id" value="{{x.id}}" class="form-control">
-                        <input type="hidden" id="item_thumb" value="{{x.item_thumb}}" class="form-control">
-                        ❤
-                </form>
+                <small><strong>{{x.name}}</strong></small>
               </div>
 
-                <a href="https://s3.amazonaws.com/glancestore/{{x.attached}}">
-                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-            </a>
 
             </div>
         </div>
@@ -98,7 +85,7 @@
 
 {% for x in images %}
   {% if loop.index < 6 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
         <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
       </a>
@@ -141,7 +128,7 @@
 
 {% for x in images %}
   {% if loop.index > 5 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
         <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_loc}}" />
       </a>
@@ -193,7 +180,7 @@
 
 {% for x in footage %}
   {% if loop.index < 6 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
         <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
       </a>
@@ -236,7 +223,7 @@
 
 {% for x in footage %}
   {% if loop.index > 5 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
         <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_loc}}" />
       </a>
@@ -288,7 +275,7 @@
 
 {% for x in geometry %}
   {% if loop.index < 6 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
         <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
       </a>
@@ -331,9 +318,9 @@
 
 {% for x in geometry %}
   {% if loop.index > 5 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
-        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_loc}}" />
+        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
       </a>
 
 
@@ -378,16 +365,17 @@
 
 
 
+
+
+
 <!-- latest people !-->
-
-
 
 
 <div style="display:flex;width:100%;position:relative;">
 
 {% for x in people %}
   {% if loop.index < 6 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
         <img width=100% src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
       </a>
@@ -430,9 +418,9 @@
 
 {% for x in people %}
   {% if loop.index > 5 %}
-      <div style="display:inline-block; width:20%">
+      <div class="grid-item">
         <a href="/item/{{x.id}}">
-        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_loc}}" />
+        <img width="100%" src="https://s3.amazonaws.com/glancestore/{{x.item_thumb}}" />
       </a>
 
 
@@ -467,6 +455,7 @@
   {% endif %}
 {%endfor%}
 </div>
+
 
 
 

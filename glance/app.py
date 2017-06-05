@@ -8,14 +8,15 @@ __license__ = ""
 
 import os
 import subprocess
-import random
 
 import requests
 from flask import Flask, render_template, request, session, jsonify
 
 from modules.file import upload_handler, process_raw_files
 from modules.image import generate_tags
-from modules.auth import LoggedIn, CheckLoginDetails, delete_from_s3
+from modules.auth import logged_in, check_login_details, delete_from_s3
+
+from config import cred
 
 
 '''Local Directories'''
@@ -26,22 +27,14 @@ UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/tmp')
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # assign `secret_key` to string on production.
-app.secret_key = os.urandom(12)
+app.secret_key = cred.secret_key
 
 '''Hard Coded API Routes'''
 # TODO: Remove.
-api_ip = 'localhost'
-API_HOST = 'http://{}:5050/'.format(api_ip)
-
-API = '{}glance/api'.format(API_HOST)
-API_ITEM = '{}glance/api/item'.format(API_HOST)
-API_IMAGE = '{}glance/api/image'.format(API_HOST)
-API_FOOTAGE = '{}glance/api/footage'.format(API_HOST)
-API_GEOMETRY = '{}glance/api/geometry'.format(API_HOST)
-API_COLLECTION = '{}glance/api/collection'.format(API_HOST)
-API_TAG = '{}glance/api/tag'.format(API_HOST)
-API_USER = '{}glance/api/user'.format(API_HOST)
-
+API = '{}glance/api'.format(cred.API_HOST)
+API_ITEM = '{}glance/api/item'.format(cred.API_HOST)
+API_COLLECTION = '{}glance/api/collection'.format(cred.API_HOST)
+API_USER = '{}glance/api/user'.format(cred.API_HOST)
 
 '''Routes'''
 # auth
@@ -55,7 +48,7 @@ def login():
             'password': form['password']
         }
 
-        if CheckLoginDetails(**data):
+        if check_login_details(**data):
             session['logged_in'] = True
             session['user'] = data['username']
             if 'filter' in session:
@@ -116,7 +109,7 @@ def append_fav():
 @app.route('/uploading', methods=['POST'])
 def uploading():
     #TODO:  refactor.
-    if LoggedIn(session):
+    if logged_in(session):
         if request.method == 'POST':
             # Init dict and append user data
             upload_data = {}
@@ -183,8 +176,8 @@ def uploading():
                             payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            #for tag in generate_tags(uploaded_file[0]):
-                            #    payload['tags'] +=  ' ' + tag.lower()
+                            for tag in generate_tags(uploaded_file[0]):
+                                payload['tags'] +=  ' ' + tag.lower()
 
                         else:
                             # Use to validate wether item is a valid format
@@ -242,11 +235,11 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload['item_loc'] = uploaded_file
-                            payload['item_thumb'] = uploaded_file
+                            payload['item_loc'] = uploaded_file[0]
+                            payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in generate_tags(uploaded_file):
+                            for tag in generate_tags(uploaded_file[0]):
                                 payload['tags'] +=  ' ' + tag.lower()
 
                         else:
@@ -319,14 +312,20 @@ def patch_item():
     if request.method == 'POST':
         form = request.form
         for k in form:
+            print('-------------------------')
+            print(k)
             if k == 'append_collection':
                 data['items'] = form[k]
 
             elif k == 'append_tags':
                 data['tags'] = form[k]
+            elif k == 'change_cover':
+                print('YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
 
             else:
                 data[k] = form[k]
+
+
 
     r = requests.patch('{}/patch'.format(API_ITEM), params=data)
 
@@ -442,7 +441,7 @@ def home():
 @app.route('/favorite')
 def favorite():
     # TODO: API needs to be able to serve, `item by author`.
-    if LoggedIn(session):
+    if logged_in(session):
         # data to send... collections made by user
         r = requests.get(
             '{}/author/{}'.format(API_COLLECTION, session['user'])
@@ -457,7 +456,7 @@ def favorite():
 
 @app.route('/upload')
 def upload():
-    if LoggedIn(session):
+    if logged_in(session):
         return render_template('upload.html')
     else:
         return home()
