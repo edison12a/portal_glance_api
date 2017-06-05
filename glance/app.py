@@ -16,7 +16,7 @@ from modules.file import upload_handler, process_raw_files
 from modules.image import generate_tags
 from modules.auth import logged_in, check_login_details, delete_from_s3
 
-from config import cred
+from config import settings
 
 
 '''Local Directories'''
@@ -26,15 +26,14 @@ UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/tmp')
 '''Flask Config'''
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# assign `secret_key` to string on production.
-app.secret_key = cred.secret_key
+app.secret_key = settings.secret_key
 
 '''Hard Coded API Routes'''
-# TODO: Remove.
-API = '{}glance/api'.format(cred.API_HOST)
-API_ITEM = '{}glance/api/item'.format(cred.API_HOST)
-API_COLLECTION = '{}glance/api/collection'.format(cred.API_HOST)
-API_USER = '{}glance/api/user'.format(cred.API_HOST)
+# TODO: find a better way.
+API = settings.api_root
+API_ITEM = '{}item'.format(settings.api_root)
+API_COLLECTION = '{}collection'.format(settings.api_root)
+API_USER = '{}user'.format(settings.api_root)
 
 '''Routes'''
 # auth
@@ -416,26 +415,32 @@ def home():
     g = requests.get('{}'.format(API_ITEM))
     res = g.json()
 
-    # latest ten collections
-    collections = [x for x in res if x['item_type'] == 'collection'][0:9]
+    if 'GET assets' in res and res['GET assets']['Message'] == 'No assets in database':
+        return render_template('home.html')
 
-    # latest ten image
-    images = [x for x in res if x['item_type'] == 'image'][0:9]
+    else:
 
-    # latest ten collections
-    footage = [x for x in res if x['item_type'] == 'footage'][0:9]
+        # latest ten collections
+        collections = [x for x in res if x['item_type'] == 'collection'][0:9]
 
-    # latest ten people
-    people = [x for x in res if x['item_type'] == 'people'][0:9]
+        # latest ten image
+        images = [x for x in res if x['item_type'] == 'image'][0:9]
 
-    # latest ten geometry
-    geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
+        # latest ten collections
+        footage = [x for x in res if x['item_type'] == 'footage'][0:9]
+
+        # latest ten people
+        people = [x for x in res if x['item_type'] == 'people'][0:9]
+
+        # latest ten geometry
+        geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
 
 
-    return render_template(
-        'home.html', collections=collections, images=images, footage=footage,
-        people=people, geometry=geometry
-        )
+
+        return render_template(
+            'home.html', collections=collections, images=images, footage=footage,
+            people=people, geometry=geometry
+            )
 
 
 @app.route('/favorite')

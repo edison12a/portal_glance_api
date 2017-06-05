@@ -42,7 +42,6 @@ engine = create_engine(settings.DEV_POSTGRES_DATABASE, echo=False)
 # production database
 engine = create_engine(settings.PROD_POSTGRES_DATABASE, echo=False)
 """
-
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
 

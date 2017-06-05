@@ -13,10 +13,7 @@ import subprocess
 import boto3
 
 import modules.auth as auth
-
-
-'''Globals'''
-API = 'http://127.0.0.1:5050/glance/api'
+from config import settings
 
 
 # AWS Rekognition

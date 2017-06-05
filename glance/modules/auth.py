@@ -11,6 +11,7 @@ import requests
 import boto3
 
 from config import cred
+from config import settings
 
 
 # basic unencrypted user auth using the api and flasks `session`.
@@ -24,7 +25,7 @@ def logged_in(session):
 
 
 def check_login_details(**data):
-    r = requests.get('{}/glance/api/user'.format(cred.API_HOST), params=data)
+    r = requests.get('{}user'.format(settings.api_root), params=data)
 
     if 'user details' in r.json():
         if r.json()['user details']:

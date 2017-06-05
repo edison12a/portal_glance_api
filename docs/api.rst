@@ -3,14 +3,12 @@ api docs
 
 config
 --
-# database details
-username='username'
-password='password'
-ip_local='dev_database_ip'
-ip_prod='prodction_database_ip'
-dev_db_name='development_database_anme'
-prod_db_name='production_database_name'
+Glance api configuration is brokwn up between 2 files. `config/settings.py` and `config/cred.py`
 
+
+cred.py contains all credential information and is decoupled for portability. For structure refer to `EXAMPLE_cred.py`.
+
+settings.py manages all of the api's config.
 
 server setup
 --
@@ -20,12 +18,11 @@ sudo apt-get update
 sudo apt-get install python3-pip python3-dev libpq-dev postgresql postgresql-contrib nginx
 
 
-
-postgres database set up
+postgres set up
 --
 
 Commands below for toy database setup in postgres. ubuntu.
-# make function for checkcing/setting db
+
 """
 Set up dev database, if False
 
