@@ -41,96 +41,6 @@ def __reset_db(session, engine):
 
 
 # helper functions
-'''
-def make_dict(item_list):
-    """ takes list of database objects, returns dict repr of objects. """
-    # TODO: using '__tablename__' on objects does the same jobs as 'item_type'
-    # any point in having it as column?
-    result = []
-
-    # for each database object, build dict, 'item', from data.
-    for item_object in item_list:
-        item = {}
-        for column in item_object.__table__.columns:
-            item[column.name] = str(getattr(item_object, column.name))
-
-        # additional many-to-many data
-        # init tags
-        # TODO: '.append(str(tag.name))' could more info be used here? like
-        # {'name': 'int(assets rate?)'} maybe too advanced?
-        if item_object.item_type == 'asset':
-            # If object is asset
-            # init tags
-            item['tags'] = []
-            assets_tags = item_object.tags
-
-            for tag in assets_tags:
-                item['tags'].append(str(tag.name))
-
-            # init collections
-            item['collections'] = []
-            # get assets collections via many-to-many
-            assets_collections = item_object.collections
-
-            # append collection objects to 'item'
-            for collection in assets_collections:
-                item['collections'].append(
-                    (int(collection.id), str(collection.name))
-                )
-
-        elif item_object.item_type == 'collection':
-            # If object is a collection
-            # init tags
-            item['tags'] = []
-            collections_tags = item_object.tags
-
-            for tag in collections_tags:
-                item['tags'].append(str(tag.name))
-
-            # init assets
-            item['assets'] = []
-            assignments = item_object.assets
-
-            for assignment in assignments:
-                bla = make_dict((assignment,))[0]
-                item['assets'].append(
-                    bla
-                )
-
-        elif item_object.item_type == 'footage':
-            # If object is asset
-            # init tags
-            try:
-                # TODO: IMP tags for footage
-                item['tags'] = []
-                assets_tags = item_object.tags
-
-                for tag in assets_tags:
-                    item['tags'].append(str(tag.name))
-            except:
-                pass
-
-            try:
-                # TODO: IMP collections for footage
-                # init collections
-                item['collections'] = []
-                # get assets collections via many-to-many
-                footage_collections = item_object.collections
-
-                # append collection objects to 'item'
-                for collection in footage_collections:
-                    item['collections'].append(
-                        (int(collection.id), str(collection.name))
-                    )
-            except:
-                pass
-
-        result.append(item)
-
-    # return database objects as dicts.
-    return result
-'''
-
 def to_dict(item_list):
     """ takes list of database objects, returns dict repr of objects. """
     # TODO: using '__tablename__' on objects does the same jobs as 'item_type'
@@ -210,8 +120,6 @@ def get_items(session, filter='all'):
 
     # returns raw db objects
     return result
-
-
 
 
 def get_item_by_id(session, id):
