@@ -1,5 +1,5 @@
 """
-This module contains functions for ...
+This module contains functions for api
 """
 
 __author__ = ""
@@ -9,7 +9,7 @@ __license__ = ""
 # TODO: classes needed?
 import datetime
 from .models import Collection, Base, Footage, User, Item, Image, Geometry, Collection, Tag, tag_ass, People
-
+import packages.models
 
 # dev functions
 def __reset_db(session, engine):
@@ -108,28 +108,6 @@ def get_tag(session, data):
     return Fales
 
 
-def get_items(session, filter='all'):
-    """Returns all asset objects"""
-    # TODO: IMP filtering
-    raw_items = session.query(Item).all()
-
-    if filter == 'all':
-        result = to_dict([x for x in raw_items])
-    else:
-        result = to_dict([x for x in raw_items if x.item_type == filter])
-
-    # returns raw db objects
-    return result
-
-
-def get_item_by_id(session, id):
-    """Return asset object as a dict using Asset.id"""
-    # querys for asset object
-    asset_by_id = session.query(Item).get(id)
-
-    # returns raw asset
-    return asset_by_id
-
 
 def get_collection_by_author(session, author):
     collection_by_author = session.query(Collection).filter_by(author=author).all()
@@ -201,56 +179,6 @@ def get_user(session, **kwarg):
 
 
 # crud
-def post_asset(session, **kwarg):
-    """Posts asset to the database
-    Return: asset; 'new posted aset'
-    """
-
-    payload = {}
-    data = {}
-
-    # process user input
-    for k, v in kwarg.items():
-        if k == 'tag':
-            bla = v.split(' ')
-            payload[k] = bla
-        else:
-            payload[k] = v
-
-    # remove attri that arnt in the database
-    for column in Asset.__table__.columns:
-        if column.name in payload:
-            data[column.name] = payload[column.name]
-        elif column.name not in payload:
-            data[column.name] = None
-        else:
-            pass
-
-    # Database entry
-    asset = Asset(
-        name=data['name'], image=data['image'],
-        image_thumb=data['image_thumb'], attached=data['attached'],
-        author=data['author']
-    )
-
-    # I think i put this here because the asset had to be 'init' with
-    # session.add() because i needed to append new tags?
-    # TODO: understand before better, refactor, multiple session hits might not
-    # be needed?
-    session.add(asset)
-
-    if 'tag' in payload:
-        for tag in payload['tag']:
-            newtag = Tag(name=str(tag))
-            session.add(newtag)
-            asset.tags.append(newtag)
-
-    # commit changes to database
-    session.commit()
-
-    return asset
-
-
 def patch_item_by_id(session, **user_columns):
     """updates asset fields using user data"""
     # TODO: This is a pretty heftly function... needs refactoring
@@ -358,28 +286,6 @@ def patch_item_by_id(session, **user_columns):
     return result
 
 
-def del_item(session, id):
-    """deletes item object"""
-    # TODO: also delete physical files.
-    # delete add item to session for deletion
-    item = session.query(Item).filter_by(id='{}'.format(int(id))).first()
-    session.delete(item)
-    session.commit()
-    # check if any assciations remain on `Tag` if None then delete it.
-    # TODO: this should problely be handled by something else tag related?
-    for x in item.tags:
-        if len(x.items) > 0:
-            pass
-        else:
-            # delete the tag
-            print('deleting {}'.format(x))
-            session.delete(x)
-
-    session.commit()
-
-    return True
-
-
 def post_user(session, **kwarg):
     data = {}
 
@@ -396,246 +302,6 @@ def post_user(session, **kwarg):
     session.commit()
 
     return user
-
-
-def post_image(session, **kwarg):
-    payload = {}
-    data = {}
-    tag_ids = []
-
-    # process user input
-    for k, v in kwarg.items():
-        payload[k] = v
-
-    # remove attri that arnt in the database
-    for column in Image.__table__.columns:
-        if column.name in payload:
-            data[column.name] = payload[column.name]
-        elif column.name not in payload:
-            data[column.name] = None
-        else:
-            pass
-
-    print(data)
-    # Database entry
-    item = Image(
-        name = data['name'],
-        item_loc = data['item_loc'],
-        item_thumb = data['item_thumb'],
-        author = data['author'],
-        attached = data['attached']
-    )
-
-    session.add(item)
-    session.commit()
-
-    # after entry is commited then hit the database with any new tags?
-    # is this the best way?
-    if 'tags' in payload:
-        tag_list = payload['tags'].split(' ')
-        for tag in tag_list:
-
-            # TODO: refactor the below its checking to see if the tags exists already
-            #if it does then just append that tag with the item object.
-            #else make a new tag object
-            test = session.query(Tag).filter_by(name=tag).first()
-
-            if test:
-                test.items.append(item)
-                session.add(test)
-                session.commit()
-            else:
-                newtag = Tag(name=str(tag))
-                session.add(newtag)
-                session.commit()
-
-                item.tags.append(newtag)
-
-    session.add(item)
-    # commit changes to database
-    session.commit()
-
-    return item
-
-
-def post_footage(session, **kwarg):
-        payload = {}
-        data = {}
-
-        # process user input
-        for k, v in kwarg.items():
-            payload[k] = v
-
-        # remove attri that arnt in the database
-        for column in Image.__table__.columns:
-            if column.name in payload:
-                data[column.name] = payload[column.name]
-            elif column.name not in payload:
-                data[column.name] = None
-            else:
-                pass
-
-        # Database entry
-        item = Footage(
-            name = data['name'],
-            item_loc = data['item_loc'],
-            item_thumb = data['item_thumb'],
-            author = data['author'],
-            attached = data['attached']
-        )
-
-        # after entry is commited then hit the database with any new tags?
-        if 'tags' in payload:
-            tag_list = payload['tags'].split(' ')
-            for tag in tag_list:
-
-                # is this the best way?
-                # TODO: refactor the below its checking to see if the tags exists already
-                #if it does then just append that tag with the item object.
-                #else make a new tag object
-                test = session.query(Tag).filter_by(name=tag).first()
-
-                if test:
-                    test.items.append(item)
-                    session.add(test)
-                    session.commit()
-                else:
-                    newtag = Tag(name=str(tag))
-                    session.add(newtag)
-                    session.commit()
-
-                    item.tags.append(newtag)
-
-
-        # TODO: sort out tags
-        session.add(item)
-        # commit changes to database
-        session.commit()
-
-        return item
-
-
-def post_geometry(session, **kwarg):
-    payload = {}
-    data = {}
-
-    # process user input
-    for k, v in kwarg.items():
-        payload[k] = v
-
-    # remove attri that arnt in the database
-    for column in Geometry.__table__.columns:
-        if column.name in payload:
-            data[column.name] = payload[column.name]
-        elif column.name not in payload:
-            data[column.name] = None
-        else:
-            pass
-
-    # Database entry
-    item = Geometry(
-        name = data['name'],
-        item_loc = data['item_loc'],
-        item_thumb = data['item_thumb'],
-        author = data['author'],
-        attached = data['attached']
-    )
-
-    # after entry is commited then hit the database with any new tags?
-    # is this the best way?
-    if 'tags' in payload:
-        tag_list = payload['tags'].split(' ')
-        for tag in tag_list:
-
-            # TODO: refactor the below its checking to see if the tags exists already
-            #if it does then just append that tag with the item object.
-            #else make a new tag object
-            test = session.query(Tag).filter_by(name=tag).first()
-
-            if test:
-                test.items.append(item)
-                session.add(test)
-                session.commit()
-            else:
-                newtag = Tag(name=str(tag))
-                session.add(newtag)
-                session.commit()
-
-                item.tags.append(newtag)
-
-
-    # TODO: sort out tags
-    session.add(item)
-    # commit changes to database
-    session.commit()
-
-    return item
-
-
-def post_people(session, **kwarg):
-    payload = {}
-    data = {}
-
-    # process user input
-    for k, v in kwarg.items():
-        payload[k] = v
-
-
-    # remove attri that arnt in the database
-    for column in People.__table__.columns:
-        if column.name in payload:
-            data[column.name] = payload[column.name]
-        elif column.name not in payload:
-            data[column.name] = None
-        else:
-            pass
-
-    # Database entry
-    item = People(
-        name = data['name'],
-        item_loc = data['item_loc'],
-        item_thumb = data['item_thumb'],
-        author = data['author'],
-        # attached = data['attached']
-    )
-    session.add(item)
-    session.commit()
-
-
-    print('dsfsssssssssssssssssssssssssssssssssssssssssssss')
-    print('its people bab!')
-
-    print(item.name)
-
-    # after entry is commited then hit the database with any new tags?
-    # is this the best way?
-    if 'tags' in payload:
-        tag_list = payload['tags'].split(' ')
-        for tag in tag_list:
-
-            # TODO: refactor the below its checking to see if the tags exists already
-            #if it does then just append that tag with the item object.
-            #else make a new tag object
-            test = session.query(Tag).filter_by(name=tag).first()
-
-            if test:
-                test.items.append(item)
-                session.add(test)
-                session.commit()
-            else:
-                newtag = Tag(name=str(tag))
-                session.add(newtag)
-                session.commit()
-
-                item.tags.append(newtag)
-
-
-    # TODO: sort out tags
-    session.add(item)
-    # commit changes to database
-    session.commit()
-
-    return item
 
 
 def post_collection(session, **kwarg):
@@ -712,3 +378,134 @@ def post_collection(session, **kwarg):
     session.commit()
 
     return item
+
+
+## oop test
+class Item():
+    """Items"""
+    def __init__(self, session):
+        self.session = session
+
+    def get(self, id=None, filter=None):
+        """get item
+        id: primary key of database item, `None` returns all
+        filter: item_type of database item, limit results to item_type
+        """
+        # TODO: imp control flow
+        if id == None:
+            if filter == None or filter == 'all':
+                items = self.session.query(packages.models.Item).all()
+                return items
+            else:
+                items = self.session.query(packages.models.Item).filter(packages.models.Item.type==filter).all()
+                return items
+
+        else:
+            item = self.session.query(packages.models.Item).get(id)
+            return item
+
+    def delete(self, id):
+        """ deletes item from database
+        id: primary key of database item,
+        """
+        item = self.session.query(packages.models.Item).filter_by(id='{}'.format(int(id))).first()
+        self.session.delete(item)
+        self.session.commit()
+
+        # check if any assciations remain on `Tag` if None then delete it.
+        # TODO: this should problely be handled by something else tag related?
+        for x in item.tags:
+            if len(x.items) > 0:
+                pass
+            else:
+                # delete the tag
+                print('deleting {}'.format(x))
+                self.session.delete(x)
+
+        self.session.commit()
+
+        return True
+
+    # item type posts
+    # TODO: mmm
+    def post(self, kwarg):
+        """post item to database
+        kwarg: dict. user data to process.
+        return: new `Item` object
+        """
+        # TODO: make item_types global?
+        # TODO: tags
+        item_types = {
+            'image': packages.models.Image,
+            'footage': packages.models.Footage,
+            'geometry': packages.models.Geometry,
+            'people': packages.models.People,
+            'collection': packages.models.Collection
+            }
+
+        # process universal data
+        # structures
+        payload = {}
+        data = {}
+
+        # process user input
+        for k, v in kwarg.items():
+            payload[k] = v
+
+        # process user data
+        for column in item_types[payload['item_type']].__table__.columns:
+            if column.name in payload:
+                data[column.name] = payload[column.name]
+            elif column.name not in payload:
+                data[column.name] = None
+            else:
+                pass
+
+        item = item_types[payload['item_type']](
+            name = data['name'],
+            item_loc = data['item_loc'],
+            item_thumb = data['item_thumb'],
+            author = data['author'],
+            attached = data['attached']
+        )
+
+        self.session.add(item)
+        self.session.commit()
+
+
+        # prepare tags for item
+        '''
+        # after entry is commited then hit the database with any new tags?
+        # is this the best way?
+        if 'tags' in payload:
+            tag_list = payload['tags'].split(' ')
+            for tag in tag_list:
+
+                # TODO: refactor the below its checking to see if the tags exists already
+                #if it does then just append that tag with the item object.
+                #else make a new tag object
+                test = session.query(Tag).filter_by(name=tag).first()
+
+                if test:
+                    test.items.append(item)
+                    session.add(test)
+                    session.commit()
+                else:
+                    newtag = Tag(name=str(tag))
+                    session.add(newtag)
+                    session.commit()
+
+                    item.tags.append(newtag)
+
+        session.add(item)
+        # commit changes to database
+        session.commit()
+
+        return item
+        '''
+        return item
+
+
+
+    def __repr__(self):
+        return '<Item>'

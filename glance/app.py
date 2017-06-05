@@ -175,8 +175,11 @@ def uploading():
                             payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in generate_tags(uploaded_file[0]):
+                            # TODO: currently running `generate_tags` on the
+                            # thumbnail. Needs to be run on the extracted image.
+                            for tag in generate_tags(uploaded_file[1]):
                                 payload['tags'] +=  ' ' + tag.lower()
+
 
                         else:
                             # Use to validate wether item is a valid format
