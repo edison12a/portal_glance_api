@@ -13,10 +13,7 @@ from sqlalchemy import create_engine
 
 from config import settings
 from packages.functions import (
-    __reset_db, get_collections, get_assets, get_collection_by_id,
-    get_asset_by_id, get_query, post_collection, post_asset,
-    del_collection, patch_asset, get_query_flag, patch_collection, make_dict,
-    get_footages, post_user, get_user, post_image, post_footage, to_dict,
+    __reset_db, get_query, post_user, get_user, post_image, post_footage, to_dict,
     get_items, post_geometry, post_collection, get_item_by_id, patch_item_by_id,
     post_people, get_tag, get_collection_by_author, del_item
     )
@@ -202,14 +199,11 @@ def query():
     'filter': takes str, affects 'query';
     """
     if 'flag' in request.args:
-        session = Session()
-        flagged = get_query_flag(session, request.args['flag'])
-        session.close()
-
-        return jsonify({'flagged assets': flagged})
+        pass
 
 
     elif 'query' in request.args:
+        print('QQQQQQQUUUUUUUUUEEEEEEERRRRRRRRRRRYYYYYY')
         # TODO: For some reason `get_query()` only accepts a dict?
         session = Session()
         raw_assets = get_query(session, request.args)
@@ -223,22 +217,6 @@ def query():
     return jsonify({'result': ''})
 
 
-@app.route('{}/collection/<int:collection_id>'.format(settings.ROUTE))
-def get_collection_id(collection_id):
-    # TODO : doc string
-    if request.method=='GET':
-        session = Session()
-        raw_collection = get_collection_by_id(session, collection_id)
-        collection = make_dict((raw_collection,))
-
-    else:
-        session.close()
-        return jsonify({'collection': 'failed - endpoint only accepts GET methods'})
-
-    session.close()
-    return jsonify({'collection': collection})
-
-
 @app.route('{}/collection/author/<author>'.format(settings.ROUTE))
 def get_collection_author(author):
     session = Session()
@@ -249,23 +227,6 @@ def get_collection_author(author):
     session.close()
 
     return jsonify({'result': result})
-
-
-@app.route('{}/asset/<int:asset_id>'.format(settings.ROUTE), methods=['GET'])
-def get_asset_id(asset_id):
-    # TODO: Doc string
-    if request.method=='GET':
-        session = Session()
-        raw_asset = get_asset_by_id(session, asset_id)
-        asset = make_dict((raw_asset,))
-
-    else:
-
-        session.close()
-        return jsonify({'asset': 'failed - endpoint only accepts GET methods'})
-
-    session.close()
-    return jsonify({'asset': asset})
 
 
 @app.route('{}/item/<int:asset_id>'.format(settings.ROUTE), methods=['GET'])
@@ -286,31 +247,6 @@ def get_item(asset_id):
 
 
 # crud
-@app.route(
-    '{}/collection/delete/<int:collection_id>'.format(settings.ROUTE), methods=['DELETE']
-    )
-def delete_collection(collection_id):
-    # TODO: make better responce
-    if request.method=='DELETE':
-        session = Session()
-        asset = del_collection(session, collection_id)
-
-        if collection_id:
-            result = {
-                'Action': 'successful',
-                'collection id': 'IMP'
-            }
-            session.close()
-            return jsonify({'DELETE collection/delete/': result})
-        else:
-            result = {
-                'Action': 'fail',
-                'collection id': 'IMP'
-            }
-            session.close()
-            return jsonify({'DELETE collection/delete/': result})
-
-
 @app.route('{}/item/delete/<int:asset_id>'.format(settings.ROUTE), methods=['DELETE'])
 def delete_asset(asset_id):
     # TODO: make better responce
@@ -339,21 +275,6 @@ def delete_asset(asset_id):
     return jsonify({'DELETE asset/delete/': 'error?'})
 
 
-@app.route('{}/asset/patch'.format(settings.ROUTE), methods=['PATCH'])
-def patch_asset_id():
-    # TODO: dont use try/except here
-
-    patch_data = {}
-    for y in request.args:
-        patch_data[y] = request.args[y]
-
-    session = Session()
-    patched_asset = patch_asset(session, **patch_data)
-    session.close()
-
-    return jsonify({'PATCH': patched_asset})
-
-
 @app.route('{}/item/patch'.format(settings.ROUTE), methods=['PATCH'])
 def patch_item():
     # TODO: dont use try/except here
@@ -367,19 +288,6 @@ def patch_item():
     session.close()
 
     return jsonify({'PATCH': patched_asset})
-
-
-@app.route('{}/collection/patch'.format(settings.ROUTE), methods=['PATCH'])
-def patch_collection_id():
-    patch_data = {}
-    for x in request.args:
-        patch_data[x] = request.args.get(x)
-
-    session = Session()
-    patched_collection = patch_collection(session, **patch_data)
-    session.close()
-
-    return jsonify({'PATCH': patched_collection})
 
 
 # item types

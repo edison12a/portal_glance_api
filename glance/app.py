@@ -449,7 +449,7 @@ def favorite():
     if logged_in(session):
         # data to send... collections made by user
         r = requests.get(
-            '{}/author/{}'.format(API_COLLECTION, session['user'])
+            '{}collection/author/{}'.format(API, session['user'])
         )
 
         data = ['test', 'test2']
@@ -505,7 +505,7 @@ def search():
         pass
         # search_data['filter'] = 'all'
 
-    r = requests.get('{}/query'.format(API), params=search_data)
+    r = requests.get('{}query'.format(API), params=search_data)
 
     return render_template('search.html', data=search_data, items=r.json()['result'])
 

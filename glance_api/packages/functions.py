@@ -41,6 +41,7 @@ def __reset_db(session, engine):
 
 
 # helper functions
+'''
 def make_dict(item_list):
     """ takes list of database objects, returns dict repr of objects. """
     # TODO: using '__tablename__' on objects does the same jobs as 'item_type'
@@ -128,7 +129,7 @@ def make_dict(item_list):
 
     # return database objects as dicts.
     return result
-
+'''
 
 def to_dict(item_list):
     """ takes list of database objects, returns dict repr of objects. """
@@ -197,29 +198,6 @@ def get_tag(session, data):
     return Fales
 
 
-def get_collections(session):
-    """Returns list of dict collection objects"""
-    # querys for all Collection objects in order of id, appends to list
-    # TODO: This should return objects in order of moddate
-    collections = []
-    for collection in session.query(Collection).order_by(Collection.id):
-        collections.append(collection)
-
-    # return raw db objects
-    return collections
-
-
-def get_assets(session):
-    """Returns all asset objects"""
-    # querys for all asset objects in order of moddate, appends to list
-    assets = []
-    for asset in session.query(Asset).order_by(Asset.moddate):
-        assets.append(asset)
-
-    # returns raw db objects
-    return assets
-
-
 def get_items(session, filter='all'):
     """Returns all asset objects"""
     # TODO: IMP filtering
@@ -234,24 +212,6 @@ def get_items(session, filter='all'):
     return result
 
 
-def get_footages(session):
-    """Returns all footage objects"""
-    # querys for all asset objects in order of moddate, appends to list
-    footages = []
-    for footage in session.query(Footage).order_by(Footage.moddate):
-        assets.append(footage)
-
-    # returns raw db objects
-    return footages
-
-
-def get_asset_by_id(session, id):
-    """Return asset object as a dict using Asset.id"""
-    # querys for asset object
-    asset_by_id = session.query(Asset).get(id)
-
-    # returns raw asset
-    return asset_by_id
 
 
 def get_item_by_id(session, id):
@@ -261,14 +221,6 @@ def get_item_by_id(session, id):
 
     # returns raw asset
     return asset_by_id
-
-
-def get_collection_by_id(session, id):
-    """Returns collection object as dict using Collection.id"""
-    # querys for collection object
-    collection_by_id = session.query(Collection).get(id)
-
-    return collection_by_id
 
 
 def get_collection_by_author(session, author):
@@ -323,22 +275,6 @@ def get_query(session, userquery):
                     item_list.append(item)
 
     return item_list
-
-
-def get_query_flag(session, flag):
-    """ Returns list of flagged items """
-    result = []
-    # collection assets
-    assets = session.query(Asset).filter(int(flag)>0).all()
-    for x in assets:
-        result.append(make_dict((x,))[0])
-
-    # collect collections
-    collections = session.query(Collection).filter(int(flag)>0).all()
-    for x in collections:
-        result.append(make_dict((x,))[0])
-
-    return result
 
 
 def get_user(session, **kwarg):
@@ -405,108 +341,6 @@ def post_asset(session, **kwarg):
     session.commit()
 
     return asset
-
-
-def patch_asset(session, **user_columns):
-    """updates asset fields using user data"""
-    # TODO: This is a pretty heftly function... needs refactoring
-
-    # init query dict
-    query = {}
-    # asset id
-    id = int(user_columns['id'])
-
-    # build list of assets column names for validation
-    asset_columns = Asset.__table__.columns.keys()
-
-    # validate user data and build query dict, from data.
-    for k, v in user_columns.items():
-        if k in asset_columns:
-            query[k] = v
-
-        else:
-            pass
-
-        # additional many-to-many data
-        if k == 'collections':
-            query[k] = v.split()
-
-        elif k == 'tags':
-            query['tags'] = v.split()
-
-        else:
-            pass
-
-    # once all user data is validated and ready to append, get asset object.
-    asset = session.query(Asset).get(id)
-
-    # Process user data and update asset object fields.
-    # TODO: is there a better way to handle these sort of 'flags'?
-    for k, v in query.items():
-        if k == 'name':
-            asset.name = v
-
-        elif k == 'image':
-            asset.image = v
-
-        elif k == 'image_thumb':
-            asset.image_thumb = v
-
-        elif k == 'attached':
-            asset.attached = v
-
-        elif k == 'tags':
-            # process asset tags
-            for tag in v:
-                # create new Tag object and append to asset object
-                # TODO: Could this be a point to implement a 'set{}' for
-                # duplicutes
-                newtag = Tag(name=str(tag))
-                session.add(newtag)
-
-                asset.tags.append(newtag)
-
-        elif k == 'flag':
-            # process flag field
-            # if 'flag' is true value is increased
-            if int(query['flag']) == 1:
-                # TODO: is a try/except needed here?
-                try:
-                    asset.flag += 1
-
-                except TypeError:
-                    asset.flag = 0
-                    asset.flag += 1
-
-            # if 'flag' is false value is reduced
-            elif int(query['flag']) == 0:
-                asset.flag -= 1
-
-            # is the 'else:' 'pythonic'?
-            else:
-                pass
-
-        elif k == 'collections':
-            for collection_id in query['collections']:
-                # get Collection object using collection.id
-                existingcollection = session.query(Collection).get(collection_id)
-                # append existing collection to assets collections
-                asset.collections.append(existingcollection)
-
-        else:
-            pass
-
-    # Finish asset object
-    # append object moddate
-    asset.moddate = datetime.datetime.utcnow()
-
-    session.add(asset)
-    session.commit()
-
-    result = make_dict((asset,))
-
-    # Returns asset object
-    return result
 
 
 def patch_item_by_id(session, **user_columns):
@@ -616,121 +450,6 @@ def patch_item_by_id(session, **user_columns):
     return result
 
 
-def patch_collection(session, id, **user_columns):
-    """updates users defined columns with user defined values"""
-    # TODO: This is a pretty heftly function... needs refactoring
-    # init query dict
-
-    #init query dict
-    query = {}
-
-    # build list of collections columnnams for validation
-    collection_columns = Collection.__table__.columns.keys()
-
-    # validdate uer data and build query dict, from data.
-    for k, v in user_columns.items():
-        if k in collection_columns:
-            query[k] = v
-
-        else:
-            pass
-
-        # additional many-to-many data
-        if k == 'assets':
-            query[k] = v.split()
-
-        elif k == 'tags':
-            query[k] = v.split()
-
-        elif k == 'remove_assets':
-            query[k] = v.split()
-
-        else:
-            pass
-
-    # once all user data is alidate and ready to append, get collection object
-    collection = session.query(Collection).get(id)
-
-    # process user data and update collection object fields.
-    # TODO: is there a better way to handle these sort of 'flags'?
-    for k, v in query.items():
-        if k == 'name':
-            collection.name = v
-
-        elif k == 'image':
-            collection.image = v
-
-        elif k == 'image_thumb':
-            collection.image_thumb = v
-
-        elif k == 'assets':
-            for asset_id in v:
-                # TODO: dont use try/except for control flow
-                try:
-                    # get asset object and append to collection
-                    newasset = session.query(Asset).get(int(asset_id))
-                    collection.assets.append(newasset)
-
-                except:
-                    pass
-
-        elif k == 'remove_assets':
-            for asset_id in v:
-                # TODO: dont use try/except for this
-                try:
-                    # get asset object and remove from collection.
-                    # TODO: is there a quicker way? without getting the object first?
-                    removeasset = session.query(Asset).get(int(asset_id))
-                    collection.assets.remove(removeasset)
-
-                except:
-                    pass
-
-        elif k == 'tags':
-            for x in v:
-                # create to Tag objects and append to collection.
-                # TODO: Could this be a point to implement a 'set{}' for
-                # duplicutes
-                newtag = Tag(name=str(x))
-                session.add(newtag)
-
-                collection.tags.append(newtag)
-
-        elif k == 'flag':
-            # process flag field
-            # if 'flag' is true value is increased
-            if int(query['flag']) == 1:
-                # TODO: is a try/except needed here?
-                try:
-                    collection.flag += 1
-
-                except TypeError:
-                    collection.flag = 0
-                    collection.flag += 1
-
-            # if 'flag' is false value is reduced
-            elif int(query['flag']) == 0:
-                collection.flag -= 1
-
-            # is the 'else:' 'pythonic'?
-            else:
-                pass
-        else:
-            pass
-
-    # Finish asset object
-    # append object moddate
-    collection.moddate = datetime.datetime.utcnow()
-
-    session.add(collection)
-    session.commit()
-
-    result = make_dict((collection,))
-
-    # Returns collection object
-    return result
-
-
 def del_item(session, id):
     """deletes item object"""
     # TODO: also delete physical files.
@@ -748,20 +467,6 @@ def del_item(session, id):
             print('deleting {}'.format(x))
             session.delete(x)
 
-    session.commit()
-
-    return True
-
-
-def del_collection(session, collection_id):
-    """deletes collection object"""
-    # TODO: also delete physical files.
-    # TODO: IMP aset database?
-    # get collection
-    collection = session.query(Collection).filter(Collection.id=='{}'.format(collection_id)).first()
-    # delete collection
-    session.delete(collection)
-    # and commit to session.
     session.commit()
 
     return True

@@ -10,8 +10,7 @@ __license__ = ""
 import os
 
 # Glance api
-api_detail = ['HOST_IP', 'HOST_POST']
-API_HOST = 'http://{}:{}/'.format(api_detail[0], api_detail[1])
+api_root = 'http://localhost:5050/glance/api/'
 
 # flask
 secret_key = os.urandom(12)
