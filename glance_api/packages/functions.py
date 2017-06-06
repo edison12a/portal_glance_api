@@ -93,6 +93,39 @@ def to_dict(item_list):
     # return database objects as dicts.
     return result
 
+# auth
+def get_user(session, **kwarg):
+
+    # TODO: if test == NONETYPE, return False
+
+    test = session.query(User).filter_by(username=kwarg['username']).first()
+
+    if test is not None and test.password == kwarg['password']:
+        result = True
+    else:
+        result = False
+
+    # returns raw db objects
+    return result
+
+
+def post_user(session, **kwarg):
+    data = {}
+
+    # process user input
+    for k, v in kwarg.items():
+        data[k] = v
+
+    # Database entry
+    user = User(
+        username=data['username'], password=data['password']
+    )
+
+    session.add(user)
+    session.commit()
+
+    return user
+
 
 # query
 # TODO: Can all these get_query_* re refactored to a single methods? using
@@ -162,40 +195,8 @@ def get_query(session, userquery):
     return item_list
 
 
-def get_user(session, **kwarg):
-
-    # TODO: if test == NONETYPE, return False
-
-    test = session.query(User).filter_by(username=kwarg['username']).first()
-
-    if test is not None and test.password == kwarg['password']:
-        result = True
-    else:
-        result = False
-
-    # returns raw db objects
-    return result
-
 
 # crud
-def post_user(session, **kwarg):
-    data = {}
-
-    # process user input
-    for k, v in kwarg.items():
-        data[k] = v
-
-    # Database entry
-    user = User(
-        username=data['username'], password=data['password']
-    )
-
-    session.add(user)
-    session.commit()
-
-    return user
-
-
 def post_collection(session, **kwarg):
     print('AM I HERE?!?!?!')
     payload = {}
@@ -319,7 +320,7 @@ class Item():
         return True
 
     # item type posts
-    # TODO: mmm
+    # TODO: collections, tags
     def post(self, kwarg):
         """post item to database
         kwarg: dict. user data to process.
