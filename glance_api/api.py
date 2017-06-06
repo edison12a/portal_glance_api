@@ -14,7 +14,6 @@ from sqlalchemy import create_engine
 from config import settings
 from packages.functions import (
     __reset_db, get_query, post_user, get_user, to_dict,
-    patch_item_by_id,
     post_collection, get_tag, get_collection_by_author, Item
     )
 
@@ -279,6 +278,7 @@ def delete_asset(asset_id):
 
 @app.route('{}/item/patch'.format(settings.ROUTE), methods=['PATCH'])
 def patch_item():
+
     # TODO: dont use try/except here
 
     patch_data = {}
@@ -286,10 +286,11 @@ def patch_item():
         patch_data[y] = request.args[y]
 
     session = Session()
-    patched_asset = patch_item_by_id(session, **patch_data)
+    raw_item = Item(session).patch(patch_data)
+    item = to_dict((raw_item,))
     session.close()
 
-    return jsonify({'PATCH': patched_asset})
+    return jsonify({'PATCH': item})
 
 
 

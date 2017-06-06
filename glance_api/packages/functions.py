@@ -108,7 +108,6 @@ def get_tag(session, data):
     return Fales
 
 
-
 def get_collection_by_author(session, author):
     collection_by_author = session.query(Collection).filter_by(author=author).all()
     return collection_by_author
@@ -179,113 +178,6 @@ def get_user(session, **kwarg):
 
 
 # crud
-def patch_item_by_id(session, **user_columns):
-    """updates asset fields using user data"""
-    # TODO: This is a pretty heftly function... needs refactoring
-
-    # init query dict
-    query = {}
-
-    # asset id
-    id = int(user_columns['id'])
-
-    # build list of assets column names for validation
-    # asset_columns = Item.__table__.columns.keys()
-    # print(asset_columns)
-
-    # validate user data and build query dict, from data.
-    for k, v in user_columns.items():
-        # additional many-to-many data
-        if k == 'collections':
-            query[k] = v.split()
-        elif k == 'items':
-            query[k] = v.split()
-
-        elif k == 'tags':
-            query['tags'] = v.split()
-
-        else:
-            query[k] = v
-
-    # once all user data is validated and ready to append, get asset object.
-    asset = session.query(Item).get(id)
-
-    # Process user data and update asset object fields.
-    # TODO: is there a better way to handle these sort of 'flags'?
-    for k, v in query.items():
-        if k == 'name':
-            asset.name = v
-
-        elif k == 'image':
-            asset.image = v
-
-        elif k == 'image_thumb':
-            asset.image_thumb = v
-
-        elif k == 'attached':
-            asset.attached = v
-
-        elif k == 'tags':
-            # process asset tags
-            for tag in v:
-                # create new Tag object and append to asset object
-                # TODO: Could this be a point to implement a 'set{}' for
-                # duplicutes
-                newtag = Tag(name=str(tag))
-                session.add(newtag)
-
-                asset.tags.append(newtag)
-
-        elif k == 'items':
-            # process asset tags
-            for item in v:
-                item_to_collection = session.query(Item).get(int(item))
-                asset.items.append(item_to_collection)
-                session.add(asset)
-
-        elif k == 'flag':
-            # process flag field
-            # if 'flag' is true value is increased
-            if int(query['flag']) == 1:
-                # TODO: is a try/except needed here?
-                try:
-                    asset.flag += 1
-
-                except TypeError:
-                    asset.flag = 0
-                    asset.flag += 1
-
-            # if 'flag' is false value is reduced
-            elif int(query['flag']) == 0:
-                asset.flag -= 1
-
-            # is the 'else:' 'pythonic'?
-            else:
-                pass
-
-        elif k == 'collections':
-            for collection_id in query['collections']:
-                # get Collection object using collection.id
-                existingcollection = session.query(Collection).get(collection_id)
-                # append existing collection to assets collections
-                asset.collections.append(existingcollection)
-
-        else:
-            pass
-
-    # Finish asset object
-    # append object moddate
-    asset.moddate = datetime.datetime.utcnow()
-
-    session.add(asset)
-    session.commit()
-
-    result = to_dict((asset,))
-
-    # Returns asset object
-    return result
-
-
 def post_user(session, **kwarg):
     data = {}
 
@@ -323,7 +215,7 @@ def post_collection(session, **kwarg):
             pass
 
     # Database entry
-    item = Collection(
+    item = packages.models.Collection(
         name = data['name'],
         item_loc = data['item_loc'],
         item_thumb = data['item_thumb'],
@@ -340,14 +232,14 @@ def post_collection(session, **kwarg):
             # TODO: refactor the below its checking to see if the tags exists already
             #if it does then just append that tag with the item object.
             #else make a new tag object
-            test = session.query(Tag).filter_by(name=tag).first()
+            test = session.query(packages.models.Tag).filter_by(name=tag).first()
 
             if test:
                 test.items.append(item)
                 session.add(test)
                 session.commit()
             else:
-                newtag = Tag(name=str(tag))
+                newtag = packages.models.Tag(name=str(tag))
                 session.add(newtag)
                 session.commit()
 
@@ -361,10 +253,10 @@ def post_collection(session, **kwarg):
 
     if 'items' in payload:
 
-        collection = session.query(Collection).get(item.id)
+        collection = session.query(packages.models.Collection).get(item.id)
 
         for item_id in payload['items'].split(' '):
-            item_to_append = session.query(Item).get(int(item_id))
+            item_to_append = session.query(packages.models.Item).get(int(item_id))
             collection.items.append(item_to_append)
             session.add(collection)
             session.commit()
@@ -474,7 +366,7 @@ class Item():
 
 
         # prepare tags for item
-        '''
+
         # after entry is commited then hit the database with any new tags?
         # is this the best way?
         if 'tags' in payload:
@@ -502,9 +394,116 @@ class Item():
         session.commit()
 
         return item
-        '''
+
         return item
 
+    def patch(self, kwarg):
+
+        print(kwarg)
+        """updates asset fields using user data"""
+        # TODO: This is a pretty heftly function... needs refactoring
+
+        # init query dict
+        query = {}
+
+        # asset id
+        id = int(kwarg['id'])
+
+        # build list of assets column names for validation
+        # asset_columns = Item.__table__.columns.keys()
+        # print(asset_columns)
+
+        # validate user data and build query dict, from data.
+        for k, v in kwarg.items():
+            # additional many-to-many data
+            if k == 'collections':
+                query[k] = v.split()
+            elif k == 'items':
+                query[k] = v.split()
+
+            elif k == 'tags':
+                query['tags'] = v.split()
+
+            else:
+                query[k] = v
+
+
+        # once all user data is validated and ready to append, get asset object.
+        asset = self.session.query(packages.models.Item).get(id)
+        # Process user data and update asset object fields.
+        # TODO: is there a better way to handle these sort of 'flags'?
+        for k, v in query.items():
+            if k == 'name':
+                asset.name = v
+
+            elif k == 'image':
+                asset.image = v
+
+            elif k == 'image_thumb':
+                asset.image_thumb = v
+
+            elif k == 'attached':
+                asset.attached = v
+
+            elif k == 'tags':
+                # process asset tags
+                for tag in v:
+                    # create new Tag object and append to asset object
+                    # TODO: Could this be a point to implement a 'set{}' for
+                    # duplicutes
+                    newtag = packages.models.Tag(name=str(tag))
+                    self.session.add(newtag)
+
+                    asset.tags.append(newtag)
+
+            elif k == 'items':
+                # process asset tags
+                for item in v:
+                    item_to_collection = self.session.query(packages.models.Item).get(int(item))
+                    asset.items.append(item_to_collection)
+                    self.session.add(asset)
+
+            elif k == 'flag':
+                # process flag field
+                # if 'flag' is true value is increased
+                if int(query['flag']) == 1:
+                    # TODO: is a try/except needed here?
+                    try:
+                        asset.flag += 1
+
+                    except TypeError:
+                        asset.flag = 0
+                        asset.flag += 1
+
+                # if 'flag' is false value is reduced
+                elif int(query['flag']) == 0:
+                    asset.flag -= 1
+
+                # is the 'else:' 'pythonic'?
+                else:
+                    pass
+
+            elif k == 'collections':
+                for collection_id in query['collections']:
+                    # get Collection object using collection.id
+                    existingcollection = self.session.query(packages.models.Collection).get(collection_id)
+                    # append existing collection to assets collections
+                    asset.collections.append(existingcollection)
+
+            else:
+                pass
+
+        # Finish asset object
+        # append object moddate
+        asset.moddate = datetime.datetime.utcnow()
+
+        self.session.add(asset)
+        self.session.commit()
+
+        # result = to_dict((asset,))
+
+        # Returns asset object
+        return asset
 
 
     def __repr__(self):

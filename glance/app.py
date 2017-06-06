@@ -154,9 +154,12 @@ def uploading():
                     # collection at the beginning? does it matter? Its not dry.
                     # TODO: Make this a helper
                     res = r.json()
+                    print('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD')
+                    print(res)
                     for x in res:
-                        item_id = res[x]['location'].split('/')[-1]
+                        item_id = res['POST: /item'][0]['id']
                         upload_data['items_for_collection'].append(item_id)
+
 
             elif upload_data['itemradio'] == 'footage':
                 # build payload for api
@@ -227,7 +230,6 @@ def uploading():
                         item_id = res[x]['location'].split('/')[-1]
                         upload_data['items_for_collection'].append(item_id)
 
-
             elif upload_data['itemradio'] == 'people':
                 # build payload for api
 
@@ -257,7 +259,6 @@ def uploading():
                     for x in res:
                         item_id = res[x]['location'].split('/')[-1]
                         upload_data['items_for_collection'].append(item_id)
-
 
             elif upload_data['itemradio'] == 'collection':
                 # build payload for api
@@ -291,12 +292,17 @@ def uploading():
                         'author': session['user']
                     }
 
+                    print('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
+                    print(payload)
+
                     r = requests.post('{}'.format(API_ITEM), params=payload)
+
 
                     res = r.json()
                     for x in res:
-                        item_id = res[x]['location'].split('/')[-1]
+                        item_id = res['POST: /item'][0]['id']
                         bla = requests.get('{}/{}'.format(API_ITEM, item_id))
+
 
                         return render_template('collection.html', item=bla.json()['item'])
 
@@ -309,6 +315,7 @@ def uploading():
 
 @app.route('/patch', methods=['POST'])
 def patch_item():
+    print('pppppppppppppppppppppppppppppppppphgh')
 
     data = {}
     if request.method == 'POST':
@@ -330,11 +337,15 @@ def patch_item():
 
 
     r = requests.patch('{}/patch'.format(API_ITEM), params=data)
+    print('pppppppppppppppppppppppppppppppppppp')
+    r.json()
 
+    '''
     responce = r.json()['PATCH']
     for x in responce:
         if 'id' in x:
             return item(x['id'])
+    '''
 
     return home()
 
