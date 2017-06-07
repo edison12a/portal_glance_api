@@ -1,5 +1,0 @@
-glance_api.packages.functions
-===================
-
-.. automodule:: glance_api.packages.functions
-  :members:
