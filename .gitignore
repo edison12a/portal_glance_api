@@ -1,10 +1,14 @@
 # Credentials_Secrets
 cred.py
-config/
 
 # setup.py junk
 .eggs/
 glance.egg-info/
+build/
+dist/
+
+# Sphinx docs
+docs/_build/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
