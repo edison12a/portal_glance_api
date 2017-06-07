@@ -7,13 +7,13 @@ __version__ = ""
 __license__ = ""
 
 import os
+import subprocess
 
 from PIL import Image, ImageOps
-import subprocess
 import boto3
 
-import modules.auth as auth
-from config import settings
+import glance.modules.auth as auth
+from glance.config import settings
 
 
 # AWS Rekognition
@@ -22,7 +22,6 @@ def generate_tags(data):
     response = auth.boto3_rek_tag(client, data)
 
     result = [x['Name'] for x in response['Labels']]
-
 
     return result
 

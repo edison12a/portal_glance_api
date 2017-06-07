@@ -11,8 +11,8 @@ import secrets
 
 import boto3
 
-import modules.image as image
-import modules.auth as auth
+import glance.modules.image as image
+import glance.modules.auth as auth
 
 
 def upload_handler(file, dst):

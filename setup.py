@@ -6,10 +6,10 @@ __author__ = ""
 __version__ = ""
 __license__ = ""
 
-from setuptools import setup
-
 # example
 """
+from setuptools import setup
+
 setup(
     name='flaskr',
     packages=['flaskr'],
@@ -25,7 +25,7 @@ setup(
     ],
 )
 """
-
+"""
 from setuptools import setup
 
 setup(
@@ -36,4 +36,12 @@ setup(
     tests_require=[
         'pytest',
     ],
+)
+"""
+
+from setuptools import setup, find_packages
+
+setup(
+    name='glance',
+    packages=find_packages()
 )

@@ -10,8 +10,8 @@ import os
 import requests
 import boto3
 
-from config import cred
-from config import settings
+from glance.config import cred
+from glance.config import settings
 
 
 # basic unencrypted user auth using the api and flasks `session`.

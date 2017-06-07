@@ -1,25 +1,28 @@
-api docs
---
+Api
+===================
 
-config
---
-Glance api configuration is brokwn up between 2 files. `config/settings.py` and `config/cred.py`
+Config
+------
 
+Glance api configuration is broken up between 2 files. ``config/settings.py`` and ``config/cred.py``
 
-cred.py contains all credential information and is decoupled for portability. For structure refer to `EXAMPLE_cred.py`.
+**settings.py**
+  settings.py manages all of the api's config.
 
-settings.py manages all of the api's config.
+**cred.py**
+  cred.py contains all credential information and is decoupled for portability. For structure refer to `EXAMPLE_cred.py`.
 
 server setup
---
+------------
+
 tested on ubuntu 14.04
 
 sudo apt-get update
 sudo apt-get install python3-pip python3-dev libpq-dev postgresql postgresql-contrib nginx
 
 
-postgres set up
---
+Postgres set up
+---------------
 
 Commands below for toy database setup in postgres. ubuntu.
 
@@ -43,14 +46,14 @@ First `cd` to postgresql installtion dir. For me on ubuntu its
 open `postgresql.conf` and find the line `#listen_addresses = 'localhost'`.
 Uncomment it and replace `localhost` with `*`.
 
-.. code-block:: cmd
+::
 
     listen_addresses = '*'
 
 
 Next open `pg_hba.conf` and add the below lines to the top of the file.
 
-.. code-block:: cmd
+::
 
     host all all 192.168.0.0/24 md5
     host all all 0.0.0.0/0 md5

@@ -1,0 +1,172 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Api &#8212; Glance 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="App" href="app.html" />
+    <link rel="prev" title="Welcome to Glance’s documentation!" href="index.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="app.html" title="App"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Glance’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Glance 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="api">
+<h1>Api<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="config">
+<h2>Config<a class="headerlink" href="#config" title="Permalink to this headline">¶</a></h2>
+<p>Glance api configuration is broken up between 2 files. <code class="docutils literal"><span class="pre">config/settings.py</span></code> and <code class="docutils literal"><span class="pre">config/cred.py</span></code></p>
+<dl class="docutils">
+<dt><strong>settings.py</strong></dt>
+<dd>settings.py manages all of the api’s config.</dd>
+<dt><strong>cred.py</strong></dt>
+<dd>cred.py contains all credential information and is decoupled for portability. For structure refer to <cite>EXAMPLE_cred.py</cite>.</dd>
+</dl>
+</div>
+<div class="section" id="server-setup">
+<h2>server setup<a class="headerlink" href="#server-setup" title="Permalink to this headline">¶</a></h2>
+<p>tested on ubuntu 14.04</p>
+<p>sudo apt-get update
+sudo apt-get install python3-pip python3-dev libpq-dev postgresql postgresql-contrib nginx</p>
+</div>
+<div class="section" id="postgres-set-up">
+<h2>Postgres set up<a class="headerlink" href="#postgres-set-up" title="Permalink to this headline">¶</a></h2>
+<p>Commands below for toy database setup in postgres. ubuntu.</p>
+<p>“””
+Set up dev database, if False</p>
+<p>sudo -u postgres psql
+CREATE DATABASE glance;
+CREATE USER glance_user WITH PASSWORD ‘password’;
+ALTER ROLE glance_user SET client_encoding TO ‘utf8’;
+ALTER ROLE glance_user SET default_transaction_isolation TO ‘read committed’;
+ALTER ROLE glance_user SET timezone TO ‘UTC’;
+GRANT ALL PRIVILEGES ON DATABASE glance TO glance_user;
+“”“</p>
+<p>if hosting postgresql on a different server to the glancec api. a few edits need
+to be made in <cite>postgresql.conf</cite> and <cite>pg_hba.conf</cite>.</p>
+<p>First <cite>cd</cite> to postgresql installtion dir. For me on ubuntu its
+<cite>etc/postgresql/9.5/main</cite>
+open <cite>postgresql.conf</cite> and find the line <cite>#listen_addresses = ‘localhost’</cite>.
+Uncomment it and replace <cite>localhost</cite> with <cite>*</cite>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">listen_addresses</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
+</pre></div>
+</div>
+<p>Next open <cite>pg_hba.conf</cite> and add the below lines to the top of the file.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">host</span> <span class="nb">all</span> <span class="nb">all</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">24</span> <span class="n">md5</span>
+<span class="n">host</span> <span class="nb">all</span> <span class="nb">all</span> <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">0</span> <span class="n">md5</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Api</a><ul>
+<li><a class="reference internal" href="#config">Config</a></li>
+<li><a class="reference internal" href="#server-setup">server setup</a></li>
+<li><a class="reference internal" href="#postgres-set-up">Postgres set up</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Glance’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="app.html"
+                        title="next chapter">App</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="app.html" title="App"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Glance’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Glance 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, vhdev.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.2.
+    </div>
+  </body>
+</html>

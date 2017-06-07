@@ -1,0 +1,609 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>glance_api.packages.functions &#8212; Glance 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Glance 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for glance_api.packages.functions</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains functions for api</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+<span class="c1"># TODO: classes needed?</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="k">import</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">Base</span><span class="p">,</span> <span class="n">Footage</span><span class="p">,</span> <span class="n">User</span><span class="p">,</span> <span class="n">Item</span><span class="p">,</span> <span class="n">Image</span><span class="p">,</span> <span class="n">Geometry</span><span class="p">,</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">Tag</span><span class="p">,</span> <span class="n">tag_ass</span><span class="p">,</span> <span class="n">People</span>
+<span class="kn">import</span> <span class="nn">glance_api.packages.models</span>
+
+<span class="c1"># dev functions</span>
+<span class="k">def</span> <span class="nf">__reset_db</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;DEV: drops tables and rebuild&quot;&quot;&quot;</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">sqlalchemy</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">MetaData</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="n">meta</span><span class="o">.</span><span class="n">reflect</span><span class="p">()</span>
+        <span class="n">meta</span><span class="o">.</span><span class="n">drop_all</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;----------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Table have not been deleted.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;----------------------------&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;---------------------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tables have not been built.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;---------------------------&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;----------------------------------------&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tables removed, and re-built successful.&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;----------------------------------------&#39;</span><span class="p">)</span>
+
+    <span class="c1"># TODO: is return True &#39;pythonic&#39;, something better?</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="c1"># helper functions</span>
+<div class="viewcode-block" id="to_dict"><a class="viewcode-back" href="../../../api/source.html#glance_api.packages.functions.to_dict">[docs]</a><span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="n">item_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; takes list of database objects, returns dict repr of objects. &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: using &#39;__tablename__&#39; on objects does the same jobs as &#39;item_type&#39;</span>
+    <span class="c1"># any point in having it as column?</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># check if `item_list` is iterable</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">item_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">item_list</span><span class="p">,)</span>
+
+    <span class="c1"># remove duplicate results</span>
+    <span class="n">item_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">item_list</span><span class="p">))</span>
+
+    <span class="c1"># for each database object, build dict, &#39;item&#39;, from data.</span>
+    <span class="k">for</span> <span class="n">item_object</span> <span class="ow">in</span> <span class="n">item_list</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">item_object</span><span class="o">.</span><span class="n">__table__</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">item</span><span class="p">[</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">item_object</span><span class="p">,</span> <span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="c1"># init tags</span>
+        <span class="n">item</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">assets_tags</span> <span class="o">=</span> <span class="n">item_object</span><span class="o">.</span><span class="n">tags</span>
+
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">assets_tags</span><span class="p">:</span>
+            <span class="n">item</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="c1"># init collections</span>
+        <span class="k">if</span> <span class="n">item_object</span><span class="o">.</span><span class="n">item_type</span> <span class="o">==</span> <span class="s1">&#39;collection&#39;</span><span class="p">:</span>
+
+            <span class="n">item</span><span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">item_object</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+                <span class="n">item</span><span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">][</span><span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="s1">&#39;item_thumb&#39;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">item_thumb</span><span class="p">,</span>
+                    <span class="s1">&#39;item_type&#39;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">item_type</span>
+                <span class="p">}</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">item</span><span class="p">[</span><span class="s1">&#39;collections&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">item_object</span><span class="o">.</span><span class="n">collections</span><span class="p">:</span>
+                <span class="n">item</span><span class="p">[</span><span class="s1">&#39;collections&#39;</span><span class="p">][</span><span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="s1">&#39;item_thumb&#39;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">item_thumb</span><span class="p">,</span>
+                    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span>
+                <span class="p">}</span>
+
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="c1"># return database objects as dicts.</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+<span class="c1"># auth</span>
+<span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg</span><span class="p">):</span>
+
+    <span class="c1"># TODO: if test == NONETYPE, return False</span>
+
+    <span class="n">test</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">User</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">kwarg</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">test</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">password</span> <span class="o">==</span> <span class="n">kwarg</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># returns raw db objects</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">post_user</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># process user input</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwarg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="c1"># Database entry</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span>
+        <span class="n">username</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">],</span> <span class="n">password</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">user</span>
+
+
+<span class="c1"># query</span>
+<span class="c1"># TODO: Can all these get_query_* re refactored to a single methods? using</span>
+<span class="c1"># flags or something.</span>
+<span class="k">def</span> <span class="nf">get_tag</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Tag</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># TODO: IF data == &#39;id&#39; return that ids tags.</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">Fales</span>
+
+
+<span class="k">def</span> <span class="nf">get_collection_by_author</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">author</span><span class="p">):</span>
+    <span class="n">collection_by_author</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Collection</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">author</span><span class="o">=</span><span class="n">author</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">collection_by_author</span>
+
+
+<div class="viewcode-block" id="get_query"><a class="viewcode-back" href="../../../api/source.html#glance_api.packages.functions.get_query">[docs]</a><span class="k">def</span> <span class="nf">get_query</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">userquery</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;takes list of words and returns related objects&quot;&quot;&quot;</span>
+    <span class="c1"># TODO: currently searching every table with every query term, multiple</span>
+    <span class="c1"># searches. gotta be a better way. look into postgres joins?</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># makes users query a dict</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">userquery</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="s1">&#39;filter&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">query</span><span class="p">:</span>
+        <span class="n">query</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">query</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># querying through many-to-many relationships leaves us with an</span>
+    <span class="c1"># instrumentedlist which needs to be exracted before using make_dict</span>
+    <span class="n">item_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">query</span><span class="p">[</span><span class="s1">&#39;query&#39;</span><span class="p">]:</span>
+        <span class="c1"># return list of tags</span>
+        <span class="k">if</span> <span class="n">term</span> <span class="o">==</span> <span class="s1">&#39;**&#39;</span><span class="p">:</span>
+            <span class="c1"># TODO: This is suuuuper slow. query item table directly.</span>
+            <span class="n">taglists</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Tag</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">taglists</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Tag</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">term</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+        <span class="c1"># for each tag</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">taglists</span><span class="p">:</span>
+            <span class="c1"># if one exists</span>
+            <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+                <span class="c1"># get asset assigned to tag and append to list, &#39;item_list&#39;</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">tag</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+                    <span class="c1"># return data according to the filter information</span>
+                    <span class="k">if</span> <span class="n">query</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                        <span class="n">item_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">item_type</span> <span class="o">==</span> <span class="n">query</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">]:</span>
+                            <span class="n">item_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">pass</span>
+            <span class="c1"># get collection assigned to tag and append to list, &#39;item_list&#39;</span>
+            <span class="k">elif</span> <span class="n">tag</span><span class="o">.</span><span class="n">collection_tags</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">tag</span><span class="o">.</span><span class="n">collection_tags</span><span class="p">:</span>
+                    <span class="n">item_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">item_list</span></div>
+
+
+
+<span class="c1"># crud</span>
+<span class="k">def</span> <span class="nf">post_collection</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;AM I HERE?!?!?!&#39;</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># process user input</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwarg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">payload</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="c1"># remove attri that arnt in the database</span>
+    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">Collection</span><span class="o">.</span><span class="n">__table__</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">column</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">column</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># Database entry</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+        <span class="n">item_loc</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;item_loc&#39;</span><span class="p">],</span>
+        <span class="n">item_thumb</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;item_thumb&#39;</span><span class="p">],</span>
+        <span class="n">author</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span>
+
+    <span class="p">)</span>
+
+    <span class="c1"># after entry is commited then hit the database with any new tags?</span>
+    <span class="c1"># is this the best way?</span>
+    <span class="k">if</span> <span class="s1">&#39;tags&#39;</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+        <span class="n">tag_list</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_list</span><span class="p">:</span>
+
+            <span class="c1"># TODO: refactor the below its checking to see if the tags exists already</span>
+            <span class="c1">#if it does then just append that tag with the item object.</span>
+            <span class="c1">#else make a new tag object</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Tag</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">test</span><span class="p">:</span>
+                <span class="n">test</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+                <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">newtag</span> <span class="o">=</span> <span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Tag</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="p">))</span>
+                <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">newtag</span><span class="p">)</span>
+                <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+                <span class="n">item</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newtag</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;PAYLOADPAYLOADPAYLOAD&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="s1">&#39;items&#39;</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+
+        <span class="n">collection</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Collection</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">):</span>
+            <span class="n">item_to_append</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Item</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">item_id</span><span class="p">))</span>
+            <span class="n">collection</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_to_append</span><span class="p">)</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="c1"># TODO: sort out tags</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="c1"># commit changes to database</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">item</span>
+
+
+<span class="c1">## oop test</span>
+<div class="viewcode-block" id="Item"><a class="viewcode-back" href="../../../api/source.html#glance_api.packages.functions.Item">[docs]</a><span class="k">class</span> <span class="nc">Item</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Items&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+
+<div class="viewcode-block" id="Item.get"><a class="viewcode-back" href="../../../api/source.html#glance_api.packages.functions.Item.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get item</span>
+<span class="sd">        id: primary key of database item, `None` returns all</span>
+<span class="sd">        filter: item_type of database item, limit results to item_type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: imp control flow</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">filter</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">filter</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Item</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">items</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Item</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Item</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="nb">filter</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">items</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Item</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">item</span></div>
+
+<div class="viewcode-block" id="Item.delete"><a class="viewcode-back" href="../../../api/source.html#glance_api.packages.functions.Item.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; deletes item from database</span>
+<span class="sd">        id: primary key of database item,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Item</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">id</span><span class="p">)))</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+        <span class="c1"># check if any assciations remain on `Tag` if None then delete it.</span>
+        <span class="c1"># TODO: this should problely be handled by something else tag related?</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">items</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># delete the tag</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;deleting </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="c1"># item type posts</span>
+    <span class="c1"># TODO: collections, tags</span>
+<div class="viewcode-block" id="Item.post"><a class="viewcode-back" href="../../../api/source.html#glance_api.packages.functions.Item.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwarg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;post item to database</span>
+<span class="sd">        kwarg: dict. user data to process.</span>
+<span class="sd">        return: new `Item` object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: make item_types global?</span>
+        <span class="c1"># TODO: tags</span>
+        <span class="n">item_types</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;image&#39;</span><span class="p">:</span> <span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Image</span><span class="p">,</span>
+            <span class="s1">&#39;footage&#39;</span><span class="p">:</span> <span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Footage</span><span class="p">,</span>
+            <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Geometry</span><span class="p">,</span>
+            <span class="s1">&#39;people&#39;</span><span class="p">:</span> <span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">People</span><span class="p">,</span>
+            <span class="s1">&#39;collection&#39;</span><span class="p">:</span> <span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Collection</span>
+            <span class="p">}</span>
+
+        <span class="c1"># process universal data</span>
+        <span class="c1"># structures</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># process user input</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwarg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">payload</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="c1"># process user data</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">item_types</span><span class="p">[</span><span class="n">payload</span><span class="p">[</span><span class="s1">&#39;item_type&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">__table__</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">column</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">column</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="n">item</span> <span class="o">=</span> <span class="n">item_types</span><span class="p">[</span><span class="n">payload</span><span class="p">[</span><span class="s1">&#39;item_type&#39;</span><span class="p">]](</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="n">item_loc</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;item_loc&#39;</span><span class="p">],</span>
+            <span class="n">item_thumb</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;item_thumb&#39;</span><span class="p">],</span>
+            <span class="n">author</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">],</span>
+            <span class="n">attached</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;attached&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+
+        <span class="c1"># prepare tags for item</span>
+
+        <span class="c1"># after entry is commited then hit the database with any new tags?</span>
+        <span class="c1"># is this the best way?</span>
+        <span class="k">if</span> <span class="s1">&#39;tags&#39;</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="n">tag_list</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_list</span><span class="p">:</span>
+
+                <span class="c1"># TODO: refactor the below its checking to see if the tags exists already</span>
+                <span class="c1">#if it does then just append that tag with the item object.</span>
+                <span class="c1">#else make a new tag object</span>
+                <span class="n">test</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Tag</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">test</span><span class="p">:</span>
+                    <span class="n">test</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">newtag</span> <span class="o">=</span> <span class="n">Tag</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="p">))</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">newtag</span><span class="p">)</span>
+                    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+                    <span class="n">item</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newtag</span><span class="p">)</span>
+
+        <span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="c1"># commit changes to database</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">item</span>
+
+        <span class="k">return</span> <span class="n">item</span></div>
+
+    <span class="k">def</span> <span class="nf">patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwarg</span><span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">kwarg</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;updates asset fields using user data&quot;&quot;&quot;</span>
+        <span class="c1"># TODO: This is a pretty heftly function... needs refactoring</span>
+
+        <span class="c1"># init query dict</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># asset id</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kwarg</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+
+        <span class="c1"># build list of assets column names for validation</span>
+        <span class="c1"># asset_columns = Item.__table__.columns.keys()</span>
+        <span class="c1"># print(asset_columns)</span>
+
+        <span class="c1"># validate user data and build query dict, from data.</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwarg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># additional many-to-many data</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;collections&#39;</span><span class="p">:</span>
+                <span class="n">query</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;items&#39;</span><span class="p">:</span>
+                <span class="n">query</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;tags&#39;</span><span class="p">:</span>
+                <span class="n">query</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">query</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+
+        <span class="c1"># once all user data is validated and ready to append, get asset object.</span>
+        <span class="n">asset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Item</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="c1"># Process user data and update asset object fields.</span>
+        <span class="c1"># TODO: is there a better way to handle these sort of &#39;flags&#39;?</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span>
+                <span class="n">asset</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;image&#39;</span><span class="p">:</span>
+                <span class="n">asset</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;image_thumb&#39;</span><span class="p">:</span>
+                <span class="n">asset</span><span class="o">.</span><span class="n">image_thumb</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;attached&#39;</span><span class="p">:</span>
+                <span class="n">asset</span><span class="o">.</span><span class="n">attached</span> <span class="o">=</span> <span class="n">v</span>
+
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;tags&#39;</span><span class="p">:</span>
+                <span class="c1"># process asset tags</span>
+                <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                    <span class="c1"># create new Tag object and append to asset object</span>
+                    <span class="c1"># TODO: Could this be a point to implement a &#39;set{}&#39; for</span>
+                    <span class="c1"># duplicutes</span>
+                    <span class="n">newtag</span> <span class="o">=</span> <span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Tag</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">newtag</span><span class="p">)</span>
+
+                    <span class="n">asset</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newtag</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;items&#39;</span><span class="p">:</span>
+                <span class="c1"># process asset tags</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                    <span class="n">item_to_collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Item</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+                    <span class="n">asset</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_to_collection</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">asset</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;flag&#39;</span><span class="p">:</span>
+                <span class="c1"># process flag field</span>
+                <span class="c1"># if &#39;flag&#39; is true value is increased</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;flag&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># TODO: is a try/except needed here?</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">asset</span><span class="o">.</span><span class="n">flag</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                        <span class="n">asset</span><span class="o">.</span><span class="n">flag</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">asset</span><span class="o">.</span><span class="n">flag</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c1"># if &#39;flag&#39; is false value is reduced</span>
+                <span class="k">elif</span> <span class="nb">int</span><span class="p">(</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;flag&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">asset</span><span class="o">.</span><span class="n">flag</span> <span class="o">-=</span> <span class="mi">1</span>
+
+                <span class="c1"># is the &#39;else:&#39; &#39;pythonic&#39;?</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;collections&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">collection_id</span> <span class="ow">in</span> <span class="n">query</span><span class="p">[</span><span class="s1">&#39;collections&#39;</span><span class="p">]:</span>
+                    <span class="c1"># get Collection object using collection.id</span>
+                    <span class="n">existingcollection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">glance_api</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Collection</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">collection_id</span><span class="p">)</span>
+                    <span class="c1"># append existing collection to assets collections</span>
+                    <span class="n">asset</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">existingcollection</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># Finish asset object</span>
+        <span class="c1"># append object moddate</span>
+        <span class="n">asset</span><span class="o">.</span><span class="n">moddate</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">asset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+        <span class="c1"># result = to_dict((asset,))</span>
+
+        <span class="c1"># Returns asset object</span>
+        <span class="k">return</span> <span class="n">asset</span>
+
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;Item&gt;&#39;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Glance 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, vhdev.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.2.
+    </div>
+  </body>
+</html>

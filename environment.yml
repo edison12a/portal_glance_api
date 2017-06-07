@@ -30,3 +30,4 @@ dependencies:
   - boto3
   - gunicorn
   - pillow
+  - Sphinx
