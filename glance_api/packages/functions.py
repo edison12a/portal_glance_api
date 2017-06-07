@@ -1,19 +1,24 @@
 """
-This module contains functions for api
+This module contains Classes and helpers for the API
 """
 
 __author__ = ""
 __version__ = ""
 __license__ = ""
 
-# TODO: classes needed?
 import datetime
-from .models import Collection, Base, Footage, User, Item, Image, Geometry, Collection, Tag, tag_ass, People
+# from .models import Collection, Base, Footage, User, Item, Image, Geometry, Collection, Tag, tag_ass, People
 import glance_api.packages.models
 
-# dev functions
+# development functions
+# TODO: dev functions should be their own module.
 def __reset_db(session, engine):
-    """DEV: drops tables and rebuild"""
+    """DANGER: Drops and rebuilds all tables.
+
+    Keyword arguments:
+    session -- sqlalchemy session object.
+    engine -- sqlalchemy engine object.
+    """
     session.close()
 
     try:
@@ -42,9 +47,15 @@ def __reset_db(session, engine):
 
 # helper functions
 def to_dict(item_list):
-    """ takes list of database objects, returns dict repr of objects. """
-    # TODO: using '__tablename__' on objects does the same jobs as 'item_type'
-    # any point in having it as column?
+    """Takes tuple of database objects.
+
+    Keyword arguments:
+    item_list -- TUPLE.
+
+    Return:
+    dict repr of database object.
+    """
+
     result = []
     # check if `item_list` is iterable
     if isinstance(item_list, list) or isinstance(item_list, tuple):
@@ -93,12 +104,22 @@ def to_dict(item_list):
     # return database objects as dicts.
     return result
 
-# auth
-def get_user(session, **kwarg):
 
+# auth
+# TODO: Refactor to User() class
+def get_user(session, **kwarg):
+    """Returns user credentials.
+
+    Keyword arguments:
+    session -- Sqlalchemy session object.
+    kwarg -- DICT. User information.
+
+    Return:
+    User object.
+    """
     # TODO: if test == NONETYPE, return False
 
-    test = session.query(User).filter_by(username=kwarg['username']).first()
+    test = session.query(glance_api.packages.models.User).filter_by(username=kwarg['username']).first()
 
     if test is not None and test.password == kwarg['password']:
         result = True
@@ -110,6 +131,15 @@ def get_user(session, **kwarg):
 
 
 def post_user(session, **kwarg):
+    """Posts user credentials.
+
+    Keyword arguments:
+    session -- Sqlalchemy session object.
+    kwarg -- DICT. User information.
+
+    Return:
+    User object.
+    """
     data = {}
 
     # process user input
@@ -117,7 +147,7 @@ def post_user(session, **kwarg):
         data[k] = v
 
     # Database entry
-    user = User(
+    user = glance_api.packages.models.User(
         username=data['username'], password=data['password']
     )
 
@@ -128,21 +158,38 @@ def post_user(session, **kwarg):
 
 
 # query
-# TODO: Can all these get_query_* re refactored to a single methods? using
-# flags or something.
+# TODO: refactor to Query() class
 def get_tag(session, data):
+    """Gets tags from database.
+
+    Keyword arguments:
+    session -- Sqlalchemy session object.
+    data -- ???. ???.
+
+    Return:
+    ???.
+    """
     if data == None:
-        result = [str(x.name) for x in session.query(Tag).all()]
+        result = [str(x.name) for x in session.query(glance_api.packages.models.Tag).all()]
         return result
     else:
         # TODO: IF data == 'id' return that ids tags.
         return False
 
-    return Fales
+    return False
 
 
 def get_collection_by_author(session, author):
-    collection_by_author = session.query(Collection).filter_by(author=author).all()
+    """Get authors collections.
+
+    Keyword arguments:
+    session -- Sqlalchemy session object.
+    author -- STRING. Author name.
+
+    Return:
+    List of database objects.
+    """
+    collection_by_author = session.query(glance_api.packages.models.Collection).filter_by(author=author).all()
     return collection_by_author
 
 
@@ -169,9 +216,9 @@ def get_query(session, userquery):
         # return list of tags
         if term == '**':
             # TODO: This is suuuuper slow. query item table directly.
-            taglists = session.query(Tag).all()
+            taglists = session.query(glance_api.packages.models.Tag).all()
         else:
-            taglists = session.query(Tag).filter_by(name=term).all()
+            taglists = session.query(glance_api.packages.models.Tag).filter_by(name=term).all()
 
         # for each tag
         for tag in taglists:
@@ -195,8 +242,8 @@ def get_query(session, userquery):
     return item_list
 
 
-
 # crud
+# TODO: refactor to Item() class
 def post_collection(session, **kwarg):
     print('AM I HERE?!?!?!')
     payload = {}
@@ -207,7 +254,7 @@ def post_collection(session, **kwarg):
         payload[k] = v
 
     # remove attri that arnt in the database
-    for column in Collection.__table__.columns:
+    for column in glance_api.packages.models.Collection.__table__.columns:
         if column.name in payload:
             data[column.name] = payload[column.name]
         elif column.name not in payload:
@@ -273,14 +320,15 @@ def post_collection(session, **kwarg):
     return item
 
 
-## oop test
+## oop
 class Item():
     """Items"""
     def __init__(self, session):
         self.session = session
 
     def get(self, id=None, filter=None):
-        """get item
+        """get item.
+
         id: primary key of database item, `None` returns all
         filter: item_type of database item, limit results to item_type
         """
@@ -298,7 +346,8 @@ class Item():
             return item
 
     def delete(self, id):
-        """ deletes item from database
+        """ deletes item from database.
+
         id: primary key of database item,
         """
         item = self.session.query(glance_api.packages.models.Item).filter_by(id='{}'.format(int(id))).first()
@@ -322,7 +371,8 @@ class Item():
     # item type posts
     # TODO: collections, tags
     def post(self, kwarg):
-        """post item to database
+        """post item to database.
+
         kwarg: dict. user data to process.
         return: new `Item` object
         """
@@ -377,14 +427,14 @@ class Item():
                 # TODO: refactor the below its checking to see if the tags exists already
                 #if it does then just append that tag with the item object.
                 #else make a new tag object
-                test = session.query(Tag).filter_by(name=tag).first()
+                test = session.query(glance_api.packages.models.Tag).filter_by(name=tag).first()
 
                 if test:
                     test.items.append(item)
                     session.add(test)
                     session.commit()
                 else:
-                    newtag = Tag(name=str(tag))
+                    newtag = glance_api.packages.models.Tag(name=str(tag))
                     session.add(newtag)
                     session.commit()
 
@@ -500,8 +550,6 @@ class Item():
 
         self.session.add(asset)
         self.session.commit()
-
-        # result = to_dict((asset,))
 
         # Returns asset object
         return asset

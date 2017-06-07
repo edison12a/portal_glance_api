@@ -1,5 +1,5 @@
 """
-sqlalchemy models
+This module describes database schemas
 """
 
 __author__ = ""
@@ -13,10 +13,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 
-'''Globals'''
 Base = declarative_base()
 
-'''association tables'''
 tag_ass = Table('tag_association_table', Base.metadata,
     Column('tag_id', Integer, ForeignKey('tag.id')),
     Column('item_id', Integer, ForeignKey('item.id'))
@@ -27,8 +25,8 @@ collect_ass = Table('collection_association_table', Base.metadata,
     Column('item_id', Integer, ForeignKey('item.id'))
 )
 
-'''tables'''
 class User(Base):
+    """User Table"""
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
@@ -43,7 +41,7 @@ class User(Base):
 
 
 class Tag(Base):
-    """Tag database structure, declarative"""
+    """Tag Table"""
     # TODO: I think all asset databases should be replaced with a 'all assets'
     # table.
     __tablename__ = 'tag'
@@ -60,6 +58,9 @@ class Tag(Base):
 
 # inherited tables test
 class Item(Base):
+    """Item Table
+    Master table. Item types inherit from Item.
+    """
     # This class also has a tags variable. From `class Tag:item` many to many
     # relationship
     __tablename__ = 'item'
@@ -74,6 +75,9 @@ class Item(Base):
 
 
 class Image(Item):
+    """Image Table
+    Inherits from Item.
+    """
     __tablename__ = 'image'
     id = Column(Integer, ForeignKey('item.id'), primary_key=True)
     name = Column(String)
@@ -99,6 +103,9 @@ class Image(Item):
 
 
 class Footage(Item):
+    """Footage Table
+    Inherits from Item.
+    """
     __tablename__ = 'footage'
 
     id = Column(Integer, ForeignKey('item.id'), primary_key=True)
@@ -118,6 +125,9 @@ class Footage(Item):
 
 
 class Geometry(Item):
+    """Geoemtry Table
+    Inherits from Item.
+    """
     __tablename__ = 'geometry'
 
     id = Column(Integer, ForeignKey('item.id'), primary_key=True)
@@ -137,6 +147,9 @@ class Geometry(Item):
 
 
 class People(Item):
+    """People Table
+    Inherits from Item.
+    """
     __tablename__ = 'people'
 
     id = Column(Integer, ForeignKey('item.id'), primary_key=True)
@@ -156,6 +169,9 @@ class People(Item):
 
 
 class Collection(Item):
+    """Collection Table
+    Inherits from Item.
+    """
     __tablename__ = 'collection'
 
     id = Column(Integer, ForeignKey('item.id'), primary_key=True)
