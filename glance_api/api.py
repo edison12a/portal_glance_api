@@ -105,7 +105,7 @@ def user():
         posted_user = post_user(session, **post_data)
         session.close()
 
-        return jsonify({'user': 'posted_user'})
+        return jsonify({'user': str(type(session))})
 
     elif request.method=='GET':
         user_details = {}

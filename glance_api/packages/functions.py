@@ -7,18 +7,20 @@ __version__ = ""
 __license__ = ""
 
 import datetime
-# from .models import Collection, Base, Footage, User, Item, Image, Geometry, Collection, Tag, tag_ass, People
+
 import glance_api.packages.models
 
 # development functions
 # TODO: dev functions should be their own module.
 def __reset_db(session, engine):
-    """DANGER: Drops and rebuilds all tables.
+    """DANGER: Drops and rebuilds all tables, if built declaritvely.
 
-    Keyword arguments:
-    session -- sqlalchemy session object.
-    engine -- sqlalchemy engine object.
+    :param session: 'sqlalchemy.orm.session.Session'.
+    :param engine: sqlalchemy engine object.
+
+    :return type: bool
     """
+    # TODO: make better.
     session.close()
 
     try:
@@ -47,13 +49,12 @@ def __reset_db(session, engine):
 
 # helper functions
 def to_dict(item_list):
-    """Takes tuple of database objects.
+    """Converts database object to dict.
 
-    Keyword arguments:
-    item_list -- TUPLE.
+    :param item_list: Tuple of database objects.
 
-    Return:
-    dict repr of database object.
+    :return: dict repr of database object.
+    :return type: Tuple
     """
 
     result = []
@@ -108,15 +109,16 @@ def to_dict(item_list):
 # auth
 # TODO: Refactor to User() class
 def get_user(session, **kwarg):
-    """Returns user credentials.
+    """Checks database to see if users credentials are correct.
 
-    Keyword arguments:
-    session -- Sqlalchemy session object.
-    kwarg -- DICT. User information.
+    :param session: 'sqlalchemy.orm.session.Session'.
+    :param kwarg:
+    :param username: str.
+    :param password: str.
 
-    Return:
-    User object.
+    :return type: bool
     """
+    # TODO: consider renaming, `check_user` or something.
     # TODO: if test == NONETYPE, return False
 
     test = session.query(glance_api.packages.models.User).filter_by(username=kwarg['username']).first()
@@ -126,20 +128,21 @@ def get_user(session, **kwarg):
     else:
         result = False
 
-    # returns raw db objects
     return result
 
 
 def post_user(session, **kwarg):
-    """Posts user credentials.
+    """Creates a new user
 
-    Keyword arguments:
-    session -- Sqlalchemy session object.
-    kwarg -- DICT. User information.
+    :param session: 'sqlalchemy.orm.session.Session'.
+    :param kwarg:
+    :param username: str.
+    :param password: str.
 
-    Return:
-    User object.
+    :return: user object
+    :return type: database object.
     """
+
     data = {}
 
     # process user input
@@ -160,14 +163,12 @@ def post_user(session, **kwarg):
 # query
 # TODO: refactor to Query() class
 def get_tag(session, data):
-    """Gets tags from database.
+    """???
 
-    Keyword arguments:
-    session -- Sqlalchemy session object.
-    data -- ???. ???.
+    :param session: 'sqlalchemy.orm.session.Session'.
+    :param data: ???
 
-    Return:
-    ???.
+    :return: ???
     """
     if data == None:
         result = [str(x.name) for x in session.query(glance_api.packages.models.Tag).all()]
@@ -189,12 +190,14 @@ def get_collection_by_author(session, author):
     Return:
     List of database objects.
     """
+    # TODO: new docstrings
     collection_by_author = session.query(glance_api.packages.models.Collection).filter_by(author=author).all()
     return collection_by_author
 
 
 def get_query(session, userquery):
     """takes list of words and returns related objects"""
+    # TODO: new docstrings
     # TODO: currently searching every table with every query term, multiple
     # searches. gotta be a better way. look into postgres joins?
     result = {}
@@ -245,6 +248,7 @@ def get_query(session, userquery):
 # crud
 # TODO: refactor to Item() class
 def post_collection(session, **kwarg):
+    # TODO: new docstrings
     print('AM I HERE?!?!?!')
     payload = {}
     data = {}
@@ -322,7 +326,16 @@ def post_collection(session, **kwarg):
 
 ## oop
 class Item():
-    """Items"""
+    """Constructs a generic :class:Item()
+
+    :method get: ???
+    :method delete: ???
+    :method post: ???
+    :method patch: ???
+
+    :return: ???
+    :rtype: ???
+    """
     def __init__(self, session):
         self.session = session
 

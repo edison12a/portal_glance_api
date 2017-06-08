@@ -10,7 +10,7 @@ Helpers
 
 Classes
 
-.. autoclass:: glance_api.packages.Item
+.. autoclass:: glance_api.packages.functions.Item
   :members:
 
 glance_api.packages.models
