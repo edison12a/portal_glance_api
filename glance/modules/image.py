@@ -18,6 +18,12 @@ from glance.config import settings
 
 # AWS Rekognition
 def generate_tags(data):
+    """Using AWS Rekognition, generate tags (labels).
+
+    :param data: -- ???
+
+    :return type: ???
+    """
     client = auth.boto3_res_rek()
     response = auth.boto3_rek_tag(client, data)
 
@@ -27,7 +33,13 @@ def generate_tags(data):
 
 
 def thumb(dir, filename):
-    """returns filename"""
+    """Generate thumbnail from file.
+
+    :param dir: -- ???
+    :param filename: -- ???
+
+    :return type: ???
+    """
     im = Image.open('{}/{}'.format(dir, filename))
     file, ext = os.path.splitext(filename)
     # correct jpg naming to jpeg
@@ -46,7 +58,13 @@ def thumb(dir, filename):
 
 
 def save_frame(dst, file):
-    """returns filename"""
+    """Extract frame from mp4.
+
+    :param dst: -- ???
+    :param file: -- ???
+
+    :return type: ???
+    """
     filename, ext = os.path.splitext(file)
     saved_frame_loc = '{}/{}.jpg'.format(dst, filename)
 

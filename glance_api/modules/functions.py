@@ -163,12 +163,12 @@ def post_user(session, **kwarg):
 # query
 # TODO: refactor to Query() class
 def get_tag(session, data):
-    """???
+    """Retrive Tag objects from database.
 
     :param session: 'sqlalchemy.orm.session.Session'.
-    :param data: ???
+    :param data: sqlalchemy objects.
 
-    :return: ???
+    :return: List
     """
     if data == None:
         result = [str(x.name) for x in session.query(glance_api.modules.models.Tag).all()]
@@ -196,7 +196,14 @@ def get_collection_by_author(session, author):
 
 
 def get_query(session, userquery):
-    """takes list of words and returns related objects"""
+    """Get database objects based user term.
+
+    Keyword arguments:
+    session -- Sqlalchemy session object.
+    userquery -- str.
+
+    Return: List
+    """
     # TODO: new docstrings
     # TODO: currently searching every table with every query term, multiple
     # searches. gotta be a better way. look into postgres joins?
@@ -248,7 +255,14 @@ def get_query(session, userquery):
 # crud
 # TODO: refactor to Item() class
 def post_collection(session, **kwarg):
-    # TODO: new docstrings
+    """Add new collection Item to database.
+
+    Keyword arguments:
+    session -- Sqlalchemy session object.
+    kwarg -- ???
+
+    Return: Item
+    """
     payload = {}
     data = {}
 

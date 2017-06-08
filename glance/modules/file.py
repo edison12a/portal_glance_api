@@ -16,9 +16,12 @@ import glance.modules.auth as auth
 
 
 def upload_handler(file, dst):
-    """handles uploading of all files
-    Returns: var result, list. List of Processed `file` and any additional files
-    made. thumbnail, video frames...
+    """handles uploading of all file types.
+
+    :param file: ???
+    :param dst: ???
+
+    :return Type: ???
     """
     # data structures
     items = []
@@ -92,7 +95,6 @@ def upload_handler(file, dst):
             os.remove(os.path.join(dst, saved_frame))
             os.remove(os.path.join(dst, thumbnail_from_saved_frame))
 
-
             return result
 
         else:
@@ -105,7 +107,12 @@ def upload_handler(file, dst):
 
 
 def process_raw_files(files):
-    '''pair images and attachments'''
+    """pairs images to attachments.
+
+    :param files: ???
+
+    :return Type: ???
+    """
     collector = {}
     for x in files:
         filename, ext = os.path.splitext(x.filename)
