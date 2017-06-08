@@ -99,8 +99,6 @@ def user():
         for x in request.args:
             post_data[x] = request.args.get(x)
 
-        print(post_data)
-
         session = Session()
         posted_user = post_user(session, **post_data)
         session.close()
@@ -204,7 +202,6 @@ def query():
 
 
     elif 'query' in request.args:
-        print('QQQQQQQUUUUUUUUUEEEEEEERRRRRRRRRRRYYYYYY')
         # TODO: For some reason `get_query()` only accepts a dict?
         session = Session()
         raw_assets = get_query(session, request.args)

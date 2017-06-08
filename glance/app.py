@@ -154,12 +154,11 @@ def uploading():
                     # collection at the beginning? does it matter? Its not dry.
                     # TODO: Make this a helper
                     res = r.json()
-                    print('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD')
-                    print(res)
+
+                    # append Item ids for Collection
                     for x in res:
                         item_id = res['POST: /item'][0]['id']
                         upload_data['items_for_collection'].append(item_id)
-
 
             elif upload_data['itemradio'] == 'footage':
                 # build payload for api
@@ -170,8 +169,6 @@ def uploading():
                         if item.filename.endswith('.mp4'):
 
                             uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            print('-------------------')
-                            print(uploaded_file)
                             item_thumb_filename, item_thumb_ext = os.path.splitext(uploaded_file[0])
 
                             payload['item_loc'] = uploaded_file[0]
@@ -195,10 +192,11 @@ def uploading():
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
                     payload['tags'] = ''
-                    # collect uploaded item ids from respoce object.
+
+                    # append Item ids for Collection
                     res = r.json()
                     for x in res:
-                        item_id = res[x]['location'].split('/')[-1]
+                        item_id = res['POST: /item'][0]['id']
                         upload_data['items_for_collection'].append(item_id)
 
             elif upload_data['itemradio'] == 'geometry':
@@ -226,8 +224,9 @@ def uploading():
                     # collect uploaded item ids from respoce object.
                     # payload['tags'] = ''
                     res = r.json()
+                    # append Item ids for Collection
                     for x in res:
-                        item_id = res[x]['location'].split('/')[-1]
+                        item_id = res['POST: /item'][0]['id']
                         upload_data['items_for_collection'].append(item_id)
 
             elif upload_data['itemradio'] == 'people':
@@ -255,9 +254,10 @@ def uploading():
                     payload['tags'] = ''
                     # collect uploaded item ids from respoce object.
                     # TODO: Make this a helper
+                    # append Item ids for Collection
                     res = r.json()
                     for x in res:
-                        item_id = res[x]['location'].split('/')[-1]
+                        item_id = res['POST: /item'][0]['id']
                         upload_data['items_for_collection'].append(item_id)
 
             elif upload_data['itemradio'] == 'collection':
@@ -282,6 +282,7 @@ def uploading():
             # Runs if collection has been requested aswell as the uploading of files.
             if 'collection' in upload_data:
                 if upload_data['collection'] != '':
+
                     payload = {
                         'name': upload_data['collection'],
                         'item_type': 'collection',
@@ -292,21 +293,9 @@ def uploading():
                         'author': session['user']
                     }
 
-                    print('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
-                    print(payload)
-
                     r = requests.post('{}'.format(API_ITEM), params=payload)
 
-
-                    res = r.json()
-                    for x in res:
-                        item_id = res['POST: /item'][0]['id']
-                        bla = requests.get('{}/{}'.format(API_ITEM, item_id))
-
-
-                        return render_template('collection.html', item=bla.json()['item'])
-
-                return home()
+                    return render_template('collection.html', item=r.json()['POST /item'])
 
             return render_template('uploadcomplete.html')
     else:
@@ -315,37 +304,24 @@ def uploading():
 
 @app.route('/patch', methods=['POST'])
 def patch_item():
-    print('pppppppppppppppppppppppppppppppppphgh')
 
     data = {}
     if request.method == 'POST':
         form = request.form
         for k in form:
-            print('-------------------------')
-            print(k)
             if k == 'append_collection':
                 data['items'] = form[k]
 
             elif k == 'append_tags':
                 data['tags'] = form[k]
             elif k == 'change_cover':
-                print('YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE')
+                pass
 
             else:
                 data[k] = form[k]
 
 
-
     r = requests.patch('{}/patch'.format(API_ITEM), params=data)
-    print('pppppppppppppppppppppppppppppppppppp')
-    r.json()
-
-    '''
-    responce = r.json()['PATCH']
-    for x in responce:
-        if 'id' in x:
-            return item(x['id'])
-    '''
 
     return home()
 

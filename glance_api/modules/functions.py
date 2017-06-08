@@ -249,7 +249,6 @@ def get_query(session, userquery):
 # TODO: refactor to Item() class
 def post_collection(session, **kwarg):
     # TODO: new docstrings
-    print('AM I HERE?!?!?!')
     payload = {}
     data = {}
 
@@ -298,10 +297,6 @@ def post_collection(session, **kwarg):
                 item.tags.append(newtag)
     else:
         payload['tags'] = ''
-
-    print('PAYLOADPAYLOADPAYLOAD')
-    print(payload)
-    print(payload['items'])
 
     if 'items' in payload:
 
@@ -416,6 +411,10 @@ class Item():
             attached = data['attached']
         )
 
+        if payload['item_type'] == 'collection':
+            for x in payload['items'].split(' '):
+                item.items.append(self.session.query(glance_api.modules.models.Item).get(x))
+
         self.session.add(item)
         self.session.commit()
 
@@ -431,30 +430,27 @@ class Item():
                 # TODO: refactor the below its checking to see if the tags exists already
                 #if it does then just append that tag with the item object.
                 #else make a new tag object
-                test = session.query(glance_api.modules.models.Tag).filter_by(name=tag).first()
+                test = self.session.query(glance_api.modules.models.Tag).filter_by(name=tag).first()
 
                 if test:
                     test.items.append(item)
-                    session.add(test)
-                    session.commit()
+                    self.session.add(test)
+                    self.session.commit()
                 else:
                     newtag = glance_api.modules.models.Tag(name=str(tag))
-                    session.add(newtag)
-                    session.commit()
+                    self.session.add(newtag)
+                    self.session.commit()
 
                     item.tags.append(newtag)
 
-        session.add(item)
+        self.session.add(item)
         # commit changes to database
-        session.commit()
+        self.session.commit()
 
         return item
 
-        return item
 
     def patch(self, kwarg):
-
-        print(kwarg)
         """updates asset fields using user data"""
         # TODO: This is a pretty heftly function... needs refactoring
 
@@ -465,8 +461,6 @@ class Item():
         id = int(kwarg['id'])
 
         # build list of assets column names for validation
-        # asset_columns = Item.__table__.columns.keys()
-        # print(asset_columns)
 
         # validate user data and build query dict, from data.
         for k, v in kwarg.items():

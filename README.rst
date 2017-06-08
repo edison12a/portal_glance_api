@@ -3,35 +3,25 @@ IN DEVELOPMENT
 Glance
 =====================
 
-Source code for hosting and utilising the Glance digital item management system.
+Glance is a management system for digital items. Using images to represent various forms of data. Video files, images, documents, source code etc.
 
-Glance is a management system for digital items.
-Using images to represent various forms of data. Video files, images, documents, source code etc.
-Searching is done through the use of tagging each item.
-
-App Features:
+Features
+---------
 
 Portfolio style display of digital items.
 
-user collections and tagging for storage and retrieval.
+User collections and tagging for storage and retrieval.
 
-Api Features:
-
-flask.
-
-postgres database.
-
-aws s3 storage.
-
-aws rekcogntion.
-
+:AWS Services:
+  AWS s3 backed storage.
+  AWS ReKognition.
 
 Installation
 ------------
 
 A postgresql database needs to be set up prior.
 
-Active AWS s3 account and a bucket called `glancestore`.
+Active AWS s3 account.
 
 Use miniconda for env, environment.yml
 
@@ -60,6 +50,10 @@ Extended Documentation & Tests
 `API docs`_
 
 `APP docs`_
+
+
+Tests
+-------------
 
 Running tests, while in project root.
 
