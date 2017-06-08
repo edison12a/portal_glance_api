@@ -8,7 +8,7 @@ __license__ = ""
 
 import datetime
 
-import glance_api.packages.models
+import glance_api.modules.models
 
 # development functions
 # TODO: dev functions should be their own module.
@@ -51,10 +51,10 @@ def __reset_db(session, engine):
 def to_dict(item_list):
     """Converts database object to dict.
 
-    :param item_list: Tuple of database objects.
+    :param item_list: Tuple, `glance_api.modules.models.Item`
 
     :return: dict repr of database object.
-    :return type: Tuple
+    :return type: Tuple. 'glance_api.modules.models.Item'
     """
 
     result = []
@@ -121,7 +121,7 @@ def get_user(session, **kwarg):
     # TODO: consider renaming, `check_user` or something.
     # TODO: if test == NONETYPE, return False
 
-    test = session.query(glance_api.packages.models.User).filter_by(username=kwarg['username']).first()
+    test = session.query(glance_api.modules.models.User).filter_by(username=kwarg['username']).first()
 
     if test is not None and test.password == kwarg['password']:
         result = True
@@ -150,7 +150,7 @@ def post_user(session, **kwarg):
         data[k] = v
 
     # Database entry
-    user = glance_api.packages.models.User(
+    user = glance_api.modules.models.User(
         username=data['username'], password=data['password']
     )
 
@@ -171,7 +171,7 @@ def get_tag(session, data):
     :return: ???
     """
     if data == None:
-        result = [str(x.name) for x in session.query(glance_api.packages.models.Tag).all()]
+        result = [str(x.name) for x in session.query(glance_api.modules.models.Tag).all()]
         return result
     else:
         # TODO: IF data == 'id' return that ids tags.
@@ -191,7 +191,7 @@ def get_collection_by_author(session, author):
     List of database objects.
     """
     # TODO: new docstrings
-    collection_by_author = session.query(glance_api.packages.models.Collection).filter_by(author=author).all()
+    collection_by_author = session.query(glance_api.modules.models.Collection).filter_by(author=author).all()
     return collection_by_author
 
 
@@ -219,9 +219,9 @@ def get_query(session, userquery):
         # return list of tags
         if term == '**':
             # TODO: This is suuuuper slow. query item table directly.
-            taglists = session.query(glance_api.packages.models.Tag).all()
+            taglists = session.query(glance_api.modules.models.Tag).all()
         else:
-            taglists = session.query(glance_api.packages.models.Tag).filter_by(name=term).all()
+            taglists = session.query(glance_api.modules.models.Tag).filter_by(name=term).all()
 
         # for each tag
         for tag in taglists:
@@ -258,7 +258,7 @@ def post_collection(session, **kwarg):
         payload[k] = v
 
     # remove attri that arnt in the database
-    for column in glance_api.packages.models.Collection.__table__.columns:
+    for column in glance_api.modules.models.Collection.__table__.columns:
         if column.name in payload:
             data[column.name] = payload[column.name]
         elif column.name not in payload:
@@ -267,7 +267,7 @@ def post_collection(session, **kwarg):
             pass
 
     # Database entry
-    item = glance_api.packages.models.Collection(
+    item = glance_api.modules.models.Collection(
         name = data['name'],
         item_loc = data['item_loc'],
         item_thumb = data['item_thumb'],
@@ -284,14 +284,14 @@ def post_collection(session, **kwarg):
             # TODO: refactor the below its checking to see if the tags exists already
             #if it does then just append that tag with the item object.
             #else make a new tag object
-            test = session.query(glance_api.packages.models.Tag).filter_by(name=tag).first()
+            test = session.query(glance_api.modules.models.Tag).filter_by(name=tag).first()
 
             if test:
                 test.items.append(item)
                 session.add(test)
                 session.commit()
             else:
-                newtag = glance_api.packages.models.Tag(name=str(tag))
+                newtag = glance_api.modules.models.Tag(name=str(tag))
                 session.add(newtag)
                 session.commit()
 
@@ -305,10 +305,10 @@ def post_collection(session, **kwarg):
 
     if 'items' in payload:
 
-        collection = session.query(glance_api.packages.models.Collection).get(item.id)
+        collection = session.query(glance_api.modules.models.Collection).get(item.id)
 
         for item_id in payload['items'].split(' '):
-            item_to_append = session.query(glance_api.packages.models.Item).get(int(item_id))
+            item_to_append = session.query(glance_api.modules.models.Item).get(int(item_id))
             collection.items.append(item_to_append)
             session.add(collection)
             session.commit()
@@ -326,16 +326,7 @@ def post_collection(session, **kwarg):
 
 ## oop
 class Item():
-    """Constructs a generic :class:Item()
-
-    :method get: ???
-    :method delete: ???
-    :method post: ???
-    :method patch: ???
-
-    :return: ???
-    :rtype: ???
-    """
+    """Constructs a generic :class:`Item`"""
     def __init__(self, session):
         self.session = session
 
@@ -348,14 +339,14 @@ class Item():
         # TODO: imp control flow
         if id == None:
             if filter == None or filter == 'all':
-                items = self.session.query(glance_api.packages.models.Item).all()
+                items = self.session.query(glance_api.modules.models.Item).all()
                 return items
             else:
-                items = self.session.query(glance_api.packages.models.Item).filter(glance_api.packages.models.Item.type==filter).all()
+                items = self.session.query(glance_api.modules.models.Item).filter(glance_api.modules.models.Item.type==filter).all()
                 return items
 
         else:
-            item = self.session.query(glance_api.packages.models.Item).get(id)
+            item = self.session.query(glance_api.modules.models.Item).get(id)
             return item
 
     def delete(self, id):
@@ -363,7 +354,7 @@ class Item():
 
         id: primary key of database item,
         """
-        item = self.session.query(glance_api.packages.models.Item).filter_by(id='{}'.format(int(id))).first()
+        item = self.session.query(glance_api.modules.models.Item).filter_by(id='{}'.format(int(id))).first()
         self.session.delete(item)
         self.session.commit()
 
@@ -392,11 +383,11 @@ class Item():
         # TODO: make item_types global?
         # TODO: tags
         item_types = {
-            'image': glance_api.packages.models.Image,
-            'footage': glance_api.packages.models.Footage,
-            'geometry': glance_api.packages.models.Geometry,
-            'people': glance_api.packages.models.People,
-            'collection': glance_api.packages.models.Collection
+            'image': glance_api.modules.models.Image,
+            'footage': glance_api.modules.models.Footage,
+            'geometry': glance_api.modules.models.Geometry,
+            'people': glance_api.modules.models.People,
+            'collection': glance_api.modules.models.Collection
             }
 
         # process universal data
@@ -440,14 +431,14 @@ class Item():
                 # TODO: refactor the below its checking to see if the tags exists already
                 #if it does then just append that tag with the item object.
                 #else make a new tag object
-                test = session.query(glance_api.packages.models.Tag).filter_by(name=tag).first()
+                test = session.query(glance_api.modules.models.Tag).filter_by(name=tag).first()
 
                 if test:
                     test.items.append(item)
                     session.add(test)
                     session.commit()
                 else:
-                    newtag = glance_api.packages.models.Tag(name=str(tag))
+                    newtag = glance_api.modules.models.Tag(name=str(tag))
                     session.add(newtag)
                     session.commit()
 
@@ -493,7 +484,7 @@ class Item():
 
 
         # once all user data is validated and ready to append, get asset object.
-        asset = self.session.query(glance_api.packages.models.Item).get(id)
+        asset = self.session.query(glance_api.modules.models.Item).get(id)
         # Process user data and update asset object fields.
         # TODO: is there a better way to handle these sort of 'flags'?
         for k, v in query.items():
@@ -515,7 +506,7 @@ class Item():
                     # create new Tag object and append to asset object
                     # TODO: Could this be a point to implement a 'set{}' for
                     # duplicutes
-                    newtag = glance_api.packages.models.Tag(name=str(tag))
+                    newtag = glance_api.modules.models.Tag(name=str(tag))
                     self.session.add(newtag)
 
                     asset.tags.append(newtag)
@@ -523,7 +514,7 @@ class Item():
             elif k == 'items':
                 # process asset tags
                 for item in v:
-                    item_to_collection = self.session.query(glance_api.packages.models.Item).get(int(item))
+                    item_to_collection = self.session.query(glance_api.modules.models.Item).get(int(item))
                     asset.items.append(item_to_collection)
                     self.session.add(asset)
 
@@ -550,7 +541,7 @@ class Item():
             elif k == 'collections':
                 for collection_id in query['collections']:
                     # get Collection object using collection.id
-                    existingcollection = self.session.query(glance_api.packages.models.Collection).get(collection_id)
+                    existingcollection = self.session.query(glance_api.modules.models.Collection).get(collection_id)
                     # append existing collection to assets collections
                     asset.collections.append(existingcollection)
 

@@ -1,20 +1,14 @@
-Source
-=======
+Developer Documentation
+=======================
 
-glance_api.packages.functions
+glance_api.modules.functions
 -----------------------------
 
-Helpers
-
-.. autofunction:: glance_api.packages.functions.__reset_db
-
-Classes
-
-.. autoclass:: glance_api.packages.functions.Item
+.. automodule:: glance_api.modules.functions
   :members:
 
-glance_api.packages.models
+glance_api.modules.models
 -----------------------------
 
-.. automodule:: glance_api.packages.models
+.. automodule:: glance_api.modules.models
   :members:

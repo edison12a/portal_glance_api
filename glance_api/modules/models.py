@@ -1,5 +1,5 @@
 """
-This module describes database schemas
+This module describes the database using sqlalchemy. declaritive.
 """
 
 __author__ = ""

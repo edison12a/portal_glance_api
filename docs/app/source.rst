@@ -1,5 +1,5 @@
-Source
-=======
+Developer Documentation
+========================
 
 glance.modules.auth
 -----------------------------

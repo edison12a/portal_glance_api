@@ -12,7 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
 from config import settings
-from packages.functions import (
+from modules.functions import (
     __reset_db, get_query, post_user, get_user, to_dict,
     post_collection, get_tag, get_collection_by_author, Item
     )
@@ -105,7 +105,7 @@ def user():
         posted_user = post_user(session, **post_data)
         session.close()
 
-        return jsonify({'user': str(type(session))})
+        return jsonify({'user': str(type(posted_user))})
 
     elif request.method=='GET':
         user_details = {}
