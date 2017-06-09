@@ -260,25 +260,6 @@ def uploading():
                         item_id = res['POST: /item'][0]['id']
                         upload_data['items_for_collection'].append(item_id)
 
-            elif upload_data['itemradio'] == 'collection':
-                # build payload for api
-
-                for items in processed_files:
-                    payload['name'] = items
-
-                    for item in processed_files[items]:
-                        if item.filename.endswith('.jpg'):
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload['item_loc'] = uploaded_file
-                            payload['item_thumb'] = uploaded_file
-
-                        else:
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload['attached'] = uploaded_file
-
-                    # post payload to api
-                    r = requests.post('{}'.format(API_COLLECTION), params=payload)
-
             # Runs if collection has been requested aswell as the uploading of files.
             if 'collection' in upload_data:
                 if upload_data['collection'] != '':
@@ -294,8 +275,10 @@ def uploading():
                     }
 
                     r = requests.post('{}'.format(API_ITEM), params=payload)
+                    # print()
 
-                    return render_template('collection.html', item=r.json()['POST /item'])
+                    # return home()
+                    return render_template('collection.html', item=r.json()['POST: /item'])
 
             return render_template('uploadcomplete.html')
     else:
