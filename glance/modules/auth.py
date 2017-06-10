@@ -10,8 +10,8 @@ import os
 import requests
 import boto3
 
-from glance.config import cred
-from glance.config import settings
+import glance.config.cred as cred
+import glance.config.settings as settings
 
 
 # basic unencrypted user auth using the api and flasks `session`.
@@ -56,6 +56,12 @@ def check_login_details(**data):
 # user session data
 class SessionHandler():
     """ Handles all interaction with flask.session object.
+
+    :methods:
+      * open(data)
+      * filter(data)
+      * fav(id, item_type)
+      * close()
     """
 
     allowed_params = {'filter': '', 'user': '', 'logged_in': '', 'fav': ''}

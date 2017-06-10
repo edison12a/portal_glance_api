@@ -13,7 +13,7 @@ from PIL import Image, ImageOps
 import boto3
 
 import glance.modules.auth as auth
-from glance.config import settings
+import glance.config.settings as settings
 
 
 # AWS Rekognition

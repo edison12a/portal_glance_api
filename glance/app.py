@@ -12,11 +12,9 @@ import subprocess
 import requests
 from flask import Flask, render_template, request, session, jsonify
 
-from modules.file import upload_handler, process_raw_files
-from modules.image import generate_tags
-from modules.auth import logged_in, check_login_details, delete_from_s3
-
 import glance.modules.auth as auth
+import glance.modules.file as file
+import glance.modules.image as image
 
 from config import settings
 
@@ -49,7 +47,7 @@ def login():
             'password': form['password']
         }
 
-        if check_login_details(**data):
+        if auth.check_login_details(**data):
             auth.SessionHandler(session).open(form['username'])
 
         else:
@@ -99,7 +97,7 @@ def append_fav():
 @app.route('/uploading', methods=['POST'])
 def uploading():
     #TODO:  refactor.
-    if logged_in(session):
+    if auth.logged_in(session):
         if request.method == 'POST':
             # Init dict and append user data
             upload_data = {}
@@ -110,7 +108,7 @@ def uploading():
                 upload_data[form_input] = request.form[form_input]
 
             # process all uploaded files.
-            processed_files = process_raw_files(request.files.getlist('file'))
+            processed_files = file.process_raw_files(request.files.getlist('file'))
 
             # Gather generic item data
             payload = {}
@@ -125,16 +123,16 @@ def uploading():
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['item_loc'] = uploaded_file[0]
                             payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in generate_tags(uploaded_file[0]):
+                            for tag in image.generate_tags(uploaded_file[0]):
                                 payload['tags'] +=  ' ' + tag.lower()
 
                         else:
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
                     # post payload to api
@@ -159,7 +157,7 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.mp4'):
 
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             item_thumb_filename, item_thumb_ext = os.path.splitext(uploaded_file[0])
 
                             payload['item_loc'] = uploaded_file[0]
@@ -168,7 +166,7 @@ def uploading():
                             # AWS REKOGNITION
                             # TODO: currently running `generate_tags` on the
                             # thumbnail. Needs to be run on the extracted image.
-                            for tag in generate_tags(uploaded_file[1]):
+                            for tag in image.generate_tags(uploaded_file[1]):
                                 payload['tags'] +=  ' ' + tag.lower()
 
 
@@ -176,7 +174,7 @@ def uploading():
                             # Use to validate wether item is a valid format
                             pass
                             """
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
                             """
 
@@ -198,16 +196,16 @@ def uploading():
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['item_loc'] = uploaded_file[0]
                             payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in generate_tags(uploaded_file[0]):
+                            for tag in image.generate_tags(uploaded_file[0]):
                                 payload['tags'] +=  ' ' + tag.lower()
 
                         else:
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
                     # post payload to api
@@ -228,16 +226,16 @@ def uploading():
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['item_loc'] = uploaded_file[0]
                             payload['item_thumb'] = uploaded_file[1]
 
                             # AWS REKOGNITION
-                            for tag in generate_tags(uploaded_file[0]):
+                            for tag in image.generate_tags(uploaded_file[0]):
                                 payload['tags'] +=  ' ' + tag.lower()
 
                         else:
-                            uploaded_file = upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
                     # post payload to api
@@ -352,7 +350,7 @@ def delete(id):
 
     # delete from s3 and database
     # TODO: IMP something safer.
-    delete_from_s3(data)
+    auth.delete_from_s3(data)
     r = requests.delete('{}/delete/{}'.format(API_ITEM, id))
 
 
@@ -413,7 +411,7 @@ def home():
 @app.route('/favorite')
 def favorite():
     # TODO: API needs to be able to serve, `item by author`.
-    if logged_in(session):
+    if auth.logged_in(session):
         # data to send... collections made by user
         r = requests.get(
             '{}collection/author/{}'.format(API, session['user'])
@@ -428,7 +426,7 @@ def favorite():
 
 @app.route('/upload')
 def upload():
-    if logged_in(session):
+    if auth.logged_in(session):
         return render_template('upload.html')
     else:
         return home()
