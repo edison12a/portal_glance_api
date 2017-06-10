@@ -26,6 +26,9 @@ def logged_in(session):
 
         return True
     else:
+        session['logged_in'] = False
+        session.pop('filter', None)
+        session.pop('user', None)
 
         return False
 
@@ -43,9 +46,16 @@ def check_login_details(**data):
         if r.json()['user details']:
             result = True
         else:
+            session['logged_in'] = False
+            session.pop('filter', None)
+            session.pop('user', None)
             result = False
     else:
         # TODO: if this is an error, it could be explained better.
+        session['logged_in'] = False
+        session.pop('filter', None)
+        session.pop('user', None)
+        
         result = False
 
     return result

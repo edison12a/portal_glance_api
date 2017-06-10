@@ -33,7 +33,7 @@ def __reset_db(session, engine):
         print('Table have not been deleted.')
         print('----------------------------')
     try:
-        Base.metadata.create_all(engine)
+        glance_api.modules.models.Base.metadata.create_all(engine)
     except:
         print('---------------------------')
         print('Tables have not been built.')
