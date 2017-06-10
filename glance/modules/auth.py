@@ -46,19 +46,60 @@ def check_login_details(**data):
         if r.json()['user details']:
             result = True
         else:
-            session['logged_in'] = False
-            session.pop('filter', None)
-            session.pop('user', None)
             result = False
     else:
-        # TODO: if this is an error, it could be explained better.
-        session['logged_in'] = False
-        session.pop('filter', None)
-        session.pop('user', None)
-        
         result = False
 
     return result
+
+
+# user session data
+class SessionHandler():
+    """ Handles all interaction with flask.session object.
+    """
+
+    allowed_params = {'filter': '', 'user': '', 'logged_in': '', 'fav': ''}
+    allowed_filters = ['all', 'image', 'footage', 'geometry', 'collection']
+
+    def __init__(self, session):
+        self.session = session
+
+
+    def open(self, data):
+        self.session['logged_in'] = True
+        self.session['user'] = data
+        self.session['filter'] = 'all'
+        self.session['fav'] = {}
+
+
+    def filter(self, data):
+        if isinstance(data, str):
+            if data in self.allowed_filters:
+                self.session['filter'] = data
+        else:
+            self.session['filter'] = 'all'
+
+        return self.session
+
+
+    def fav(self, id, item_thumb):
+        if id not in self.session['fav']:
+            self.session['fav'][id] = item_thumb
+            self.session.modified = True
+
+        return self.session
+
+
+    def close(self):
+        self.session['logged_in'] = False
+        self.session.pop('filter', None)
+        self.session.pop('user', None)
+        self.session.pop('fav', None)
+
+        return self.session
+
+    def __repr__(self):
+        return '<SessionHandler>'
 
 
 # aws access

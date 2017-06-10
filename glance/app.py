@@ -16,6 +16,8 @@ from modules.file import upload_handler, process_raw_files
 from modules.image import generate_tags
 from modules.auth import logged_in, check_login_details, delete_from_s3
 
+import glance.modules.auth as auth
+
 from config import settings
 
 
@@ -48,15 +50,11 @@ def login():
         }
 
         if check_login_details(**data):
-            session['logged_in'] = True
-            session['user'] = data['username']
-            if 'filter' in session:
-                pass
-            else:
-                session['filter'] = 'all'
+            auth.SessionHandler(session).open(form['username'])
+
         else:
-            # TODO: Something here?
-            pass
+            auth.SessionHandler(session).close()
+
     elif request.method == 'GET':
         return render_template('index.html')
 
@@ -65,9 +63,8 @@ def login():
 
 @app.route("/logout")
 def logout():
-    session['logged_in'] = False
-    session.pop('filter', None)
-    session.pop('user', None)
+
+    auth.SessionHandler(session).close()
 
     return home()
 
@@ -94,13 +91,7 @@ def append_fav():
     item_id = request.args['item_id']
     item_thumb = request.args['item_thumb']
 
-    if 'fav' in session:
-        session['fav'].append({item_id: item_thumb})
-        session.modified = True
-    elif 'fav' not in session:
-        session['fav'] = []
-        session['fav'].append({item_id: item_thumb})
-        session.modified = True
+    auth.SessionHandler(session).fav(item_id, item_thumb)
 
     return jsonify(result=len(session['fav']))
 
@@ -371,6 +362,10 @@ def delete(id):
 # display
 @app.route('/')
 def home():
+    """Serves front page
+    :return: dict. Each item tyoe.
+    """
+    print(session)
     # process and reverse data so the latest uploaded items are first.
     # Currently using the items `id`, but upload date would be better.
     reversed_list = []
@@ -379,11 +374,10 @@ def home():
     if session:
         if 'filter' in request.args:
             payload['filter'] = request.args['filter']
-            session['filter'] = request.args['filter']
+            auth.SessionHandler(session).filter(request.args['filter'])
 
             return search()
-        else:
-            session['filter'] = None
+
 
     g = requests.get('{}'.format(API_ITEM))
     res = g.json()
@@ -473,7 +467,7 @@ def search():
 
     if 'filter' in request.args:
         search_data['filter'] = request.args['filter']
-        session['filter'] = request.args['filter']
+        auth.SessionHandler(session).filter(request.args['filter'])
     else:
         pass
         # search_data['filter'] = 'all'

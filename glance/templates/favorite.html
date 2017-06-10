@@ -30,23 +30,25 @@
                       <tbody>
 
 
-          {% for x in session.fav %}
-          {% for j in x.items() %}
+          {% for x in session.fav.items() %}
 
 
-                      <tr>
-                        <td>{{j.0}}</td>
-                        <td>
-                            <a href="/item/{{j.0}}">
-                                <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/glancestore/{{j.1}}">
-                          </a>
-                        </td>
-                        <td>IMP</td>
-                        <td>[X]</td>
-                        <td>[X]</td>
-                      </tr>
 
-                      {% endfor %}
+                                <tr>
+                                  <td>{{x.0}}</td>
+                                  <td>
+                                      <a href="/item/{{x.0}}">
+                                          <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/glancestore/{{x.1}}">
+                                    </a>
+                                  </td>
+                                  <td>IMP</td>
+                                  <td>[X]</td>
+                                  <td>[X]</td>
+                                </tr>
+
+
+
+
                   {% endfor %}
               </tbody>
             </table>
