@@ -293,6 +293,7 @@ def patch_item():
             elif k == 'people_tags':
 
                 tags = ' '.join(form.getlist('people_tags'))
+                # print(tags)
                 data['people_tags'] = tags
 
             else:

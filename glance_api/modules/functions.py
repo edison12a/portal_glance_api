@@ -489,6 +489,7 @@ class Item():
             elif k == 'people_tags':
                 # get items current tags
                 current_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
+
                 # append new tags only if they arent in current_tags
                 for x in kwarg[k].split(' '):
                     if x not in current_tags:
@@ -520,13 +521,41 @@ class Item():
                 # process asset tags
                 # remove dups
                 tag_list = list(set(v))
+                add_tag = []
+                remove_tag = []
 
                 for tag in tag_list:
+                    if tag.startswith('-'):
+                        remove_tag.append(tag)
+                    else:
+                        add_tag.append(tag)
+
+                for tag in add_tag:
                     # create new Tag object and append to asset object
                     newtag = glance_api.modules.models.Tag(name=str(tag))
                     self.session.add(newtag)
 
                     asset.tags.append(newtag)
+
+                for tag in remove_tag:
+                    item = self.session.query(glance_api.modules.models.Item).filter_by(id='{}'.format(int(kwarg['id']))).first()
+                    for x in item.tags:
+                        if x.name == tag[1:]:
+                            self.session.delete(x)
+
+                    # check if any assciations remain on `Tag` if None then delete it.
+                    # TODO: this should problely be handled by something else tag related?
+                    """
+                    for x in item.tags:
+                        if len(x.items) > 0:
+                            pass
+                        else:
+                            # delete the tag
+                            print('deleting {}'.format(x))
+                            self.session.delete(x)
+
+                    self.session.commit()
+                    """
 
             elif k == 'items':
                 # process asset tags

@@ -88,17 +88,18 @@ def get_people_tags(data):
 
     for x in bla:
         for g in bla[x]:
-            print(g)
             if g in list_of_people_tags:
                 bla[x][g] = 1
             else:
                 bla[x][g] = 0
 
-    # print(list_of_people_tags)
-
     result = structure_people_tags()
 
     return bla
+
+def update_people_tags(data):
+    # get current tags
+    pass
 
 
 
