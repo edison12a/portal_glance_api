@@ -286,12 +286,17 @@ def patch_item():
 
             elif k == 'append_tags':
                 data['tags'] = form[k]
+
             elif k == 'change_cover':
                 pass
 
+            elif k == 'people_tags':
+
+                tags = ' '.join(form.getlist('people_tags'))
+                data['people_tags'] = tags
+
             else:
                 data[k] = form[k]
-
 
     r = requests.patch('{}/patch'.format(API_ITEM), params=data)
 
@@ -450,7 +455,11 @@ def item(id):
         return render_template('geometry.html', item=r.json()['item'])
 
     elif r.json()['item'][0]['item_type'] == 'people':
-        return render_template('people.html', item=r.json()['item'])
+        tags_from_api = r.json()['item'][0]['tags']
+        people_tags = image.get_people_tags(tags_from_api)
+        #print(people_tags)
+
+        return render_template('people.html', item=r.json()['item'], people_tags=people_tags)
 
 
     else:

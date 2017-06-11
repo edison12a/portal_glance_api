@@ -470,6 +470,7 @@ class Item():
 
         # init query dict
         query = {}
+        query['tags'] = []
 
         # asset id
         id = int(kwarg['id'])
@@ -483,10 +484,17 @@ class Item():
                 query[k] = v.split()
             elif k == 'items':
                 query[k] = v.split()
-
             elif k == 'tags':
                 query['tags'] = v.split()
-
+            elif k == 'people_tags':
+                # get items current tags
+                current_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
+                # append new tags only if they arent in current_tags
+                for x in kwarg[k].split(' '):
+                    if x not in current_tags:
+                        query['tags'].append(x)
+                    else:
+                        pass
             else:
                 query[k] = v
 
@@ -510,10 +518,11 @@ class Item():
 
             elif k == 'tags':
                 # process asset tags
-                for tag in v:
+                # remove dups
+                tag_list = list(set(v))
+
+                for tag in tag_list:
                     # create new Tag object and append to asset object
-                    # TODO: Could this be a point to implement a 'set{}' for
-                    # duplicutes
                     newtag = glance_api.modules.models.Tag(name=str(tag))
                     self.session.add(newtag)
 
