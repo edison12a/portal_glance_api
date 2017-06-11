@@ -13,6 +13,8 @@ import boto3
 import glance.config.cred as cred
 import glance.config.settings as settings
 
+import glance.modules.struct as struct
+
 
 # basic unencrypted user auth using the api and flasks `session`.
 def logged_in(session):
@@ -65,7 +67,7 @@ class SessionHandler():
     """
 
     allowed_params = {'filter': '', 'user': '', 'logged_in': '', 'fav': ''}
-    allowed_filters = ['all', 'image', 'footage', 'geometry', 'collection']
+    allowed_filters = ['all', 'image', 'footage', 'geometry', 'collection', 'people']
 
     def __init__(self, session):
         self.session = session
@@ -76,6 +78,7 @@ class SessionHandler():
         self.session['user'] = data
         self.session['filter'] = 'all'
         self.session['fav'] = {}
+        self.session['people_tags'] = struct.structure_people_tags()
 
 
     def filter(self, data):
@@ -86,6 +89,11 @@ class SessionHandler():
             self.session['filter'] = 'all'
 
         return self.session
+
+    def filter_people(self, data):
+        print('jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj')
+        for filter in data:
+            print(filter)
 
 
     def fav(self, id, item_thumb):

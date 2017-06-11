@@ -281,6 +281,8 @@ def patch_item():
     if request.method == 'POST':
         form = request.form
         for k in form:
+            print('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
+            print(k)
             if k == 'append_collection':
                 data['items'] = form[k]
 
@@ -293,7 +295,8 @@ def patch_item():
             elif k == 'people_tags':
 
                 tags = ' '.join(form.getlist('people_tags'))
-                # print(tags)
+                print('pppppppppppppppppppppp')
+                print(tags)
                 data['people_tags'] = tags
 
             else:
@@ -375,14 +378,9 @@ def home():
     reversed_list = []
 
     payload = {}
-    if session:
-        if 'filter' in request.args:
-            payload['filter'] = request.args['filter']
-            auth.SessionHandler(session).filter(request.args['filter'])
-
-            return search()
-
-
+    payload['filter'] = 'all'
+    auth.SessionHandler(session).filter(payload['filter'])
+            
     g = requests.get('{}'.format(API_ITEM))
     res = g.json()
 

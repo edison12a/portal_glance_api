@@ -54,179 +54,40 @@
 
 
 
-      <form action="/patch" method="POST">
-
-          <div class="form-group">
+    <div style="display: inline-block;width:33.1%;vertical-align: top;">
 
 
 
 
-{% for k, v in people_tags.items() %}
-<br>{{ k }}<br>
-{% for g, h in v.items() %}
-{% if h == 1%}
-<label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}" checked>{{g}}</label>
-{% elif h == 0 %}
-<label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}">{{g}}</label>
+            <form action="{{ url_for('patch_item') }}" method="POST">
 
-{% endif %}
-{% endfor %}
-{% endfor %}
-
-
-<input type="hidden" name="id" value="{{item.0.id}}">
-
-<button type="submit" class="btn btn-default">Submit</button>
-
-</div>
-
-</form>
+                <div class="form-group">
 
 
 
 
+      {% for k, v in people_tags.items() %}
+      <br>
+      <br>{{ k }}<br>
+      {% for g, h in v.items() %}
+      {% if h == 1%}
+      <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}" checked />{{g}}</label>
+      {% elif h == 0 %}
+      <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}">{{g}}</label>
+
+      {% endif %}
+      {% endfor %}
+      {% endfor %}
 
 
-
-
-
+      <input type="hidden" name="id" value="{{item.0.id}}">
 <br>
-<br>
+      <button type="submit" class="btn btn-default">Submit</button>
 
+      </div>
 
+      </form>
 
-    <div style="display: inline-block;width:33.1%;vertical-align: top;">
-
-
-      <form action="/patch" method="POST">
-
-          <div class="form-group">
-
-
-
-
-        <h3>Subject</h3>
-        <br>
-        <b>Number of people</b><br>
-        <small>
-        <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="_one">One</label>
-        <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="_couple">Couple</label>
-        <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="_group">Group</label>
-      </small>
-        <br>
-        <br>
-        <b>Gender</b><br>
-        <small>
-        <label class="checkbox-inline"><input type="checkbox" value="">Male</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Female</label>
-        </small>
-        <br>
-        <br>
-        <b>Age</b><br>
-        <small>
-        <label class="checkbox-inline"><input type="checkbox" value="">Baby</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Child</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Teen</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Adult</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Senior</label>
-        </small>
-        <br>
-        <br>
-        <b>Ethnicity</b><br>
-        <small>
-        <label class="checkbox-inline"><input type="checkbox" value="">Caucasian</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Asian</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">African</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Middle East</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Indian</label>
-        </small>
-        <br>
-    </div>
-    <div style="display: inline-block;width:33.1%;vertical-align: top;">
-        <h3>Camera and Lighting</h3>
-        <br>
-        <b>View Angle</b><br>
-        <small>
-        <label class="checkbox-inline"><input type="checkbox" value="">Back</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Back Angle</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Side</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Front Angle</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Front</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Above</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Eye Level</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Below</label>
-        </small>
-        <br>
-        <br>
-        <b>Light Source</b><br>
-        <small>
-        <label class="checkbox-inline"><input type="checkbox" value="">Above</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Back</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Front</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Side</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Below</label>
-        </small>
-        <br>
-        <br>
-        <b>General Lighting</b><br>
-        <small>
-        <label class="checkbox-inline"><input type="checkbox" value="">Sunlight</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Ambient</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Partial/Shade</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Backlit</label>
-        </small>
-        <br>
-    </div>
-    <div style="display: inline-block;width:33.1%;vertical-align: top;">
-        <h3>General</h3>
-        <br>
-        <b>Season</b><br>
-        <small>
-        <label class="checkbox-inline"><input type="checkbox" value="">Summer</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Autumn/Spring</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Winter</label>
-        </small>
-        <br>
-        <br>
-        <b>Activity</b><br>
-        <small>
-        <label class="checkbox-inline"><input type="checkbox" value="">Standing</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Sitting</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Playing</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Running</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Riding</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Working Out</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Lying</label>
-        </small>
-        <br>
-        <br>
-        <b>Style</b><br>
-        <small>
-        <label class="checkbox-inline"><input type="checkbox" value="">Casual</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Resort</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Sports</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Religious</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Alternative</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Business</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Medical</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Uniform</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Formal</label>
-        <label class="checkbox-inline"><input type="checkbox" value="">Work</label>
-        </small>
-
-        <br>
-    </div>
-
-    <input type="hidden" name="id" value="{{item.0.id}}">
-
-    <!-- <input style="width:300px;" type="text" class="form-control" id="append_tags" name="append_tags" /> !-->
-
-
-<button type="submit" class="btn btn-default">Submit</button>
-
-</div>
-
-</form>
 
 
 
@@ -234,9 +95,9 @@
 
 </div>
 
+</div>
 
-
-                <div style="padding-left:10%;padding-right:10%;background-color:lightgray;padding-bottom:30px;">
+<div style="padding-left:10%;padding-right:10%;background-color:lightgray;padding-bottom:30px;">
 
 
 
@@ -276,8 +137,6 @@
         </div>
 
     </form>
-
-
 
 
 

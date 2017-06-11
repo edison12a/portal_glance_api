@@ -383,11 +383,24 @@
 {%endif%}
 
 {% if session.filter == 'people' %}
-<div id="searchfilterbox">
+  <div style="width:100%; color:gray;padding-top:20px;padding-bottom:20px;box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.05);">
   <small>
-words
+
+{% for k, v in session.people_tags.items() %}
+<strong style="color:black;">{{k}} | </strong>
+{% for x, z in v.items() %}
+{% if z == 0 %}
+<a style="color:gray" href="/search?search=**&filter={{x}}">{{x}}, </a>
+{% else %}
+<a style="color:red" href="/search?search=**&filter={{x}}">{{x}}, </a>
+{% endif %}
+{% endfor %}
+
+{% endfor %}
+
 </small>
 </div>
+
 {%endif%}
 
         {% block content %}

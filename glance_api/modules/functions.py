@@ -489,7 +489,6 @@ class Item():
             elif k == 'people_tags':
                 # get items current tags
                 current_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
-
                 # append new tags only if they arent in current_tags
                 for x in kwarg[k].split(' '):
                     if x not in current_tags:
@@ -520,13 +519,18 @@ class Item():
             elif k == 'tags':
                 # process asset tags
                 # remove dups
+                item_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
+
                 tag_list = list(set(v))
                 add_tag = []
                 remove_tag = []
+                people_tag = []
 
                 for tag in tag_list:
                     if tag.startswith('-'):
                         remove_tag.append(tag)
+                    elif tag.startswith('_'):
+                        people_tag.append(tag)
                     else:
                         add_tag.append(tag)
 
@@ -536,6 +540,19 @@ class Item():
                     self.session.add(newtag)
 
                     asset.tags.append(newtag)
+
+                for tag in people_tag:
+                    current_people_tags = [x for x in item_tags if x.startswith('_')]
+                    print('-------------------')
+                    # print(current_people_tags)
+                    print(people_tag)
+
+                    # create new Tag object and append to asset object
+                    newtag = glance_api.modules.models.Tag(name=str(tag))
+                    self.session.add(newtag)
+
+                    asset.tags.append(newtag)
+
 
                 for tag in remove_tag:
                     item = self.session.query(glance_api.modules.models.Item).filter_by(id='{}'.format(int(kwarg['id']))).first()

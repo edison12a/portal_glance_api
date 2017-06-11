@@ -16,7 +16,6 @@ import glance.modules.auth as auth
 import glance.config.settings as settings
 
 
-
 # AWS Rekognition
 def generate_tags(data):
     """Using AWS Rekognition, generate tags (labels).
@@ -97,14 +96,13 @@ def get_people_tags(data):
 
     return bla
 
+
 def update_people_tags(data):
     # get current tags
     pass
 
 
-
 # support structures
-
 def structure_people_tags():
     return {
         "num_people": {
