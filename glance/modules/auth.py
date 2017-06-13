@@ -10,9 +10,7 @@ import os
 import requests
 import boto3
 
-import glance.config.cred as cred
 import glance.config.settings as settings
-
 import glance.modules.struct as struct
 
 
@@ -123,8 +121,8 @@ def boto3_res_s3():
     :return type: boto3 resource
     """
     boto3_session = boto3.session.Session(
-        aws_access_key_id=cred.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=cred.AWS_SECRET_ACCESS_KEY,
+        aws_access_key_id=settings.config_type['AWS_ACCESS_KEY_ID'],
+        aws_secret_access_key=settings.config_type['AWS_SECRET_ACCESS_KEY'],
     )
 
     s3 = boto3_session.resource('s3')
@@ -138,8 +136,8 @@ def boto3_res_rek():
     :return type: boto3 client
     """
     boto3_session = boto3.session.Session(
-        aws_access_key_id=cred.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=cred.AWS_SECRET_ACCESS_KEY,
+        aws_access_key_id=settings.config_type['AWS_ACCESS_KEY_ID'],
+        aws_secret_access_key=settings.config_type['AWS_SECRET_ACCESS_KEY'],
     )
 
     # init client
@@ -160,7 +158,7 @@ def boto3_rek_tag(client, data, confidence=60):
     result = client.detect_labels(
         Image={
             'S3Object': {
-                'Bucket': cred.AWS_BUCKET,
+                'Bucket': settings.config_type['AWS_BUCKET'],
                 'Name': data,
             },
         },
@@ -180,7 +178,7 @@ def boto3_s3_upload(s3, dst, file):
 
     Return Type: Bool
     """
-    s3.Object(cred.AWS_BUCKET, file).put(Body=open(os.path.join(dst, file), 'rb'))
+    s3.Object(settings.config_type['AWS_BUCKET'], file).put(Body=open(os.path.join(dst, file), 'rb'))
 
     return file
 
@@ -197,7 +195,7 @@ def delete_from_s3(data):
     # TODO: dont not delete thumbnail?
     s3 = boto3_res_s3()
 
-    bucket = s3.Bucket(cred.AWS_BUCKET)
+    bucket = s3.Bucket(settings.config_type['AWS_BUCKET'])
 
     objects_to_delete = []
     for obj in data:
