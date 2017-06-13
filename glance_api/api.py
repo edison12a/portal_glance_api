@@ -26,17 +26,13 @@ app = Flask(__name__)
 
 '''auth and config'''
 '''api config'''
-# TODO: Global config?
+# TODO: Global config?s
 #app.config.from_object('config.config')
 #app.config.from_object('config')
 
-# development database
-engine = create_engine(settings.DEV_POSTGRES_DATABASE, echo=False)
+# database
+engine = create_engine(settings.POSTGRES_DATABASE, echo=False)
 
-"""
-# production database
-engine = create_engine(settings.PROD_POSTGRES_DATABASE, echo=False)
-"""
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
 
