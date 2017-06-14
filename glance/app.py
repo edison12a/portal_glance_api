@@ -478,13 +478,23 @@ def search():
     search_data = {}
     search_term = request.args['search']
     search_data['query'] = str(search_term)
+    search_data['filter_people'] = []
 
     if 'filter' in request.args:
         search_data['filter'] = request.args['filter']
         auth.SessionHandler(session).filter(request.args['filter'])
     else:
         pass
-        # search_data['filter'] = 'all'
+
+    # adds people filter to session.
+    if 'filter_people' in request.args:
+        auth.SessionHandler(session).filter_people(request.args['filter_people'])
+
+    # get all people filters == 1, and append to searfh_data
+    for x in session['filter_people']:
+        for j in session['filter_people'][x]:
+            if session['filter_people'][x][j] == 1:
+                search_data['filter_people'].append(j)
 
     r = requests.get('{}query'.format(API), params=search_data)
 

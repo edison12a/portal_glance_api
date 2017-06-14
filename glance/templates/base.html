@@ -45,16 +45,8 @@
           });
 
 
-
-
-
         });
         </script>
-
-
-
-
-
 
 
     <style>
@@ -386,13 +378,13 @@
   <div style="width:100%; color:gray;padding-top:20px;padding-bottom:20px;box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.05);">
   <small>
 
-{% for k, v in session.people_tags.items() %}
+{% for k, v in session.filter_people.items() %}
 <strong style="color:black;">{{k}} | </strong>
 {% for x, z in v.items() %}
 {% if z == 0 %}
-<a style="color:gray" href="/search?search=**&filter={{x}}">{{x}}, </a>
+<a style="color:gray" href="/search?search=**&filter_people={{x}}">{{x}}, </a>
 {% else %}
-<a style="color:red" href="/search?search=**&filter={{x}}">{{x}}, </a>
+<a style="color:red" href="/search?search=**&filter_people={{x}}">{{x}}, </a>
 {% endif %}
 {% endfor %}
 

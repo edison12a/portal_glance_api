@@ -64,7 +64,7 @@ class SessionHandler():
       * close()
     """
 
-    allowed_params = {'filter': '', 'user': '', 'logged_in': '', 'fav': ''}
+    allowed_params = {'filter': '', 'user': '', 'logged_in': '', 'fav': '', 'filter_people': ''}
     allowed_filters = ['all', 'image', 'footage', 'geometry', 'collection', 'people']
 
     def __init__(self, session):
@@ -76,7 +76,7 @@ class SessionHandler():
         self.session['user'] = data
         self.session['filter'] = 'all'
         self.session['fav'] = {}
-        self.session['people_tags'] = struct.structure_people_tags()
+        self.session['filter_people'] = struct.structure_people_tags()
 
 
     def filter(self, data):
@@ -89,10 +89,17 @@ class SessionHandler():
         return self.session
 
     def filter_people(self, data):
-        print('jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj')
-        for filter in data:
-            print(filter)
+        for x in self.session['filter_people']:
+            for j in self.session['filter_people'][x]:
+                if data == j:
+                    if self.session['filter_people'][x][data] == 0:
+                        self.session['filter_people'][x][data] = 1
+                        self.session.modified = True
+                    else:
+                        self.session['filter_people'][x][data] = 0
+                        self.session.modified = True
 
+        return self.session
 
     def fav(self, id, item_thumb):
         if id not in self.session['fav']:
@@ -107,6 +114,7 @@ class SessionHandler():
         self.session.pop('filter', None)
         self.session.pop('user', None)
         self.session.pop('fav', None)
+        self.session.pop('filter_people', None)
 
         return self.session
 

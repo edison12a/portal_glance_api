@@ -175,12 +175,12 @@ def tag():
 def query():
     """ returns results from querys
     'flag': takes key/value, returns
-    'query': takes list of string, returns list of dict;
-    'filter': takes str, affects 'query';
+    'query': takes list of string, returns list of dict
+    'filter': takes str, affects 'query'
+    'filter_people': ???
     """
     if 'flag' in request.args:
         pass
-
 
     elif 'query' in request.args:
         # TODO: For some reason `functions.get_query()` only accepts a dict?
