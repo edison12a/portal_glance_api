@@ -379,7 +379,7 @@
   <small>
 
 {% for k, v in session.filter_people.items() %}
-<strong style="color:black;">{{k}} | </strong>
+<strong style="color:black;">{{k.capitalize()}} | </strong>
 {% for x, z in v.items() %}
 {% if z == 0 %}
 <a style="color:gray" href="/search?search=**&filter_people={{x}}">{{x}}, </a>

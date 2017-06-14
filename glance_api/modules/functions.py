@@ -242,15 +242,6 @@ def get_query(session, userquery):
                     else:
                         if item.item_type == query['filter']:
                             if item.item_type == 'people':
-                                print(item.tags)
-                                people_filters = [x for x in dict(userquery)['filter_people']]
-                                for x in people_filters:
-                                    if x in item.tags:
-                                        item_list.append(item)
-                                    else:
-                                        pass
-
-                            else:
                                 item_list.append(item)
                         else:
                             pass
