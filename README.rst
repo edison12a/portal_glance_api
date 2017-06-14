@@ -23,7 +23,11 @@ A postgresql database needs to be set up prior.
 
 Active AWS s3 account.
 
+Clone repo.
+
 Use miniconda for env, environment.yml
+# TODO: research/automate building requirements.txt from environment.yml??
+# or just use pyenv?
 
 .. code-block:: cmd
 
@@ -31,16 +35,39 @@ Use miniconda for env, environment.yml
     $ conda env create
     $ source activate glance-api-env
 
-Run api.py to get the web api running.
+setup.py develop
+# TODO: research: if i use install none of the modules can find each other...
+# why?
+
+setup.py tests
+
+Api config
+..........
+
+glance_api/config/config.ini
+
+Run glance_api/api.py to get api running.
 
 .. code-block:: cmd
 
-    (glance-api-env)$ cd glance-api
+    (glance-api-env)$ cd glance_api
     (glance-api-env)$ python api.py
 
-Api entry point is **http://[localhost]/glance/api**
+http://localhost/glance/api
 
-Webapp **http://[localhost]/5000**
+App config
+..........
+
+glance/config/config.ini
+
+Run glance/app.py to get the app running.
+
+.. code-block:: cmd
+
+    (glance-api-env)$ cd glance
+    (glance-api-env)$ python app.py
+
+
 
 Extended Documentation & Tests
 -------------
