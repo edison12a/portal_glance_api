@@ -1,13 +1,8 @@
-"""
-glance api
-"""
-
-__author__ = ""
-__version__ = ""
-__license__ = ""
-
 import configparser
 import os
+from pathlib import Path
+
+project_root = Path(os.path.dirname(__file__)).parent
 
 config = configparser.ConfigParser()
 config.read(os.path.join('config', 'config.ini'))

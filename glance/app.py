@@ -3,8 +3,8 @@ glance web app
 """
 
 __author__ = ""
-__version__ = ""
-__license__ = ""
+__version__ = "0.1"
+__license__ = "./LICENSE"
 
 import os
 import subprocess
@@ -19,17 +19,13 @@ import glance.modules.image as image
 from config import settings
 
 
-'''Local Directories'''
-APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/tmp')
-
 '''Flask Config'''
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = settings.tmp_upload
 app.secret_key = settings.secret_key
 
-'''Hard Coded API Routes'''
-# TODO: find a better way.
+'''API SHORTHAND'''
+# TODO: Lazy?
 API = settings.api_root
 API_ITEM = '{}item'.format(settings.api_root)
 API_COLLECTION = '{}collection'.format(settings.api_root)
@@ -380,7 +376,7 @@ def home():
     payload = {}
     payload['filter'] = 'all'
     auth.SessionHandler(session).filter(payload['filter'])
-            
+
     g = requests.get('{}'.format(API_ITEM))
     res = g.json()
 

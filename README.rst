@@ -67,7 +67,7 @@ Run glance/app.py to get the app running.
     (glance-api-env)$ cd glance
     (glance-api-env)$ python app.py
 
-
+http://localhost:5000
 
 Extended Documentation & Tests
 -------------

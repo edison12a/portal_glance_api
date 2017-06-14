@@ -7,28 +7,13 @@ __version__ = ""
 __license__ = ""
 
 from flask import Flask, jsonify, request, make_response
-
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
 from config import settings
-from modules.functions import (
-    __reset_db, get_query, post_user, get_user, to_dict,
-    post_collection, get_tag, get_collection_by_author, Item
-    )
+import modules.functions as functions
 
 app = Flask(__name__)
-
-
-# TODO: Auth
-# TODO: api tests
-# TODO: catch/process no cred file error
-
-'''auth and config'''
-'''api config'''
-# TODO: Global config?s
-#app.config.from_object('config.config')
-#app.config.from_object('config')
 
 # database
 engine = create_engine(settings.POSTGRES_DATABASE, echo=False)
@@ -36,11 +21,11 @@ engine = create_engine(settings.POSTGRES_DATABASE, echo=False)
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
 
-'''database tools'''
+'''development tools'''
 """
-# Dev functions
+# functions
 session = Session()
-__reset_db(session, engine)
+functions.__reset_db(session, engine)
 """
 
 # info
@@ -96,7 +81,7 @@ def user():
             post_data[x] = request.args.get(x)
 
         session = Session()
-        posted_user = post_user(session, **post_data)
+        posted_user = functions.post_user(session, **post_data)
         session.close()
 
         return jsonify({'user': str(type(posted_user))})
@@ -112,7 +97,7 @@ def user():
         user_details['username'] = username
         user_details['password'] = password
 
-        user_cred = get_user(session, **user_details)
+        user_cred = functions.get_user(session, **user_details)
 
     session.close()
 
@@ -129,8 +114,8 @@ def item():
             query[x] = request.args[x]
 
         session = Session()
-        test = Item(session).post(query)
-        result = to_dict((test,))
+        test = functions.Item(session).post(query)
+        result = functions.to_dict((test,))
         session.close()
 
         return make_response(
@@ -145,11 +130,11 @@ def item():
         session = Session()
 
         if 'filter' in request.args:
-            raw_items = Item(session).get(filter=request.args['filter'])
-            result = to_dict(raw_items)
+            raw_items = functions.Item(session).get(filter=request.args['filter'])
+            result = functions.to_dict(raw_items)
         else:
-            raw_items = Item(session).get()
-            result = to_dict(raw_items)
+            raw_items = functions.Item(session).get()
+            result = functions.to_dict(raw_items)
 
         if len(result) == 0:
             session.close()
@@ -179,7 +164,7 @@ def tag():
     session = Session()
 
     data = None
-    result = get_tag(session, data)
+    result = functions.get_tag(session, data)
     session.close()
 
     return jsonify({'tags': result})
@@ -198,10 +183,10 @@ def query():
 
 
     elif 'query' in request.args:
-        # TODO: For some reason `get_query()` only accepts a dict?
+        # TODO: For some reason `functions.get_query()` only accepts a dict?
         session = Session()
-        raw_assets = get_query(session, request.args)
-        assets = to_dict(raw_assets)
+        raw_assets = functions.get_query(session, request.args)
+        assets = functions.to_dict(raw_assets)
 
         session.close()
 
@@ -215,8 +200,8 @@ def query():
 def get_collection_author(author):
     session = Session()
 
-    raw_result = get_collection_by_author(session, author)
-    result = to_dict(raw_result)
+    raw_result = functions.get_collection_by_author(session, author)
+    result = functions.to_dict(raw_result)
 
     session.close()
 
@@ -228,8 +213,8 @@ def get_item(item_id):
     # TODO: Doc string
     if request.method=='GET':
         session = Session()
-        raw_asset = Item(session).get(item_id)
-        asset = to_dict((raw_asset, ))
+        raw_asset = functions.Item(session).get(item_id)
+        asset = functions.to_dict((raw_asset, ))
 
     else:
 
@@ -246,7 +231,7 @@ def delete_asset(asset_id):
     # TODO: make better responce
     if request.method=='DELETE':
         session = Session()
-        asset = Item(session).delete(asset_id)
+        asset = functions.Item(session).delete(asset_id)
 
         if asset:
             result = {
@@ -279,8 +264,8 @@ def patch_item():
         patch_data[y] = request.args[y]
 
     session = Session()
-    raw_item = Item(session).patch(patch_data)
-    item = to_dict((raw_item,))
+    raw_item = functions.Item(session).patch(patch_data)
+    item = functions.to_dict((raw_item,))
     session.close()
 
     return jsonify({'PATCH': item})

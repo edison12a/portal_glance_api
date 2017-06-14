@@ -253,6 +253,7 @@ def get_query(session, userquery):
 
 
 # crud
+'''
 # TODO: refactor to Item() class
 def post_collection(session, **kwarg):
     """Add new collection Item to database.
@@ -331,7 +332,7 @@ def post_collection(session, **kwarg):
     session.commit()
 
     return item
-
+'''
 
 ## oop
 class Item():

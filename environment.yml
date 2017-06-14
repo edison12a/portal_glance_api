@@ -1,7 +1,7 @@
 name: glance_api_env
-channels: !!python/tuple
-- defaults
+channels:
 - menpo
+- defaults
 dependencies:
 - openssl=1.0.2j=0
 - pip=9.0.1=py36_1
@@ -13,21 +13,35 @@ dependencies:
 - wheel=0.29.0=py36_0
 - xz=5.2.2=0
 - zlib=1.2.8=3
-- ffmpeg=3.1.3
+- ffmpeg=3.1.3=0
 - pip:
+  - alabaster==0.7.10
+  - babel==2.4.0
+  - boto3==1.4.4
+  - botocore==1.5.67
   - click==6.6
+  - docutils==0.13.1
   - flask==0.12
   - flask-sqlalchemy==2.1
+  - gunicorn==19.7.1
+  - imagesize==0.7.1
   - itsdangerous==0.24
   - jinja2==2.8
+  - jmespath==0.9.3
   - markupsafe==0.23
+  - olefile==0.44
+  - pillow==4.1.1
   - psycopg2==2.6.2
   - py==1.4.32
+  - pygments==2.2.0
   - pytest==3.0.5
+  - python-dateutil==2.6.0
+  - pytz==2017.2
   - requests==2.12.4
+  - s3transfer==0.1.10
+  - six==1.10.0
+  - snowballstemmer==1.2.1
+  - sphinx==1.6.2
+  - sphinxcontrib-websupport==1.0.1
   - sqlalchemy==1.1.4
   - werkzeug==0.11.11
-  - boto3
-  - gunicorn
-  - pillow
-  - Sphinx
