@@ -106,20 +106,18 @@ def uploading():
             # process all uploaded files.
             processed_files = file.process_raw_files(request.files.getlist('file'))
 
-            # Gather generic item data
-            payload = {}
-            payload['author'] = session['user']
-            payload['tags'] = upload_data['tags']
-            payload['item_type'] = upload_data['itemradio']
-
             # process remaining item data
             if upload_data['itemradio'] == 'image':
                 for items in processed_files:
-                    payload['name'] = items
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
+                            payload = {}
+                            payload['name'] = items
+                            payload['author'] = session['user']
+                            payload['tags'] = upload_data['tags']
+                            payload['item_type'] = upload_data['itemradio']
                             payload['item_loc'] = uploaded_file[0]
                             payload['item_thumb'] = uploaded_file[1]
 
@@ -152,10 +150,14 @@ def uploading():
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.mp4'):
-
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             item_thumb_filename, item_thumb_ext = os.path.splitext(uploaded_file[0])
 
+                            payload = {}
+                            payload['name'] = items
+                            payload['author'] = session['user']
+                            payload['tags'] = upload_data['tags']
+                            payload['item_type'] = upload_data['itemradio']
                             payload['item_loc'] = uploaded_file[0]
                             payload['item_thumb'] = uploaded_file[1]
 
@@ -188,11 +190,17 @@ def uploading():
                 # build payload for api
 
                 for items in processed_files:
-                    payload['name'] = items
+                    # payload['name'] = items
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
+
+                            payload = {}
+                            payload['name'] = items
+                            payload['author'] = session['user']
+                            payload['tags'] = upload_data['tags']
+                            payload['item_type'] = upload_data['itemradio']
                             payload['item_loc'] = uploaded_file[0]
                             payload['item_thumb'] = uploaded_file[1]
 
@@ -218,11 +226,16 @@ def uploading():
                 # build payload for api
 
                 for items in processed_files:
-                    payload['name'] = items
 
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
+
+                            payload = {}
+                            payload['name'] = items
+                            payload['author'] = session['user']
+                            payload['tags'] = upload_data['tags']
+                            payload['item_type'] = upload_data['itemradio']
                             payload['item_loc'] = uploaded_file[0]
                             payload['item_thumb'] = uploaded_file[1]
 
@@ -236,7 +249,6 @@ def uploading():
 
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
-                    payload['tags'] = ''
                     # collect uploaded item ids from respoce object.
                     # TODO: Make this a helper
                     # append Item ids for Collection
