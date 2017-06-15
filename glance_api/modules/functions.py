@@ -204,71 +204,69 @@ def get_query(session, userquery):
 
     Return: List
     """
-    # TODO: new docstrings
-    # TODO: currently searching every table with every query term, multiple
-    # searches. gotta be a better way. look into postgres joins?
-    result = {}
-    query = {}
-    # makes users query a dict
-    for k, v in userquery.items():
-        query[k] = str(v).split()
+    data = dict(userquery)
 
-    if 'filter' not in query:
+    # init structures
+    result = []
+    item_list = []
+    taglists = []
+    query = {}
+
+    # collect data
+    if 'filter' not in data:
         query['filter'] = 'all'
     else:
-        query['filter'] = query['filter'][0]
+        query['filter'] = data['filter']
 
-    # TODO:FUTURE IMP: PATCH FOR NOW
-    # extending querys via the api: filter_people
-    filter_people = None
-    if 'filter_people' in query:
-        filter_people = dict(userquery)['filter_people']
+    filter_people = []
+    if 'filter_people' in data:
+        filter_people = data['filter_people']
 
+    # construct query
+    query = {
+        'filter': data['filter'][0],
+        'filter_people': filter_people,
+        'query': data['query'][0]
+    }
 
+    # get tags for query
+    if query['query'] == '**':
+        taglists = session.query(glance_api.modules.models.Tag).all()
+    else:
+        for x in query['query'].split(' '):
+            bla = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).all()]
+            for j in bla:
+                taglists.append(j)
 
-    # querying through many-to-many relationships leaves us with an
-    # instrumentedlist which needs to be exracted before using make_dict
-    item_list = []
-    for term in query['query']:
-        # return list of tags
-        if term == '**':
-            # TODO: This is suuuuper slow. query item table directly.
-            taglists = session.query(glance_api.modules.models.Tag).all()
-        else:
-            taglists = session.query(glance_api.modules.models.Tag).filter_by(name=term).all()
-
-
-    # for each tag
-    for tag in taglists:
-        # if one exists
-        if tag.items:
-            # get asset assigned to tag and append to list, 'item_list'
+    # apply filters to tags
+    if query['filter'] != 'all':
+        for tag in taglists:
             for item in tag.items:
-                # return data according to the filter information
-                if query['filter'] == 'all':
+                if item.item_type == query['filter']:
                     item_list.append(item)
+    else:
+        for tag in taglists:
+            for item in tag.items:
+                    result.append(item)
 
-                elif item.item_type == query['filter']:
-                    if query['filter'] == 'people':
-                        # only append item is items have the filters as tags
-                        if 'filter_people' not in query:
-                            item_list.append(item)
-                        else:
-                            # logic for applying `filter_people`
-                            for x in item.tags:
-                                if x.name in query['filter_people']:
 
-                                    item_list.append(item)
-
+    if query['filter'] == 'people':
+        if len(query['filter_people']) != 0:
+            for x in item_list:
+                for k in x.tags:
+                    if k.name not in query['filter_people']:
+                        pass
                     else:
-                        item_list.append(item)
+                        result.append(x)
+        else:
+            for x in item_list:
+                result.append(x)
+    else:
+        for x in item_list:
+            result.append(x)
 
-        # get collection assigned to tag and append to list, 'item_list'
-        elif tag.collection_tags:
-            for item in tag.collection_tags:
-                item_list.append(item)
 
-    return item_list
+    return result
 
 
 # crud
@@ -353,7 +351,6 @@ def post_collection(session, **kwarg):
     return item
 '''
 
-## oop
 class Item():
     """Constructs a generic :class:`Item`"""
     def __init__(self, session):
