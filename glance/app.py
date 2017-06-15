@@ -146,8 +146,6 @@ def uploading():
             elif upload_data['itemradio'] == 'footage':
                 # build payload for api
                 for items in processed_files:
-                    payload['name'] = items
-
                     for item in processed_files[items]:
                         if item.filename.endswith('.mp4'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
@@ -272,7 +270,6 @@ def uploading():
                     }
 
                     r = requests.post('{}'.format(API_ITEM), params=payload)
-                    # print()
 
                     # return home()
                     return render_template('collection.html', item=r.json()['POST: /item'])
@@ -289,8 +286,6 @@ def patch_item():
     if request.method == 'POST':
         form = request.form
         for k in form:
-            print('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
-            print(k)
             if k == 'append_collection':
                 data['items'] = form[k]
 
@@ -303,8 +298,6 @@ def patch_item():
             elif k == 'people_tags':
 
                 tags = ' '.join(form.getlist('people_tags'))
-                print('pppppppppppppppppppppp')
-                print(tags)
                 data['people_tags'] = tags
 
             else:
@@ -380,7 +373,6 @@ def home():
     """Serves front page
     :return: dict. Each item tyoe.
     """
-    print(session)
     # process and reverse data so the latest uploaded items are first.
     # Currently using the items `id`, but upload date would be better.
     reversed_list = []
@@ -464,7 +456,6 @@ def item(id):
     elif r.json()['item'][0]['item_type'] == 'people':
         tags_from_api = r.json()['item'][0]['tags']
         people_tags = image.get_people_tags(tags_from_api)
-        #print(people_tags)
 
         return render_template('people.html', item=r.json()['item'], people_tags=people_tags)
 
@@ -475,30 +466,36 @@ def item(id):
 
 @app.route('/search')
 def search():
-    search_data = {}
-    search_term = request.args['search']
-    search_data['query'] = str(search_term)
-    search_data['filter_people'] = []
+    # collection init data
+    data = {
+        'filter': session['filter'],
+        'filter_people': [],
+        'query': request.args['search']
+    }
 
+    # if sent with 'filter'
     if 'filter' in request.args:
-        search_data['filter'] = request.args['filter']
+        # update data user session
         auth.SessionHandler(session).filter(request.args['filter'])
-    else:
-        pass
-
-    # adds people filter to session.
-    if 'filter_people' in request.args:
+        data['filter'] =  request.args['filter']
+    elif 'filter_people' in request.args:
+        # update user session
         auth.SessionHandler(session).filter_people(request.args['filter_people'])
+    else:
+        data['filter'] = session['filter']
 
-    # get all people filters == 1, and append to searfh_data
-    for x in session['filter_people']:
-        for j in session['filter_people'][x]:
-            if session['filter_people'][x][j] == 1:
-                search_data['filter_people'].append(j)
+    # get`people_filters`
+    if data['filter'] == 'people':
+        # collect all True 'filter_people' tags, append to query
+        for subject in session['filter_people']:
+            for tag in session['filter_people'][subject]:
+                if session['filter_people'][subject][tag] == 1:
+                    data['filter_people'].append(tag)
 
-    r = requests.get('{}query'.format(API), params=search_data)
 
-    return render_template('search.html', data=search_data, items=r.json()['result'])
+    r = requests.get('{}query'.format(API), params=data)
+
+    return render_template('search.html', data=data, items=r.json()['result'])
 
 
 if __name__ == "__main__":

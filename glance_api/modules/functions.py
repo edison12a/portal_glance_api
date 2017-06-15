@@ -209,7 +209,6 @@ def get_query(session, userquery):
     # searches. gotta be a better way. look into postgres joins?
     result = {}
     query = {}
-
     # makes users query a dict
     for k, v in userquery.items():
         query[k] = str(v).split()
@@ -218,6 +217,14 @@ def get_query(session, userquery):
         query['filter'] = 'all'
     else:
         query['filter'] = query['filter'][0]
+
+    # TODO:FUTURE IMP: PATCH FOR NOW
+    # extending querys via the api: filter_people
+    filter_people = None
+    if 'filter_people' in query:
+        filter_people = dict(userquery)['filter_people']
+
+
 
     # querying through many-to-many relationships leaves us with an
     # instrumentedlist which needs to be exracted before using make_dict
@@ -230,25 +237,36 @@ def get_query(session, userquery):
         else:
             taglists = session.query(glance_api.modules.models.Tag).filter_by(name=term).all()
 
-        # for each tag
-        for tag in taglists:
-            # if one exists
-            if tag.items:
-                # get asset assigned to tag and append to list, 'item_list'
-                for item in tag.items:
-                    # return data according to the filter information
-                    if query['filter'] == 'all':
-                        item_list.append(item)
-                    else:
-                        if item.item_type == query['filter']:
-                            if item.item_type == 'people':
-                                item_list.append(item)
-                        else:
-                            pass
-            # get collection assigned to tag and append to list, 'item_list'
-            elif tag.collection_tags:
-                for item in tag.collection_tags:
+
+    # for each tag
+    for tag in taglists:
+        # if one exists
+        if tag.items:
+            # get asset assigned to tag and append to list, 'item_list'
+            for item in tag.items:
+                # return data according to the filter information
+                if query['filter'] == 'all':
                     item_list.append(item)
+
+                elif item.item_type == query['filter']:
+                    if query['filter'] == 'people':
+                        # only append item is items have the filters as tags
+                        if 'filter_people' not in query:
+                            item_list.append(item)
+                        else:
+                            # logic for applying `filter_people`
+                            for x in item.tags:
+                                if x.name in query['filter_people']:
+
+                                    item_list.append(item)
+
+                    else:
+                        item_list.append(item)
+
+        # get collection assigned to tag and append to list, 'item_list'
+        elif tag.collection_tags:
+            for item in tag.collection_tags:
+                item_list.append(item)
 
     return item_list
 
@@ -545,10 +563,6 @@ class Item():
 
                 for tag in people_tag:
                     current_people_tags = [x for x in item_tags if x.startswith('_')]
-                    print('-------------------')
-                    # print(current_people_tags)
-                    print(people_tag)
-
                     # create new Tag object and append to asset object
                     newtag = glance_api.modules.models.Tag(name=str(tag))
                     self.session.add(newtag)
