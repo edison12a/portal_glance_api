@@ -487,10 +487,13 @@ def search():
     # get`people_filters`
     if data['filter'] == 'people':
         # collect all True 'filter_people' tags, append to query
-        for subject in session['filter_people']:
-            for tag in session['filter_people'][subject]:
-                if session['filter_people'][subject][tag] == 1:
-                    data['filter_people'].append(tag)
+        if 'filter_people' in session:
+            for subject in session['filter_people']:
+                for tag in session['filter_people'][subject]:
+                    if session['filter_people'][subject][tag] == 1:
+                        data['filter_people'].append(tag)
+        else:
+            session['filter_people'] = {}
 
 
     r = requests.get('{}query'.format(API), params=data)
