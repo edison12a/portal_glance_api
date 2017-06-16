@@ -313,7 +313,8 @@ def fav_to_collection():
     if 'fav' in session:
         items = []
         for x in session['fav']:
-            items.append(list(x.keys())[0])
+            items.append(x)
+
 
     payload = {
         'name': "upload_data['collection']",
@@ -326,6 +327,7 @@ def fav_to_collection():
     }
 
     r = requests.post('{}'.format(API_ITEM), params=payload)
+    session['fav'] = {}
 
 
     res = r.json()['POST: /item']
@@ -333,8 +335,6 @@ def fav_to_collection():
         if x == 'responce':
             if res['responce'] == 'successful':
                 collection_id = res['location'].split('/')[-1:][0]
-
-                session['fav'] = []
                 return item(collection_id)
         else:
             print('empty else')
