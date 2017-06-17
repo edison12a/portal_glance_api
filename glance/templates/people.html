@@ -5,7 +5,7 @@
 <div style="width:100%;color:white;">
 
 <div style="text-align:center;">
-  <img style="height:400px;" src="https://s3.amazonaws.com/glancestore/{{ item.0.item_loc }}" />
+  <img style="height:400px;" src="https://s3.amazonaws.com/{{bucketname}}/{{ item.0.item_loc }}" />
 </div>
 
 </div>
@@ -24,7 +24,7 @@
                 <div style="position:relative;display:inline-block;">
 
                 <a href="/item/{{ g.id }}">
-                <img style="max-width:300px; height: auto;" src="https://s3.amazonaws.com/glancestore/{{ g.item_thumb }}" />
+                <img style="max-width:300px; height: auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{ g.item_thumb }}" />
                 </a>
 
                 <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">

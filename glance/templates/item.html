@@ -30,7 +30,7 @@
     {% for x, g in v.items() %}
     <a href="/item/{{ g.id }}">
     <div style="text-align:center;">
-        <img style="max-width:200px; height: auto;" src="https://s3.amazonaws.com/glancestore/{{ g.item_thumb }}" />
+        <img style="max-width:200px; height: auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{ g.item_thumb }}" />
     </div>
     </a>
     {% endfor %}
@@ -43,7 +43,7 @@
     </div>
         <div class="img-wrap">
 
-        <img src="https://s3.amazonaws.com/glancestore/{{ item.0.item_loc }}" />
+        <img src="https://s3.amazonaws.com/{{bucketname}}/{{ item.0.item_loc }}" />
         </div>
 
 

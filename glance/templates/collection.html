@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div style="z-index:50;max-width:100%;max-height:200px;overflow:hidden;position:relative;box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.3);">
-    <img style="width:100%;height:auto;" src="https://s3.amazonaws.com/glancestore/{{ item.0.item_loc }}" />
+    <img style="width:100%;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{ item.0.item_loc }}" />
 
     <div style="padding-left:20px;padding-right:20px;border-radius:35px;position:absolute;bottom:0;right:0;height:45px;background-color:rgba(255, 255, 255, .5);margin:10px;">
         <div style="text-align:center;font-size:30px;">
@@ -29,7 +29,7 @@
               <div class="grid-item">
                   <div style="position:relative;">
                       <a href="/item/{{ item.id }}">
-                          <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                          <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
                       </a>
                   </div>
                   <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
@@ -72,7 +72,7 @@
                   <div class="grid-item">
                       <div style="position:relative;">
                           <a href="/item/{{ item.id }}">
-                              <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                              <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
                           </a>
                       </div>
                       <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
@@ -104,7 +104,7 @@
                                     <div class="grid-item">
                                         <div style="position:relative;">
                                             <a href="/item/{{ item.id }}">
-                                                <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                                                <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
                                             </a>
                                         </div>
                                         <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
@@ -134,7 +134,7 @@
                                                       <div class="grid-item">
                                                           <div style="position:relative;">
                                                               <a href="/item/{{ item.id }}">
-                                                                  <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                                                                  <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
                                                               </a>
                                                           </div>
                                                           <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
@@ -165,7 +165,7 @@
                                                                         <div class="grid-item">
                                                                             <div style="position:relative;">
                                                                                 <a href="/item/{{ item.id }}">
-                                                                                    <img width="100%" src="https://s3.amazonaws.com/glancestore/{{item.item_thumb}}" />
+                                                                                    <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
                                                                                 </a>
                                                                             </div>
                                                                             <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
