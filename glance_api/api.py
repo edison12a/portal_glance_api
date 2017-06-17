@@ -187,8 +187,6 @@ def query():
         session = Session()
         raw_assets = functions.get_query(session, request.args)
         assets = functions.to_dict(raw_assets)
-        print('==OUT==')
-        print(assets)
         session.close()
 
         return jsonify({'result': assets})

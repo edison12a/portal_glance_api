@@ -313,7 +313,8 @@ def fav_to_collection():
     if 'fav' in session:
         items = []
         for x in session['fav']:
-            items.append(list(x.keys())[0])
+            items.append(x)
+
 
     payload = {
         'name': "upload_data['collection']",
@@ -326,6 +327,7 @@ def fav_to_collection():
     }
 
     r = requests.post('{}'.format(API_ITEM), params=payload)
+    session['fav'] = {}
 
 
     res = r.json()['POST: /item']
@@ -333,8 +335,6 @@ def fav_to_collection():
         if x == 'responce':
             if res['responce'] == 'successful':
                 collection_id = res['location'].split('/')[-1:][0]
-
-                session['fav'] = []
                 return item(collection_id)
         else:
             print('empty else')
@@ -487,10 +487,13 @@ def search():
     # get`people_filters`
     if data['filter'] == 'people':
         # collect all True 'filter_people' tags, append to query
-        for subject in session['filter_people']:
-            for tag in session['filter_people'][subject]:
-                if session['filter_people'][subject][tag] == 1:
-                    data['filter_people'].append(tag)
+        if 'filter_people' in session:
+            for subject in session['filter_people']:
+                for tag in session['filter_people'][subject]:
+                    if session['filter_people'][subject][tag] == 1:
+                        data['filter_people'].append(tag)
+        else:
+            session['filter_people'] = {}
 
 
     r = requests.get('{}query'.format(API), params=data)
