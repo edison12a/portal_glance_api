@@ -259,6 +259,19 @@ def uploading():
             if 'collection' in upload_data:
                 if upload_data['collection'] != '':
 
+                    print('lllllllllllllllllllllllllll')
+                    print(upload_data['collection'])
+                    print(upload_data['tags'])
+                    print(type(upload_data))
+
+                    # add collection name to tags
+                    foo = upload_data['collection'].split(' ')
+                    if len(upload_data['tags']) != 0:
+                        for x in foo:
+                            upload_data['tags'] += ' ' + str(x)
+                    else:
+                        upload_data['tags'] = upload_data['collection']
+
                     payload = {
                         'name': upload_data['collection'],
                         'item_type': 'collection',
