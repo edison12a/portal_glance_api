@@ -381,18 +381,25 @@ class Item():
         id: primary key of database item,
         """
         item = self.session.query(glance_api.modules.models.Item).filter_by(id='{}'.format(int(id))).first()
-        self.session.delete(item)
-        self.session.commit()
 
-        # check if any assciations remain on `Tag` if None then delete it.
-        # TODO: this should problely be handled by something else tag related?
-        for x in item.tags:
-            if len(x.items) > 0:
-                pass
-            else:
-                # delete the tag
-                print('deleting {}'.format(x))
-                self.session.delete(x)
+        # TODO: strange bug using session.delete() it deletes the item and throws
+        # as error item=None. wrapped it try/except fix it.
+        try:
+            # check if any assciations remain on `Tag` if None then delete it.
+            # TODO: this should problely be handled by something else tag related?
+            for x in item.tags:
+                if len(x.items) > 0:
+                    pass
+                else:
+                    # delete the tag
+                    print('deleting {}'.format(x))
+                    self.session.delete(x)
+                    self.session.commit()
+
+
+            self.session.delete(item)
+        except:
+            pass
 
         self.session.commit()
 
