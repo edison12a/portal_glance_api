@@ -70,6 +70,12 @@ def signup():
         for form_input in request.form:
             payload[form_input] = request.form[form_input]
 
+        # TODO: below is for testing only. remove for prod
+        if payload['username'] != 'test':
+            return render_template('signup.html')
+        elif payload['password'] != 'test':
+            return render_template('signup.html')
+
         r = requests.post('{}'.format(API_USER), params=payload)
 
         return home()
@@ -392,6 +398,9 @@ def home():
     res = g.json()
 
     if 'GET assets' in res and res['GET assets']['Message'] == 'No assets in database':
+        return render_template('home.html')
+
+    elif session['logged_in'] == False:
         return render_template('home.html')
 
     else:

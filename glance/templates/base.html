@@ -289,9 +289,9 @@
         {% endif %}
 
 
-<!-- search bear !-->
+<!-- search bar !-->
 
-
+{% if session.logged_in == true %}
 
         {% if data is defined %}
 
@@ -325,6 +325,8 @@
 
     {% endif %}
 
+  {% endif %}
+
 </div>
 
 
@@ -332,6 +334,10 @@
 
 
     <p style="height:42px;"></p>
+
+
+
+{% if session.logged_in == true %}
 
 
 <!-- surely this can be refactored? !-->
@@ -395,11 +401,16 @@
 
 {%endif%}
 
+
+
+{% endif %}
+
+
+
 {% set bucketname = 'devglancestore' %}
 
         {% block content %}
         {% endblock %}
-
 
 </body>
 </html>
