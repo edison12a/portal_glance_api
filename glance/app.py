@@ -397,10 +397,14 @@ def home():
     g = requests.get('{}'.format(API_ITEM))
     res = g.json()
 
-    if 'GET assets' in res and res['GET assets']['Message'] == 'No assets in database':
+    # TODO: Temp fix for hidding information when a user isn logged in.
+    try:
+        if session['logged_in'] == False:
+            return render_template('home.html')
+    except:
         return render_template('home.html')
 
-    elif session['logged_in'] == False:
+    if 'GET assets' in res and res['GET assets']['Message'] == 'No assets in database':
         return render_template('home.html')
 
     else:
