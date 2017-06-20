@@ -259,11 +259,6 @@ def uploading():
             if 'collection' in upload_data:
                 if upload_data['collection'] != '':
 
-                    print('lllllllllllllllllllllllllll')
-                    print(upload_data['collection'])
-                    print(upload_data['tags'])
-                    print(type(upload_data))
-
                     # add collection name to tags
                     foo = upload_data['collection'].split(' ')
                     if len(upload_data['tags']) != 0:

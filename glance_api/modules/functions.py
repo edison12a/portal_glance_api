@@ -546,6 +546,7 @@ class Item():
                 for tag in tag_list:
                     if tag.startswith('-'):
                         remove_tag.append(tag)
+
                     elif tag.startswith('_'):
                         people_tag.append(tag)
                     else:
@@ -566,12 +567,12 @@ class Item():
 
                     asset.tags.append(newtag)
 
-
                 for tag in remove_tag:
                     item = self.session.query(glance_api.modules.models.Item).filter_by(id='{}'.format(int(kwarg['id']))).first()
                     for x in item.tags:
                         if x.name == tag[1:]:
                             self.session.delete(x)
+                            self.session.commit()
 
                     # check if any assciations remain on `Tag` if None then delete it.
                     # TODO: this should problely be handled by something else tag related?
