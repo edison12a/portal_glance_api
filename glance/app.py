@@ -323,13 +323,12 @@ def fav_to_collection():
         for x in session['fav']:
             items.append(x)
 
-
     payload = {
-        'name': "upload_data['collection']",
+        'name': "noname",
         'item_type': 'collection',
         'item_loc': 'site/default_cover.jpg',
         'item_thumb': 'site/default_cover.jpg',
-        'tags': "upload_data['tags']",
+        'tags': "noname",
         'items': ' '.join(items),
         'author': session['user']
     }
