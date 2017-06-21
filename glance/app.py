@@ -8,6 +8,8 @@ __license__ = "./LICENSE"
 
 import os
 import subprocess
+import string
+import re
 
 import requests
 from flask import Flask, render_template, request, session, jsonify
@@ -99,6 +101,7 @@ def append_fav():
 @app.route('/uploading', methods=['POST'])
 def uploading():
     #TODO:  refactor.
+    # TODO: user input sanitising? here or the api?
     if auth.logged_in(session):
         if request.method == 'POST':
             # Init dict and append user data
@@ -109,13 +112,13 @@ def uploading():
             for form_input in request.form:
                 upload_data[form_input] = request.form[form_input]
 
+
             # process all uploaded files.
             processed_files = file.process_raw_files(request.files.getlist('file'))
 
             # process remaining item data
             if upload_data['itemradio'] == 'image':
                 for items in processed_files:
-
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
@@ -129,11 +132,34 @@ def uploading():
 
                             # AWS REKOGNITION
                             for tag in image.generate_tags(uploaded_file[0]):
-                                payload['tags'] +=  ' ' + tag.lower()
+                                if payload['tags'] == '':
+                                    payload['tags'] = tag.lower()
+                                else:
+                                    payload['tags'] +=  ' ' + tag.lower()
+
+                            # append name to tags
+                            # remove punc
+                            payload_name = ''
+                            for x in payload['name']:
+                                if x == '_' or x == '-':
+                                    payload_name += ' '
+                                    pass
+                                elif x in string.punctuation:
+                                    pass
+                                else:
+                                    payload_name += x
+                            # apend payload_name to tag string for posting.
+                            if payload['tags'] == '':
+                                payload['tags'] = payload_name.lower()
+                            else:
+                                payload['tags'] += ' {}'.format(payload_name.lower())
+
+                            print(payload_name)
 
                         else:
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
+                    print(payload)
 
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
@@ -180,6 +206,25 @@ def uploading():
                             payload['attached'] = uploaded_file
                             """
 
+                    # append name to tags
+                    # remove punc
+                    payload_name = ''
+                    for x in payload['name']:
+                        if x == '_' or x == '-':
+                            payload_name += ' '
+                            pass
+                        elif x in string.punctuation:
+                            pass
+                        else:
+                            payload_name += x
+                    # apend payload_name to tag string for posting.
+                    if payload['tags'] == '':
+                        payload['tags'] = payload_name.lower()
+                    else:
+                        payload['tags'] += ' {}'.format(payload_name.lower())
+
+
+
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
                     payload['tags'] = ''
@@ -216,6 +261,26 @@ def uploading():
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
+
+                    # append name to tags
+                    # remove punc
+                    payload_name = ''
+                    for x in payload['name']:
+                        if x == '_' or x == '-':
+                            payload_name += ' '
+                            pass
+                        elif x in string.punctuation:
+                            pass
+                        else:
+                            payload_name += x
+                    # apend payload_name to tag string for posting.
+                    if payload['tags'] == '':
+                        payload['tags'] = payload_name.lower()
+                    else:
+                        payload['tags'] += ' {}'.format(payload_name.lower())
+
+
+
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
                     # collect uploaded item ids from respoce object.
@@ -251,6 +316,26 @@ def uploading():
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
+
+                    # append name to tags
+                    # remove punc
+                    payload_name = ''
+                    for x in payload['name']:
+                        if x == '_' or x == '-':
+                            payload_name += ' '
+                            pass
+                        elif x in string.punctuation:
+                            pass
+                        else:
+                            payload_name += x
+                    # apend payload_name to tag string for posting.
+                    if payload['tags'] == '':
+                        payload['tags'] = payload_name.lower()
+                    else:
+                        payload['tags'] += ' {}'.format(payload_name.lower())
+
+
+
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
                     # collect uploaded item ids from respoce object.
@@ -282,6 +367,23 @@ def uploading():
                         'items': ' '.join(upload_data['items_for_collection']),
                         'author': session['user']
                     }
+
+                    # append name to tags
+                    # remove punc
+                    payload_name = ''
+                    for x in payload['name']:
+                        if x == '_' or x == '-':
+                            payload_name += ' '
+                            pass
+                        elif x in string.punctuation:
+                            pass
+                        else:
+                            payload_name += x
+                    # apend payload_name to tag string for posting.
+                    if payload['tags'] == '':
+                        payload['tags'] = payload_name.lower()
+                    else:
+                        payload['tags'] += ' {}'.format(payload_name.lower())
 
                     r = requests.post('{}'.format(API_ITEM), params=payload)
 

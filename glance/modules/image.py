@@ -22,13 +22,13 @@ def generate_tags(data):
 
     :param data: -- ???
 
-    :return type: ???
+    :return type: ???``
     """
     client = auth.boto3_res_rek()
     response = auth.boto3_rek_tag(client, data)
 
     result = [x['Name'] for x in response['Labels']]
-
+    
     return result
 
 
