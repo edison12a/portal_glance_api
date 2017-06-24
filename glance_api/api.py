@@ -28,10 +28,6 @@ session = Session()
 functions.__reset_db(session, engine)
 """
 
-"""
-whaaa
-"""
-
 # info
 @app.route('{}'.format(settings.ROUTE))
 def api():

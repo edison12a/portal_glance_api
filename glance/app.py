@@ -12,7 +12,7 @@ import string
 import re
 
 import requests
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, render_template, request, session, jsonify, url_for
 
 import glance.modules.auth as auth
 import glance.modules.file as file
@@ -154,12 +154,9 @@ def uploading():
                             else:
                                 payload['tags'] += ' {}'.format(payload_name.lower())
 
-                            print(payload_name)
-
                         else:
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
-                    print(payload)
 
                     # post payload to api
                     r = requests.post('{}'.format(API_ITEM), params=payload)
@@ -390,7 +387,15 @@ def uploading():
                     # return home()
                     return render_template('collection.html', item=r.json()['POST: /item'])
 
-            return render_template('uploadcomplete.html')
+
+            # TODO: return actual items. instead of 'uploadcompelte.html'.
+            print('------------------------')
+            if len(processed_files) > 1:
+                return render_template('uploadcomplete.html')
+            elif len(processed_files) == 1:
+                return item()
+            else:
+                return render_template('uploadcomplete.html')
     else:
         return home()
 
@@ -561,27 +566,30 @@ def upload():
 @app.route('/item/<id>/')
 def item(id):
 
-    r = requests.get('{}/{}'.format(API_ITEM, id))
+    if id:
+        r = requests.get('{}/{}'.format(API_ITEM, id))
 
-    if r.json()['item'][0]['item_type'] == 'image':
-        return render_template('image.html', item=r.json()['item'])
+        if r.json()['item'][0]['item_type'] == 'image':
+            return render_template('image.html', item=r.json()['item'])
 
-    elif r.json()['item'][0]['item_type'] == 'collection':
-        return render_template('collection.html', item=r.json()['item'])
+        elif r.json()['item'][0]['item_type'] == 'collection':
+            return render_template('collection.html', item=r.json()['item'])
 
-    elif r.json()['item'][0]['item_type'] == 'footage':
-        return render_template('footage.html', item=r.json()['item'])
+        elif r.json()['item'][0]['item_type'] == 'footage':
+            return render_template('footage.html', item=r.json()['item'])
 
-    elif r.json()['item'][0]['item_type'] == 'geometry':
-        return render_template('geometry.html', item=r.json()['item'])
+        elif r.json()['item'][0]['item_type'] == 'geometry':
+            return render_template('geometry.html', item=r.json()['item'])
 
-    elif r.json()['item'][0]['item_type'] == 'people':
-        tags_from_api = r.json()['item'][0]['tags']
-        people_tags = image.get_people_tags(tags_from_api)
+        elif r.json()['item'][0]['item_type'] == 'people':
+            tags_from_api = r.json()['item'][0]['tags']
+            people_tags = image.get_people_tags(tags_from_api)
 
-        return render_template('people.html', item=r.json()['item'], people_tags=people_tags)
+            return render_template('people.html', item=r.json()['item'], people_tags=people_tags)
 
 
+        else:
+            return home()
     else:
         return home()
 
