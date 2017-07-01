@@ -30,6 +30,7 @@ app.secret_key = settings.secret_key
 # TODO: Lazy?
 API = settings.api_root
 API_ITEM = '{}item'.format(settings.api_root)
+API_PATCH = '{}item/patch'.format(settings.api_root)
 API_COLLECTION = '{}collection'.format(settings.api_root)
 API_USER = '{}user'.format(settings.api_root)
 
@@ -438,9 +439,32 @@ def manage_selection():
         # imp append each item in selection to the user entered collection id
         print(request.form['collection_append'])
 
+        # get collection id
+        # get items to append
+
+        payload = {}
+        payload['id'] = request.form['collection_append']
+
+        ids = []
+        form_dict = request.form.to_dict()
+        for x in form_dict:
+            if form_dict[x] == 'on':
+                ids.append(x)
+
+        payload['items'] = ' '.join(ids)
+
+        print(payload)
+        r = requests.patch('{}'.format(API_PATCH), params=payload)
+        print(r.json())
+
+
+        # requests.post()
+        # send payload to api
+
     if 'tags' in request.form and request.form['tags'] != '':
         # imp appending all tags to each item in selection
         print(request.form['tags'])
+
 
     if 'collection_name' in request.form and request.form['collection_name'] != '':
         # IMP using checked == 'on'

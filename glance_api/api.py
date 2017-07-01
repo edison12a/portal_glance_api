@@ -256,11 +256,11 @@ def delete_asset(asset_id):
 @app.route('{}/item/patch'.format(settings.ROUTE), methods=['PATCH'])
 def patch_item():
 
-    # TODO: dont use try/except here
-
     patch_data = {}
     for y in request.args:
         patch_data[y] = request.args[y]
+
+    print(patch_data)
 
     session = Session()
     raw_item = functions.Item(session).patch(patch_data)
