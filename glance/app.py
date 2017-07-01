@@ -429,36 +429,50 @@ def patch_item():
     return home()
 
 
-@app.route('/fav_to_collection', methods=['GET', 'POST'])
-def fav_to_collection():
-    if 'fav' in session:
-        items = []
-        for x in session['fav']:
-            items.append(x)
+@app.route('/manage_selection', methods=['GET', 'POST'])
+def manage_selection():
 
-    payload = {
-        'name': "noname",
-        'item_type': 'collection',
-        'item_loc': 'site/default_cover.jpg',
-        'item_thumb': 'site/default_cover.jpg',
-        'tags': "noname",
-        'items': ' '.join(items),
-        'author': session['user']
-    }
+    print(request.form.to_dict())
 
-    r = requests.post('{}'.format(API_ITEM), params=payload)
-    session['fav'] = {}
+    if 'collection_append' in request.form and request.form['collection_append'] != '':
+        # imp append each item in selection to the user entered collection id
+        print(request.form['collection_append'])
 
+    if 'tags' in request.form and request.form['tags'] != '':
+        # imp appending all tags to each item in selection
+        print(request.form['tags'])
 
-    res = r.json()['POST: /item']
-    for x in res:
-        if x == 'responce':
-            if res['responce'] == 'successful':
-                collection_id = res['location'].split('/')[-1:][0]
-                return item(collection_id)
-        else:
-            print('empty else')
-            pass
+    if 'collection_name' in request.form and request.form['collection_name'] != '':
+        # IMP using checked == 'on'
+        if 'fav' in session:
+            items = []
+            for x in session['fav']:
+                items.append(x)
+
+        payload = {
+            'name': request.form['collection_name'],
+            'item_type': 'collection',
+            'item_loc': 'site/default_cover.jpg',
+            'item_thumb': 'site/default_cover.jpg',
+            'tags': request.form['collection_name'].split(' '),
+            'items': ' '.join(items),
+            'author': session['user']
+        }
+
+        r = requests.post('{}'.format(API_ITEM), params=payload)
+
+        #clean up session object
+        session['fav'] = {}
+
+        res = r.json()['POST: /item']
+        for x in res:
+            if x == 'responce':
+                if res['responce'] == 'successful':
+                    collection_id = res['location'].split('/')[-1:][0]
+                    return item(collection_id)
+            else:
+                print('empty else')
+                pass
 
 
 
