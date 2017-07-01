@@ -113,10 +113,8 @@ def uploading():
             for form_input in request.form:
                 upload_data[form_input] = request.form[form_input]
 
-
             # process all uploaded files.
             processed_files = file.process_raw_files(request.files.getlist('file'))
-
 
             # process remaining item data
             if 'itemradio' in upload_data and upload_data['itemradio'] == 'image':
@@ -389,9 +387,7 @@ def uploading():
                     # return home()
                     return render_template('collection.html', item=r.json()['POST: /item'])
 
-
             elif 'collection' in upload_data:
-                print('yeeeee boi')
 
                 payload = {
                     'name': upload_data['collection'],
@@ -403,12 +399,8 @@ def uploading():
                 }
 
                 r = requests.post('{}'.format(API_ITEM), params=payload)
-                #print(r.json())
 
-                return home()
-                # return render_template('collection.html', item=r.json()['POST: /item'])
-
-
+                return render_template('collection.html', item=r.json()['POST: /item'])
 
             # TODO: return actual items. instead of 'uploadcompelte.html'.
             print('------------------------')
@@ -457,15 +449,10 @@ def manage_selection():
     print(request.form.to_dict())
 
     if 'collection_append' in request.form and request.form['collection_append'] != '':
-        # imp append each item in selection to the user entered collection id
-        print(request.form['collection_append'])
-
-        # get collection id
-        # get items to append
-
         payload = {}
         payload['id'] = request.form['collection_append']
 
+        # get items in selection
         ids = []
         form_dict = request.form.to_dict()
         for x in form_dict:
@@ -474,17 +461,31 @@ def manage_selection():
 
         payload['items'] = ' '.join(ids)
 
-        print(payload)
         r = requests.patch('{}'.format(API_PATCH), params=payload)
-        print(r.json())
 
-
-        # requests.post()
-        # send payload to api
 
     if 'tags' in request.form and request.form['tags'] != '':
         # imp appending all tags to each item in selection
+
+        #get selection
+        # get items in selection
+        ids = []
+        form_dict = request.form.to_dict()
+        for x in form_dict:
+            if form_dict[x] == 'on':
+                ids.append(x)
+        print(ids)
+
+        # get tags
         print(request.form['tags'])
+
+        payload = {}
+
+        for x in ids:
+            payload['id'] = x
+            payload['tags'] = request.form['tags']
+
+            r = requests.patch('{}'.format(API_PATCH), params=payload)
 
 
     if 'collection_name' in request.form and request.form['collection_name'] != '':
