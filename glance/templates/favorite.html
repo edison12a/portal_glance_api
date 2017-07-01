@@ -6,68 +6,46 @@
         <div style="width:70%;margin:auto;">
 
 
-          {% if session.fav|length > 0 %}
-
-
-                      <div>
-
-
-                      <br><br>
-                                  <h1>Make Collection From Favorites</h1>
-                      <br><br>
-
-                  <table class="table table-hover">
-
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Thumbnail</th>
-                        <th>Item Type</th>
-                        <th>Allow in Collection</th>
-                        <th>Remove from Favorites</th>
-                      </tr>
-                    </thead>
-                      <tbody>
-
-
-          {% for x in session.fav.items() %}
-
-
-
-                                <tr>
-                                  <td>{{x.0}}</td>
-                                  <td>
-                                      <a href="/item/{{x.0}}">
-                                          <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{x.1}}">
-                                    </a>
-                                  </td>
-                                  <td>IMP</td>
-                                  <td>[X]</td>
-                                  <td>[X]</td>
-                                </tr>
-
-
-
-
-                  {% endfor %}
-              </tbody>
-            </table>
 
 
 
 
 
 
-          <form method="post" action="{{ url_for('fav_to_collection') }}">
-                            <button type="submit" class="btn btn-primary btn-block">Make Collection</button>
-                          </form>
+                              {% if session.fav|length > 0 %}
 
 
-          </div>
 
 
-          {% else %}
+                                                    <div>
 
+
+                                                    <br><br>
+                                                                <h1>Manage Selection</h1>
+                                                    <br><br>
+
+
+
+                    {% for x in session.fav.items() %}
+
+
+<div style="display: inline-block;position:relative;">
+
+                    <a href="/item/{{x.0}}">
+                        <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{x.1}}">
+                  </a>
+<div style="position:absolute; top:0px; right: 5px; width:10px; height:10px;">
+
+<input id="checkBox" type="checkbox" checked>
+
+</div>
+</div>
+
+
+                            {% endfor %}
+
+
+</div>
           {% endif %}
 
 
@@ -76,35 +54,26 @@
 
 
 
+<br>
+
+
+          <form method="post" action="{{ url_for('fav_to_collection') }}">
+
+            <div class="input-group">
+              <span class="input-group-addon" id="basic-addon3">Add/remove tags from selection</span>
+              <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+            </div>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                            <button type="submit" class="btn btn-primary btn-block">Make Collection</button>
+                          </form>
 
 
             <div>
 
                 <br><br>
-                            <h1>My Collections</h1>
+                            <h1>Manage Collections</h1>
                 <br><br>
             </div>
 
@@ -117,7 +86,6 @@
                   <th>Thumbnail</th>
                   <th>Overview</th>
                   <th>Manage Tags</th>
-                  <th>Tools</th>
                 </tr>
               </thead>
                 <tbody>
@@ -126,16 +94,62 @@
                   {% for x in collection.result %}
 
 
+
                 <tr>
-                  <td>{{x.0}}</td>
+                  <td>{{x.id}}</td>
                   <td>
                       <a href="/item/{{x.id}}">
                           <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{x.item_thumb}}">
-                    </a>
+                    </a><br>
+                    <span class="label label-primary">Change Cover</span>
                   </td>
-                  <td>IMP</td>
-                  <td>[X]</td>
-                  <td>[X]</td>
+                  <td>
+
+
+
+<strong>{{x.name}}</strong><br>
+<br>
+
+<small><strong>Contains</strong></small><br>
+{% for bla in x['items'] %}
+<a href="/item/{{bla}}">
+
+
+  <img style="width:50px;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{x['items'][bla].item_thumb}}">
+
+
+
+</a>
+
+
+
+{% endfor %}
+<br>
+<br>
+
+[flag] [delete]
+
+
+          </td>
+                  <td>
+
+{% for tag in x.tags %}
+
+<span class="label label-default">{{tag}}
+
+<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+
+</span>
+{% endfor %}
+<br><br>
+<div class="input-group">
+  <span class="input-group-addon" id="basic-addon3">Add Tags</span>
+  <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+</div>
+
+
+
+                  </td>
                 </tr>
 
             {% endfor %}
