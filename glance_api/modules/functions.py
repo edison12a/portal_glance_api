@@ -450,8 +450,9 @@ class Item():
         )
 
         if payload['item_type'] == 'collection':
-            for x in payload['items'].split(' '):
-                item.items.append(self.session.query(glance_api.modules.models.Item).get(x))
+            if 'items' in payload:
+                for x in payload['items'].split(' '):
+                    item.items.append(self.session.query(glance_api.modules.models.Item).get(x))
 
         self.session.add(item)
         self.session.commit()
@@ -597,10 +598,13 @@ class Item():
 
             elif k == 'items':
                 # process asset tags
+                print('api:functions:patch:items')
+
                 for item in v:
                     item_to_collection = self.session.query(glance_api.modules.models.Item).get(int(item))
                     asset.items.append(item_to_collection)
                     self.session.add(asset)
+
 
             elif k == 'flag':
                 # process flag field

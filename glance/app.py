@@ -117,8 +117,9 @@ def uploading():
             # process all uploaded files.
             processed_files = file.process_raw_files(request.files.getlist('file'))
 
+
             # process remaining item data
-            if upload_data['itemradio'] == 'image':
+            if 'itemradio' in upload_data and upload_data['itemradio'] == 'image':
                 for items in processed_files:
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
@@ -173,7 +174,7 @@ def uploading():
                         item_id = res['POST: /item'][0]['id']
                         upload_data['items_for_collection'].append(item_id)
 
-            elif upload_data['itemradio'] == 'footage':
+            elif 'itemradio' in upload_data and upload_data['itemradio'] == 'footage':
                 # build payload for api
                 for items in processed_files:
                     for item in processed_files[items]:
@@ -233,7 +234,7 @@ def uploading():
                         item_id = res['POST: /item'][0]['id']
                         upload_data['items_for_collection'].append(item_id)
 
-            elif upload_data['itemradio'] == 'geometry':
+            elif 'itemradio' in upload_data and upload_data['itemradio'] == 'geometry':
                 # build payload for api
 
                 for items in processed_files:
@@ -289,7 +290,7 @@ def uploading():
                         item_id = res['POST: /item'][0]['id']
                         upload_data['items_for_collection'].append(item_id)
 
-            elif upload_data['itemradio'] == 'people':
+            elif 'itemradio' in upload_data and upload_data['itemradio'] == 'people':
                 # build payload for api
 
                 for items in processed_files:
@@ -345,13 +346,13 @@ def uploading():
                         upload_data['items_for_collection'].append(item_id)
 
             # Runs if collection has been requested aswell as the uploading of files.
-            if 'collection' in upload_data:
+            if 'collection' in upload_data and 'itemradio' in upload_data:
                 if upload_data['collection'] != '':
 
                     # add collection name to tags
-                    foo = upload_data['collection'].split(' ')
+                    tags_from_name = upload_data['collection'].split(' ')
                     if len(upload_data['tags']) != 0:
-                        for x in foo:
+                        for x in tags_from_name:
                             upload_data['tags'] += ' ' + str(x)
                     else:
                         upload_data['tags'] = upload_data['collection']
@@ -387,6 +388,26 @@ def uploading():
 
                     # return home()
                     return render_template('collection.html', item=r.json()['POST: /item'])
+
+
+            elif 'collection' in upload_data:
+                print('yeeeee boi')
+
+                payload = {
+                    'name': upload_data['collection'],
+                    'item_type': 'collection',
+                    'item_loc': 'site/default_cover.jpg',
+                    'item_thumb': 'site/default_cover.jpg',
+                    'tags': "upload_data['tags']",
+                    'author': session['user']
+                }
+
+                r = requests.post('{}'.format(API_ITEM), params=payload)
+                #print(r.json())
+
+                return home()
+                # return render_template('collection.html', item=r.json()['POST: /item'])
+
 
 
             # TODO: return actual items. instead of 'uploadcompelte.html'.
