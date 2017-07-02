@@ -402,14 +402,16 @@ def uploading():
 
                 return render_template('collection.html', item=r.json()['POST: /item'])
 
-            # TODO: return actual items. instead of 'uploadcompelte.html'.
-            print('------------------------')
-            if len(processed_files) > 1:
+
+            if len(upload_data['items_for_collection']) > 1:
                 return render_template('uploadcomplete.html')
-            elif len(processed_files) == 1:
-                return item()
+            elif len(upload_data['items_for_collection']) == 1:
+                # TODO: return actual items. instead of 'uploadcompelte.html'.
+                return render_template('uploadcomplete.html')
+
             else:
                 return render_template('uploadcomplete.html')
+
     else:
         return home()
 
@@ -625,6 +627,7 @@ def upload():
 
 @app.route('/item/<id>/')
 def item(id):
+    print('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL')
 
     if id:
         r = requests.get('{}/{}'.format(API_ITEM, id))
