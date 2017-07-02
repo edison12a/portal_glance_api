@@ -1,0 +1,151 @@
+
+/* global */
+body {
+  background-color: rgb(242, 242, 240);
+  margin: 0;
+}
+
+/* base.html specific */
+#nav_main {
+  z-index:100;
+  width:100%;
+  height:53px;
+  position:fixed;
+  top:0;
+  background-color: rgba(44, 46, 48, .96);
+  padding-left:50px;
+  padding-right:10%;
+  box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.4);
+}
+#nav_main_logo
+{
+  float:left;
+  padding-top:17px;
+  padding-bottom:10px;
+  width: 120px;;
+  height: 100%;
+  padding-right: 20px;
+}
+#nav_main_logo a:link
+{
+  color: white;
+  text-decoration: none;
+}
+#nav_main_logo a:visited
+{
+  color: white;
+  text-decoration: none;
+}
+#nav_main_logo a:hover
+{
+  color: white;
+  text-decoration: none;
+}
+#nav_main_logo a:active
+{
+  color: white;
+  text-decoration: none;
+}
+#nav_main_button
+{
+  float:left;
+  height:100%;
+  width:auto;
+  padding-top: 17px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+#nav_main_button:hover
+{
+  background-color: rgba(44, 46, 48, .7);
+}
+#nav_main_button a:link
+{
+  color: white;
+  text-decoration: none;
+}
+#nav_main_button a:visited
+{
+  color: white;
+  text-decoration: none;
+}
+#nav_main_button a:hover
+{
+  color: white;
+  text-decoration: none;
+}
+#nav_main_button a:active
+{
+  color: white;
+  text-decoration: none;
+}
+#nav_main_button_notif
+{
+  padding-left:5px;
+  padding-right:5px;
+  border-radius:10px;
+  position:absolute;
+  top:-6px;
+  right:0;
+  height:15px;
+  background-color:red;
+  text-align:center;
+  color:white;
+}
+#nav_main_button_notif_pos
+{
+  position:relative;
+  bottom:4px;
+}
+#nav_main_search
+{
+  float:right;
+  padding-top:12px;
+}
+/* Search Bar CSS */
+.search input[type="text"] {
+    color: rgb(134, 136, 136);
+    border-radius:10px;
+    background-color: rgba(60, 60, 60, .5);
+    padding-left: 20px;
+    text-align: left;
+    font-size: 20px;
+    border: none;
+    border-bottom: solid 1px rgba(0, 0, 0, 0);
+    transition: border 0.3s;
+}
+.search input[type="text"]:focus,
+.search input[type="text"].focus {
+    color: white;
+    outline-width: 0;
+    border-bottom: solid 2px lightgray;
+}
+.inner-addon {
+    position: relative;
+}
+.inner-addon .glyphicon {
+  font-size: 25px;
+  color: lightgray;
+  position: absolute;
+  padding: 5px;
+  pointer-events: none;
+}
+.left-addon .glyphicon  { left:  0px;}
+.right-addon .glyphicon { right: 0px;}
+.left-addon input  { padding-left:  30px; }
+.right-addon input { padding-right: 30px; }
+
+#nav_item_panel {
+    z-index: 100;
+    padding-left:10%;
+    min-width:100%;
+    background-color: rgba(220, 220, 220, .96);
+}
+#nav_item_panel_subitem
+{
+  width:100%;
+  color:gray;
+  padding-top:20px;
+  padding-bottom:20px;
+  box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.05);
+}

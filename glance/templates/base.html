@@ -2,6 +2,8 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+
     <script src="{{ url_for('static', filename='js/masonry.pkgd.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/imagesloaded.pkgd.min.js') }}"></script>
 
@@ -10,10 +12,6 @@
     <script type=text/javascript>
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     </script>
-
-
-
-
 
 
         <script type=text/javascript>
@@ -44,10 +42,6 @@
 
 
     <style>
-        body {
-            background-color: rgb(242, 242, 240);
-            margin: 0;
-        }
         .half-circle {
             width: 50%;
             height: inherit; /* as the half of the width */
@@ -99,64 +93,8 @@
             color: rgb(46, 137, 176);
             text-decoration: none;
         }
-        .menu
-        {
-          float:left;
-          padding-top:17px;
-          padding-bottom:10px;
-        }
-        .menu a:link
-        {
-            color: white;
-            text-decoration: none;
-        }
-        .menu a:visited
-        {
-            color: white;
-            text-decoration: none;
-        }
-        .menu a:hover
-        {
-            color: white;
-            text-decoration: none;
-        }
-        .menu a:active
-        {
-            color: white;
-            text-decoration: none;
-        }
-        /* Search Bar CSS */
-        .search input[type="text"] {
-            color: rgb(134, 136, 136);
-            border-radius:10px;
-            background-color: rgba(60, 60, 60, .5);
-            padding-left: 20px;
-            text-align: left;
-            font-size: 20px;
-            border: none;
-            border-bottom: solid 1px rgba(0, 0, 0, 0);
-            transition: border 0.3s;
-        }
-        .search input[type="text"]:focus,
-        .search input[type="text"].focus {
-            color: white;
-            outline-width: 0;
-            border-bottom: solid 2px lightgray;
-        }
-        .inner-addon {
-            position: relative;
-        }
-        .inner-addon .glyphicon {
-          font-size: 25px;
-          color: lightgray;
-          position: absolute;
-          padding: 5px;
-          pointer-events: none;
-        }
-        .left-addon .glyphicon  { left:  0px;}
-        .right-addon .glyphicon { right: 0px;}
-        .left-addon input  { padding-left:  30px; }
-        .right-addon input { padding-right: 30px; }
+
+
 
         /* Masonry CSS */
         .grid {
@@ -188,12 +126,6 @@
             z-index:0;
         	filter: grayscale(0%) brightness(1.05);
         }
-        #searchfilterbox {
-            z-index: 100;
-            padding-left:10%;
-            min-width:100%;
-            background-color: rgba(220, 220, 220, .96);
-        }
         .img-wrap {
             max-width: 100%;
             width: 100%;
@@ -208,202 +140,166 @@
 
     </style>
 </head>
-
 <body>
+  <div id="nav_main">
 
+    <div id="nav_main_logo">
+      <a href='/'>GLANCE</a>
+    </div>
 
+    {% if session.logged_in == True %}
 
-    <div style="z-index:100;width:100%;height:53px;position:fixed;top:0;background-color: rgba(44, 46, 48, .96);padding-left:10%;padding-right:10%;box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.4);">
-
-
-
-
-        <div class="menu">
-
-            <a href='/' style="font-size:20px;position:absolute;top:13px;left:5%;">GLANCE</a>&emsp;&emsp;&emsp;
-
-
-        </div>
-
-
-
-
-
-  {% if session.logged_in == True %}
-
-
-        <div class="menu">
-        <a href='/upload'>UPLOAD</a>&emsp;
+    <div id="nav_main_button">
+      <a href='/upload'>upload</a>
     </div>
 
 
-          <div class="menu">
-              <div style="position:relative;">
-            <a href='/favorite'>MANAGE</a>&emsp;
+    <div id="nav_main_button">
+      <div style="position:relative;">
+        <a href='/favorite'>manage</a>
 
-            {% if 'fav' in session %}
+          {% if 'fav' in session %}
 
-            <div style="padding-left:5px;padding-right:5px;border-radius:10px;position:absolute;top:-6px;right:4px;height:15px;background-color:red;text-align:center;color:white;">
-                <div style="position:relative;bottom:4px;">
-                  <span id="myDiv"><small><small><strong>{{session.fav|length}}</strong></small></small></span>
+          <div id="nav_main_button_notif">
+              <div id="nav_main_button_notif_pos">
+                <span id="myDiv"><small><small><strong>{{session.fav|length}}</strong></small></small></span>
+              </div>
+          </div>
 
-                </div>
-            </div>
+          {% else %}
 
-            {% else %}
+          <div id="nav_main_button_notif">
+              <div id="nav_main_button_notif_pos">
+                <span id="myDiv"><small><small><strong>{{session.fav|length}}</strong></small></small></span>
+              </div>
+          </div>
 
-            <div style="padding-left:5px;padding-right:5px;border-radius:10px;position:absolute;top:-6px;right:4px;height:15px;background-color:red;text-align:center;color:white;">
-                <div style="position:relative;bottom:4px;">
-                  <span id="myDiv"><small><small><strong>{{session.fav|length}}</strong></small></small></span>
+          {% endif %}
 
-                </div>
-            </div>
-
-
-            {% endif %}
-
-            </div>
-        </div>
-
-       <div class="menu">
-            <a href='/logout'>LOGOUT</a>
-        </div>
-
-        {% else %}
-
-<!-- user not logged in !-->
-
-        <div class="menu">
-        <a href='/login'>LOGIN</a>
       </div>
-      <diV style="float:left;min-width:20px;">
-        &ensp;
-      </div>
-        <div class="menu">
-        <a href='/signup'>SIGN UP</a>
-        </div>
-
-        {% endif %}
-
-
-<!-- search bar !-->
-
-{% if session.logged_in == true %}
-
-        {% if data is defined %}
-
-        <div style="float:right;padding-top:12px;">
-            <form action="/search">
-                <ul class="input-list search clearfix">
-                    <div class="inner-addon right-addon">
-                        <i class="glyphicon glyphicon-search"></i>
-                        <input type="text" name="search" placeholder="{{data.query}}">
-                    </div>
-                </ul>
-            </form>
-        </div>
     </div>
 
-
-
+    <div id="nav_main_button">
+      <a href='/logout'>logout</a>
+    </div>
 
     {% else %}
 
-    <div style="float:right;padding-top:12px;">
-        <form action="/search">
-            <ul class="input-list search clearfix">
-                <div class="inner-addon right-addon">
-                    <i class="glyphicon glyphicon-search"></i>
-                    <input type="text" name="search" placeholder="">
-                </div>
-            </ul>
-        </form>
+<!-- user not logged in !-->
+
+    <div id="nav_main_button">
+      <a href='/login'>login</a>
+    </div>
+
+    <div id="nav_main_button">
+      <a href='/signup'>sign up</a>
     </div>
 
     {% endif %}
 
+<!-- search bar !-->
+
+    {% if session.logged_in == true %}
+    {% if data is defined %}
+
+    <div id="nav_main_search">
+      <form action="/search">
+        <ul class="input-list search clearfix">
+          <div class="inner-addon right-addon">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" name="search" placeholder="{{data.query}}">
+          </div>
+        </ul>
+      </form>
+    </div>
+
+    {% else %}
+
+    <div id="nav_main_search">
+      <form action="/search">
+        <ul class="input-list search clearfix">
+          <div class="inner-addon right-addon">
+            <i class="glyphicon glyphicon-search"></i>
+            <input type="text" name="search" placeholder="">
+          </div>
+        </ul>
+      </form>
+    </div>
+
+    {% endif %}
+
+    {% endif %}
+
+  </div>
+
+  <p style="height:42px;"></p>
+
+  {% if session.logged_in == true %}
+
+  <!-- surely this can be refactored? !-->
+
+  {%if 'filter' in session%}
+    {%if session.filter == 'image'%}
+      <div id="nav_item_panel">
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a style='color:red;' href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+      </div>
+    {%elif session.filter == 'geometry'%}
+      <div id="nav_item_panel">
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a style='color:red;' href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+      </div>
+
+    {%elif session.filter == 'footage'%}
+      <div id="nav_item_panel">
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a style='color:red;' href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+      </div>
+
+    {%elif session.filter == 'people'%}
+      <div id="nav_item_panel">
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a  style='color:red;' href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+      </div>
+
+    {%elif session.filter == 'collection'%}
+      <div id="nav_item_panel">
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a style='color:red;' href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+      </div>
+
+    {%elif session.filter == 'all'%}
+      <div id="nav_item_panel">
+        <small><small><small>VIEW:&emsp;</small> <a style='color:red;' href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+      </div>
+
+    {%else %}
+      <div id="nav_item_panel">
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+      </div>
+
+    {%endif%}
+    {%endif%}
+
+    {% if session.filter == 'people' %}
+
+    <div id="nav_item_panel_subitem">
+      <small>
+
+      {% for k, v in session.filter_people.items() %}
+        <strong style="color:black;">{{k.capitalize()}} | </strong>
+      {% for x, z in v.items() %}
+      {% if z == 0 %}
+        <a style="color:gray" href="/search?search=**&filter_people={{x}}">{{x}}, </a>
+      {% else %}
+        <a style="color:red" href="/search?search=**&filter_people={{x}}">{{x}}, </a>
+      {% endif %}
+      {% endfor %}
+
+      {% endfor %}
+
+      </small>
+    </div>
+
+  {% endif %}
   {% endif %}
 
-</div>
-
-
-
-
-
-    <p style="height:42px;"></p>
-
-
-
-{% if session.logged_in == true %}
-
-
-<!-- surely this can be refactored? !-->
-
-{%if 'filter' in session%}
-  {%if session.filter == 'image'%}
-    <div id="searchfilterbox">
-        <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a style='color:red;' href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
-    </div>
-  {%elif session.filter == 'geometry'%}
-  <div id="searchfilterbox">
-      <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a style='color:red;' href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
-  </div>
-
-  {%elif session.filter == 'footage'%}
-  <div id="searchfilterbox">
-    <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a style='color:red;' href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
-  </div>
-
-  {%elif session.filter == 'people'%}
-  <div id="searchfilterbox">
-    <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a  style='color:red;' href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
-  </div>
-
-  {%elif session.filter == 'collection'%}
-  <div id="searchfilterbox">
-      <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a style='color:red;' href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
-  </div>
-
-  {%elif session.filter == 'all'%}
-  <div id="searchfilterbox">
-      <small><small><small>VIEW:&emsp;</small> <a style='color:red;' href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
-  </div>
-
-  {%else %}
-  <div id="searchfilterbox">
-      <small><small><small>VIEW:&emsp;</small> <a href="/search?search=**&filter=all">All</a> | <a href="/search?search=**&filter=image">Images</a> | <a href="/search?search=**&filter=geometry">Geometry</a> | <a href="/search?search=**&filter=footage">Footage</a> | <a href="/search?search=**&filter=people">People</a> | <a href="/search?search=**&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
-  </div>
-
-{%endif%}
-{%endif%}
-
-{% if session.filter == 'people' %}
-  <div style="width:100%; color:gray;padding-top:20px;padding-bottom:20px;box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.05);">
-  <small>
-
-{% for k, v in session.filter_people.items() %}
-<strong style="color:black;">{{k.capitalize()}} | </strong>
-{% for x, z in v.items() %}
-{% if z == 0 %}
-<a style="color:gray" href="/search?search=**&filter_people={{x}}">{{x}}, </a>
-{% else %}
-<a style="color:red" href="/search?search=**&filter_people={{x}}">{{x}}, </a>
-{% endif %}
-{% endfor %}
-
-{% endfor %}
-
-</small>
-</div>
-
-{%endif%}
-
-
-
-{% endif %}
-
-
-
+<!-- set AWS bucket name !-->
 {% set bucketname = 'devglancestore' %}
 
         {% block content %}
