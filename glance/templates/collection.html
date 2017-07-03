@@ -1,221 +1,185 @@
 {% extends "base.html" %}
 {% block content %}
-<div style="z-index:50;max-width:100%;max-height:200px;overflow:hidden;position:relative;box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.3);">
+<div id="item_header_collection">
+
     <img style="width:100%;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{ item.0.item_loc }}" />
 
-    <div style="padding-left:20px;padding-right:20px;border-radius:35px;position:absolute;bottom:0;right:0;height:45px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-        <div style="text-align:center;font-size:30px;">
-            <small><strong>{{ item.0.name }}</strong></small>
-        </div>
+    <div id="item_header_title">
+      <small><strong>{{ item.0.name }}</strong></small>
     </div>
+
 </div>
 
-<div style="background-color: lightgray;">
 
 
 
-  <div class="grid">
+<div id="item_results">
+  {% for k, v in item.0.items() %}
+  {% if k == 'items' %}
+  {% for j,item in v.items() %}
 
-    {% for k, v in item.0.items() %}
-    {% if k == 'items' %}
+  {% if item.item_type == 'image' %}
 
-    {% for j,item in v.items() %}
+    <div class="item">
 
-          {% if item.item_type == 'image' %}
+          <a href="/item/{{ item.id }}">
+              <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
+          </a>
+      <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+          <div style="text-align:center;">
+              <small><strong>Image</strong></small>
+          </div>
+      </div>
+
+      <div class="item_panel">
+          <div style="text-align:center;">
+
+              <a href="#">
+              <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+          </a>
+          <a href="#">
+              <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+          </a>
+
+          <a href="#">
+              <small><strong><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></strong></small>
+          </a>
+
+          </div>
+      </div>
+
+    </div>
+
+    {% elif item.item_type == 'people' %}
 
 
 
-              <div class="grid-sizer"></div>
-              <div class="grid-item">
-                  <div style="position:relative;">
+        <div class="item">
+                <a href="/item/{{ item.id }}">
+                    <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
+                </a>
+            <div class="item_header_type">
+                <div style="text-align:center;">
+                    <small><strong>People</strong></small>
+                </div>
+            </div>
+
+              <div class="item_panel">
+                <div style="text-align:center;">
+                    <a href="#">
+                    <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                </a>
+                <a href="#">
+                    <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                </a>
+                </div>
+            </div>
+          </div>
+
+
+
+
+          {% elif item.item_type == 'footage' %}
+
+
+
+              <div class="item">
                       <a href="/item/{{ item.id }}">
                           <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
                       </a>
-                  </div>
-                  <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                    <div class="item_header_type">
                       <div style="text-align:center;">
-                          <small><strong>Image</strong></small>
+                          <small><strong>Footage</strong></small>
                       </div>
                   </div>
 
-                  <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                    <div class="item_panel">
                       <div style="text-align:center;">
-
                           <a href="#">
                           <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
                       </a>
                       <a href="#">
                           <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
                       </a>
-
-                      <a href="#">
-                          <small><strong><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></strong></small>
-                      </a>
-
                       </div>
                   </div>
-              </div>
+                  </div>
+
+
+                {% elif item.item_type == 'geometry' %}
 
 
 
-
-
-
-
-
-
-              {% elif item.item_type == 'people' %}
-
-
-
-                  <div class="grid-sizer"></div>
-                  <div class="grid-item">
-                      <div style="position:relative;">
-                          <a href="/item/{{ item.id }}">
-                              <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                          </a>
-                      </div>
-                      <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
+                    <div class="item">
+                            <a href="/item/{{ item.id }}">
+                                <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
+                            </a>
+                          <div class="item_header_type">
                           <div style="text-align:center;">
-                              <small><strong>People</strong></small>
+                                <small><strong>Geometry</strong></small>
+                            </div>
+                        </div>
+
+                          <div class="item_panel">
+                            <div style="text-align:center;">
+                                <a href="#">
+                                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                            </a>
+                            <a href="#">
+                                <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                            </a>
+                            </div>
+                        </div>
+                        </div>
+
+
+
+                  {% elif item.item_type == 'collection' %}
+
+
+
+                      <div class="item">
+                              <a href="/item/{{ item.id }}">
+                                  <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
+                              </a>
+                            <div class="item_header_type">
+                              <div style="text-align:center;">
+                                  <small><strong>Collecton</strong></small>
+                              </div>
                           </div>
-                      </div>
 
-                      <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                          <div style="text-align:center;">
+                              <div class="item_panel">
+                                <div style="text-align:center;">
+                                  <a href="#">
+                                  <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+                              </a>
                               <a href="#">
-                              <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                          </a>
-                          <a href="#">
-                              <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-                          </a>
+                                  <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+                              </a>
+                              </div>
                           </div>
-                      </div>
-                  </div>
+                          </div>
 
-
-
-
-                                {% elif item.item_type == 'footage' %}
-
-
-
-                                    <div class="grid-sizer"></div>
-                                    <div class="grid-item">
-                                        <div style="position:relative;">
-                                            <a href="/item/{{ item.id }}">
-                                                <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                                            </a>
-                                        </div>
-                                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                            <div style="text-align:center;">
-                                                <small><strong>Footage</strong></small>
-                                            </div>
-                                        </div>
-
-                                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                            <div style="text-align:center;">
-                                                <a href="#">
-                                                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                                            </a>
-                                            <a href="#">
-                                                <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-                                            </a>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                                  {% elif item.item_type == 'geometry' %}
-
-
-
-                                                      <div class="grid-sizer"></div>
-                                                      <div class="grid-item">
-                                                          <div style="position:relative;">
-                                                              <a href="/item/{{ item.id }}">
-                                                                  <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                                                              </a>
-                                                          </div>
-                                                          <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                                              <div style="text-align:center;">
-                                                                  <small><strong>Geometry</strong></small>
-                                                              </div>
-                                                          </div>
-
-                                                          <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                                              <div style="text-align:center;">
-                                                                  <a href="#">
-                                                                  <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                                                              </a>
-                                                              <a href="#">
-                                                                  <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-                                                              </a>
-                                                              </div>
-                                                          </div>
-                                                      </div>
-
-
-
-                                                                    {% elif item.item_type == 'collection' %}
-
-
-
-                                                                        <div class="grid-sizer"></div>
-                                                                        <div class="grid-item">
-                                                                            <div style="position:relative;">
-                                                                                <a href="/item/{{ item.id }}">
-                                                                                    <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                                                                                </a>
-                                                                            </div>
-                                                                            <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                                                                <div style="text-align:center;">
-                                                                                    <small><strong>Collecton</strong></small>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                                                                                <div style="text-align:center;">
-                                                                                    <a href="#">
-                                                                                    <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                                                                                </a>
-                                                                                <a href="#">
-                                                                                    <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-                                                                                </a>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-
-
-
-
-
-
-
-
-              {% endif %}
-              {% endfor %}
-              {% endif %}
-              {% endfor %}
-  </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
 
 
 
 </div>
+
+
+
+
+
+
+<br><br><br><br>
+
+
+
+
+
     <div style="background-color:lightgray;padding-left:10%;padding-right:10%">
 
         <p style="height:30px;"></p>
