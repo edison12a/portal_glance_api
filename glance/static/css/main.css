@@ -47,6 +47,16 @@ padding-bottom: 30px;
   padding-bottom:30px;
   background-color: lightgray;
 }
+/* scales image if larger then the browser vp */
+.img-wrap {
+    max-width: 100%;
+    width: 100%;
+}
+
+.img-wrap img {
+    height: auto;
+    max-width: 100%;
+}
 
 /* base.html specific */
 #nav_main {
@@ -300,4 +310,10 @@ padding-bottom: 30px;
   padding-left:10%;
   padding-right:10%;
   margin:auto;
+}
+#geometry_content
+{
+  width:100%;
+  margin:auto;
+  background-color:lightgray;
 }
