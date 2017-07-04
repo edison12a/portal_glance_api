@@ -218,3 +218,9 @@ body {
     z-index:0;
   filter: grayscale(0%) brightness(1.05);
 }
+
+#manage_content
+{
+  width:70%;
+  margin:auto;
+}
