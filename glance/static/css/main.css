@@ -4,6 +4,49 @@ body {
   background-color: rgb(242, 242, 240);
   margin: 0;
 }
+#part_of_collection
+{
+padding-top: 30px;
+padding-bottom: 30px;
+}
+#part_of_collection_item
+{
+  position: relative;
+  display: inline-block;
+}
+#part_of_collection_item_header
+{
+  padding-left:10px;
+  padding-right:10px;
+  border-radius: 10px;
+  position:absolute;
+  top:0;
+  height:20px;
+  background-color:rgba(255, 255, 255, .5);
+  margin:10px;
+}
+#item_info
+{
+  width:100%;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 50;
+  padding-left:10%;
+  padding-right:10%;
+  padding-top:30px;
+  padding-bottom:30px;
+  background-color: lightgray;
+}
+#item_edit
+{
+  width:100%;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  padding-left:10%;
+  padding-right:10%;
+  padding-top:30px;
+  padding-bottom:30px;
+  background-color: lightgray;
+}
 
 /* base.html specific */
 #nav_main {
@@ -244,4 +287,17 @@ body {
   left: 5px;
   width:10px;
   height:10px;
+}
+#footage_content
+{
+  width:100%;
+  margin:auto;
+  background-color:lightgray;
+}
+#footage_display
+{
+  width:100%;
+  padding-left:10%;
+  padding-right:10%;
+  margin:auto;
 }
