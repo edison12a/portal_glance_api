@@ -224,3 +224,24 @@ body {
   width:70%;
   margin:auto;
 }
+#manage_item
+{
+  display: inline-block;
+  position:relative;
+}
+#manage_item_checkbox
+{
+  position:absolute;
+  top:0px;
+  right: 5px;
+  width:10px;
+  height:10px;
+}
+#manage_item_text
+{
+  position:absolute;
+  bottom:15px;
+  left: 5px;
+  width:10px;
+  height:10px;
+}

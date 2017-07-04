@@ -601,8 +601,8 @@ def home():
             )
 
 
-@app.route('/favorite')
-def favorite():
+@app.route('/manage')
+def manage():
     # TODO: API needs to be able to serve, `item by author`.
     if auth.logged_in(session):
         # data to send... collections made by user
@@ -612,7 +612,7 @@ def favorite():
 
         data = ['test', 'test2']
 
-        return render_template('favorite.html', collection=r.json(), items=data)
+        return render_template('manage.html', collection=r.json(), items=data)
     else:
         return home()
 
