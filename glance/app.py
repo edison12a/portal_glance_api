@@ -627,7 +627,6 @@ def upload():
 
 @app.route('/item/<id>/')
 def item(id):
-    print('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL')
 
     if id:
         r = requests.get('{}/{}'.format(API_ITEM, id))
