@@ -1,153 +1,96 @@
 {% extends "base.html" %}
 {% block content %}
 
-
 <div style="width:100%;color:white;">
-
-<div style="text-align:center;">
-  <img style="height:400px;" src="https://s3.amazonaws.com/{{bucketname}}/{{ item.0.item_loc }}" />
+  <div style="text-align:center;">
+    <img style="height:400px;" src="https://s3.amazonaws.com/{{bucketname}}/{{ item.0.item_loc }}" />
+  </div>
 </div>
 
-</div>
+<div id="part_of_collection">
 
+  {% for k, v in item.0.items() %}
+    {% if k == 'collections' %}
+      {% for x, g in v.items() %}
 
+        <div id="part_of_collection_item">
+          <a href="/item/{{ g.id }}">
+            <img style="max-width:300px; height: auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{ g.item_thumb }}" />
+          </a>
 
-        <div style="background-color:darkgray;width:100%;">
-
-
-
-            {% for k, v in item.0.items() %}
-            {% if k == 'collections' %}
-            {% for x, g in v.items() %}
-
-
-                <div style="position:relative;display:inline-block;">
-
-                <a href="/item/{{ g.id }}">
-                <img style="max-width:300px; height: auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{ g.item_thumb }}" />
-                </a>
-
-                <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                    <div style="text-align:center;">
-                        <small><strong>Collection</strong></small>
-                    </div>
-                </div>
-
-                </div>
-
-
-
-
-            {% endfor %}
-            {% endif %}
-            {% endfor %}
-
-
+          <div id="part_of_collection_item_header">
+            <div style="text-align:center;">
+              <small><strong>Collection</strong></small>
+            </div>
+          </div>
         </div>
 
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
 
-<div style="display: inline-block;width:100%;text-align:center;padding-top:30px;padding-bottom:30px;color:black;background-color:lightgray;">
+</div>
 
-{{people_tags}}
-<br>
-<br>
+<div id="apply_people_tags">
 
-
-
-    <div style="display: inline-block;width:33.1%;vertical-align: top;">
-
-
-
-
-            <form action="{{ url_for('patch_item') }}" method="POST">
-
-                <div class="form-group">
-
-
-
-
+  <form action="{{ url_for('patch_item') }}" method="POST">
+    <div class="form-group">
       {% for k, v in people_tags.items() %}
-      <br>
-      <br>{{ k }}<br>
-      {% for g, h in v.items() %}
-      {% if h == 1%}
-      <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}" checked />{{g}}</label>
-      {% elif h == 0 %}
-      <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}">{{g}}</label>
 
-      {% endif %}
-      {% endfor %}
-      {% endfor %}
+        <br>
+        <br>{{ k }}<br>
 
+        {% for g, h in v.items() %}
+          {% if h == 1%}
+
+            <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}" checked />{{g}}</label>
+
+          {% elif h == 0 %}
+
+            <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}">{{g}}</label>
+
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
 
       <input type="hidden" name="id" value="{{item.0.id}}">
-<br>
+      <br>
       <button type="submit" class="btn btn-default">Submit</button>
-
-      </div>
-
-      </form>
-
-
-
-
-
-
-</div>
-
-</div>
-
-<div style="padding-left:10%;padding-right:10%;background-color:lightgray;padding-bottom:30px;">
-
-
-
-<br>
-<br>
-        {% for k, v in item.0.items() %}
-        {% if k != 'items' %}
-        {{ k }} - {{ v }}<br>
-        {% endif %}
-        {% endfor %}
-
-
-
-
-<br>
-<br>
-
-
-
-<form action="/item/delete/{{item.0.id}}" method="DELETE">
-  <div class="form-group">
-  <button type="submit" class="btn btn-default">Delete</button>
-  </div>
-</form>
-
-    <form action="/patch" method="POST">
-
-        <div class="form-group">
-
-            <label for="append_collection">Append Tags</label>
-            <input style="width:300px;" type="text" class="form-control" id="append_tags" name="append_tags" />
-            <input type="hidden" name="id" value="{{item.0.id}}">
-            <small><small><p class="help-block">Enter words, separated by spaces.</p></small></small>
-        <br>
-        <button type="submit" class="btn btn-default">Submit</button>
-
-        </div>
-
-    </form>
-
-
-
-  </div>
-
-
-
-    <div style=background-color:black;color:white;margin-top:100px;>
-        <small><small>
-            <strong>item</strong><br>
-            {{ item }}
-        </small></small>
     </div>
+  </form>
+
+</div>
+
+<div id="item_info">
+  {% for k, v in item.0.items() %}
+    {% if k != 'items' %}
+      {{ k }} - {{ v }}<br>
+    {% endif %}
+  {% endfor %}
+</div>
+
+
+<div id="item_edit">
+
+  <form action="/item/delete/{{item.0.id}}" method="DELETE">
+    <div class="form-group">
+      <button type="submit" class="btn btn-default">Delete</button>
+    </div>
+  </form>
+
+  <form action="/patch" method="POST">
+    <div class="form-group">
+      <label for="append_collection">Append Tags</label>
+      <input style="width:300px;" type="text" class="form-control" id="append_tags" name="append_tags" />
+      <input type="hidden" name="id" value="{{item.0.id}}">
+      <small><small><p class="help-block">Enter words, separated by spaces.</p></small></small>
+
+      <br><br>
+
+      <button type="submit" class="btn btn-default">Submit</button>
+    </div>
+  </form>
+
+</div>
+
 {% endblock %}

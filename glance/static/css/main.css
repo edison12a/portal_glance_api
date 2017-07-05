@@ -4,6 +4,18 @@ body {
   background-color: rgb(242, 242, 240);
   margin: 0;
 }
+#pagination
+{
+  width:100%;
+  padding-top:30px;
+  text-align:center;
+}
+#section_header
+{
+  padding-top:15px;
+  padding-bottom:15px;
+  font-size: 30px;
+}
 #part_of_collection
 {
 padding-top: 30px;
@@ -301,6 +313,10 @@ padding-bottom: 30px;
   width:10px;
   height:10px;
 }
+#manage_item_selection
+{
+
+}
 #footage_content
 {
   width:100%;
@@ -318,5 +334,16 @@ padding-bottom: 30px;
 {
   width:100%;
   margin:auto;
+  background-color:lightgray;
+}
+#apply_people_tags
+{
+  display: inline-block;
+  width:100%;
+  text-align:center;
+  font-size:10px;
+  padding-top:30px;
+  padding-bottom:30px;
+  color:black;
   background-color:lightgray;
 }

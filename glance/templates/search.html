@@ -1,208 +1,72 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="grid">
-        {% for item in items %}
-            {% if item.item_type == 'image' %}
-                <div class="grid-sizer"></div>
-                <div class="grid-item">
 
+{% for item in items %}
+  {% if item.item_type == 'collection' %}
 
-                    <div style="position:relative;">
-                        <a href="item/{{ item.id }}">
-                            <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                        </a>
-                    </div>
+    <div class="item">
 
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-                            <small><strong>Image</strong></small>
-                        </div>
-                    </div>
+      <div style="position:relative;">
+        <a href="item/{{ item.id }}">
+          <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
+        </a>
+      </div>
 
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-
-
-                          <div class="add_to_selection" style="display:inline-block;text-align:center;">
-                            <form class="form-signin"  role="form">
-                                    <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
-                                    <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
-                                    ❤
-                            </form>
-                          </div>
-
-
-
-
-                            <a href="#">
-                            <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                        </a>
-
-                        </div>
-                    </div>
-                </div>
-            {% elif item.item_type == 'footage' %}
-                <div class="grid-sizer"></div>
-                <div class="grid-item">
-                    <div style="position:relative;">
-                        <a href="item/{{ item.id }}">
-                            <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                        </a>
-                    </div>
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-                            <small><strong>Footage</strong></small>
-                        </div>
-                    </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-
-
-
-
-                              <div class="add_to_selection" style="display:inline-block;text-align:center;">
-                                <form class="form-signin"  role="form">
-                                        <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
-                                        <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
-                                        ❤
-                                </form>
-                              </div>
-
-
-
-
-
-
-                                <a href="#">
-                                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                            </a>
-                            </div>
-                        </div>
-                </div>
-            {% elif item.item_type == 'geometry' %}
-                <div class="grid-sizer"></div>
-                <div class="grid-item">
-                    <div style="position:relative;">
-                        <a href="item/{{ item.id }}">
-                            <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                        </a>
-                    </div>
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-                            <small><strong>Geometry</strong></small>
-                        </div>
-                    </div>
-                    <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                        <div style="text-align:center;">
-
-
-
-
-                          <div class="add_to_selection" style="display:inline-block;text-align:center;">
-                            <form class="form-signin"  role="form">
-                                    <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
-                                    <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
-                                    ❤
-                            </form>
-                          </div>
-
-
-
-
-
-                            <a href="#">
-                            <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                        </a>
-                        </div>
-                    </div>
-                </div>
-                {% elif item.item_type == 'people' %}
-                    <div class="grid-sizer"></div>
-                    <div class="grid-item">
-                        <div style="position:relative;">
-                            <a href="item/{{ item.id }}">
-                                <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                            </a>
-                        </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-                                <small><strong>People</strong></small>
-                            </div>
-                        </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-
-
-                              <div class="add_to_selection" style="display:inline-block;text-align:center;">
-                                <form class="form-signin"  role="form">
-                                        <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
-                                        <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
-                                        ❤
-                                </form>
-                              </div>
-
-
-
-
-                                <a href="#">
-                                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                            </a>
-                            </div>
-                        </div>
-                    </div>
-                {% elif item.item_type == 'collection' %}
-                    <div class="grid-sizer"></div>
-                    <div class="grid-item">
-                        <div style="position:relative;">
-                            <a href="item/{{ item.id }}">
-                                <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                            </a>
-                        </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;top:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-                                <small><strong>Collection</strong></small>
-                            </div>
-                        </div>
-                        <div style="padding-left:10px;padding-right:10px;border-radius: 10px;position:absolute;bottom:0;right:0;height:20px;background-color:rgba(255, 255, 255, .5);margin:10px;">
-                            <div style="text-align:center;">
-                                <small><strong>{{item.name}}</strong></small>
-                            </div>
-                        </div>
-                    </div>
-            {% endif %}
-        {% endfor %}
+      <div class="item_header_type">
+        <div style="text-align:center;">
+          <small><strong>{{ item.item_type|capitalize }}</strong></small>
+        </div>
+      </div>
+      <div class="item_panel">
+        <div style="text-align:center;">
+          <small><strong>{{item.name}}</strong></small>
+        </div>
+      </div>
     </div>
 
-<br><br>
-<div style="text-align:center;">
+    {% else %}
 
-[IMP: Pagination]
+    <div class="item">
 
+      <div style="position:relative;">
+        <a href="item/{{ item.id }}">
+          <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
+        </a>
+      </div>
+
+      <div class="item_header_type">
+        <div style="text-align:center;">
+          <small><strong>{{ item.item_type|capitalize }}</strong></small>
+        </div>
+      </div>
+
+      <div class="item_panel">
+        <div style="text-align:center;">
+          <div class="add_to_selection" style="display:inline-block;text-align:center;">
+
+            <form class="form-signin"  role="form">
+              <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
+              <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
+              ❤
+            </form>
+
+          </div>
+
+          <a href="#">
+            <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+  {% endif %}
+{% endfor %}
+
+<div style="clear:both;"></div>
+
+<div id="pagination">
+  [IMP: Pagination]
 </div>
-<br>
-    <!-- Init masonry js -->
-    <script>
-    var grid = document.querySelector('.grid');
-    var msnry;
-
-    imagesLoaded( grid, function() {
-        // init Isotope after all images have loaded
-        msnry = new Masonry( grid, {
-            itemSelector: '.grid-item',
-            columnWidth: '.grid-sizer',
-            percentPosition: true,
-            transitionDuration: 0,
-        });
-    });
-    </script>
-
-    <div style=background-color:black;color:white;margin-top:100px;>
-        <small><small>
-            <strong>data</strong><br>
-            {{ data }}<br>
-            <strong>items</strong><br>
-            {{ items }}<br>
-        </small></small>
-    </div>
 
 {% endblock %}

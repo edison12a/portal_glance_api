@@ -4,22 +4,18 @@
 <div id="footage_content">
 
   {% if session['logged_in'] %}
-
     <p>You're logged in already!</p>
-
   {% else %}
 
   <p style="height:30px;" />
 
   <div style="width:400px;margin:auto;">
-    <div id="section_header">
-      Sign Up
-    </div>
+    <div id="section_header">Login</div>
 
-    <form action="/signup" method="POST">
+    <form action="/login" method="POST">
       <input type="username" class="form-control" name="username" placeholder="Username">
       <input type="password" class="form-control" name="password" placeholder="Password">
-      <button type="submit" class="btn btn-primary btn-block">Signup</button>
+      <button type="submit" class="btn btn-primary btn-block">Login</button>
     </form>
 
     <p style="height:100px;" />

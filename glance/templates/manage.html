@@ -2,19 +2,25 @@
 {% block content %}
 
 <div id="manage_content">
-  <form method="post" action="{{ url_for('manage_selection') }}">
+
+
+
+
     {% if session.fav|length > 0 %}
 
-      <br><br>
-      <h1>Manage Selection</h1>
-      <br><br>
+    <div id="section_header">
+      Manage Selection
+    </div>
+
+    <div id="manage_item_selection">
+      <form method="post" action="{{ url_for('manage_selection') }}">
 
       {% for x in session.fav.items() %}
 
       <div id="manage_item">
-          <a href="/item/{{x.0}}">
-            <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{x.1}}">
-          </a>
+        <a href="/item/{{x.0}}">
+          <img style="width:100px;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{x.1}}">
+        </a>
 
         <div id="manage_item_checkbox">
           <input id="checkBox" name="{{x.0}}" type="checkbox" checked>
@@ -24,12 +30,12 @@
         <div id="manage_item_text">
           <span class="label label-default">{{x.0}}</span>
         </div>
-
       </div>
 
       {% endfor %}
 
       <br><br>
+
       <small>Append selection to exisiting collection.</small><br>
       <input type="text" name="collection_append">
       <br><br>
@@ -38,16 +44,20 @@
       <br><br>
       <small>Making a collection? Enter a name, otherwise ignore.</small><br>
       <input type="text" name="collection_name">
+
       <br><br>
+
       <button type="submit" name="btn_proc_selection" class="btn btn-primary btn-block">Process Selection</button>
-    </form>
+
+
+      </form>
+    </div>
 
     {% endif %}
 
-    <br><br>
-      <h1>Manage Collections</h1>
-    <br><br>
-
+    <div id="section_header">
+      Manage Collections
+    </div>
 
     <table class="table table-hover">
       <thead>

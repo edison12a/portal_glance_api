@@ -52,8 +52,9 @@ def login():
         else:
             auth.SessionHandler(session).close()
 
-    elif request.method == 'GET':
-        return render_template('index.html')
+    else:
+
+        return render_template('login.html')
 
     return home()
 
