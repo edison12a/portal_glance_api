@@ -2,13 +2,13 @@
 This module contains Classes and helpers for the API
 """
 
-__author__ = ""
 __version__ = ""
 __license__ = ""
 
 import datetime
 
 import glance_api.modules.models
+import glance_api.modules.query
 
 # development functions
 # TODO: dev functions should be their own module.
@@ -231,10 +231,22 @@ def get_query(session, userquery):
 
     # get tags for query
     if query['query'] == '**':
-        taglists = session.query(glance_api.modules.models.Tag).all()
+        #taglists = session.query(glance_api.modules.models.Tag).all()
+
+        test = glance_api.modules.query.order_by(session)
+
+        for x in test:
+            print(x.id)
+
+        # print(taglists)
+
     else:
+        # TODO: Start to implement pagination, and sorted search results.
         for x in query['query'].split(' '):
             bla = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).all()]
+
+            # Todo.query.order_by(Todo.pub_date.desc()).all()
+
             for j in bla:
                 taglists.append(j)
 
