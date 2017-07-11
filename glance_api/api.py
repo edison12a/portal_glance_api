@@ -148,8 +148,11 @@ def item():
                     }
                 )
             ), 200
+        # sorts items by initdate
+        result.sort(key=lambda r: r["initdate"], reverse=True)
 
         session.close()
+
         return make_response(
             jsonify(result)
         ), 200
@@ -187,10 +190,12 @@ def query():
         session = Session()
         raw_items = functions.get_query(session, request.args)
         items = functions.to_dict(raw_items)
+        # sorts items by date
+        items.sort(key=lambda r: r["initdate"], reverse=True)
+
         session.close()
 
         return jsonify({'result': items})
-
 
     return jsonify({'result': ''})
 

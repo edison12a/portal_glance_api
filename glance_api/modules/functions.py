@@ -106,6 +106,21 @@ def to_dict(item_list):
     return result
 
 
+def order_by_initdate(lst):
+    result = []
+    for x in lst:
+        for j in x.items:
+            if j not in result:
+                result.append(j)
+
+    try:
+        result.sort(key=lambda r: r.initdate, reverse=True)
+        return result
+    except:
+        result.sort(key=lambda r: r["initdate"], reverse=True)
+        return result
+
+
 # auth
 # TODO: Refactor to User() class
 def get_user(session, **kwarg):
@@ -195,6 +210,8 @@ def get_collection_by_author(session, author):
     return collection_by_author
 
 
+
+
 def get_query(session, userquery):
     """Get database objects based user term.
 
@@ -232,13 +249,9 @@ def get_query(session, userquery):
     # get tags for query
     if query['query'] == '**':
         #taglists = session.query(glance_api.modules.models.Tag).all()
-
+        # TODO: imp item sorting
         test = glance_api.modules.query.order_by(session)
-
-        for x in test:
-            print(x.id)
-
-        # print(taglists)
+        result = order_by_initdate(test)
 
     else:
         # TODO: Start to implement pagination, and sorted search results.
@@ -277,6 +290,8 @@ def get_query(session, userquery):
         for x in item_list:
             result.append(x)
 
+    for x in result:
+        print(x.initdate)
 
     return result
 

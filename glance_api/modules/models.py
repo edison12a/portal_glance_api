@@ -96,11 +96,6 @@ class Image(Item):
         'polymorphic_identity': 'image'
     }
 
-    def __repr__(self):
-        return "<Image(id='%s', name='%s')>" % (
-            self.id, self.name
-        )
-
 
 class Footage(Item):
     """Footage Table

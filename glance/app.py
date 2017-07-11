@@ -690,6 +690,9 @@ def search():
 
 
     r = requests.get('{}query'.format(API), params=data)
+    print('ooooooooooooooooooooooooooooooooooooooo')
+    for x in r.json()['result']:
+        print(x['id'])
 
     return render_template('search.html', data=data, items=r.json()['result'])
 
