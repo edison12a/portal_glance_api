@@ -670,7 +670,7 @@ def search():
     if 'filter' in request.args:
         # update data user session
         auth.SessionHandler(session).filter(request.args['filter'])
-        data['filter'] =  request.args['filter']
+        data['filter'] = request.args['filter']
     elif 'filter_people' in request.args:
         # update user session
         auth.SessionHandler(session).filter_people(request.args['filter_people'])
@@ -688,11 +688,7 @@ def search():
         else:
             session['filter_people'] = {}
 
-
     r = requests.get('{}query'.format(API), params=data)
-    print('ooooooooooooooooooooooooooooooooooooooo')
-    for x in r.json()['result']:
-        print(x['id'])
 
     return render_template('search.html', data=data, items=r.json()['result'])
 

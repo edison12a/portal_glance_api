@@ -250,8 +250,12 @@ def get_query(session, userquery):
     if query['query'] == '**':
         #taglists = session.query(glance_api.modules.models.Tag).all()
         # TODO: imp item sorting
-        test = glance_api.modules.query.order_by(session)
-        result = order_by_initdate(test)
+        if 'filter' in query and query['filter'] != 'all':
+            result = [x for x in session.query(glance_api.modules.models.Item).filter_by(type=query['filter']).all()]
+
+        else:
+            test = glance_api.modules.query.order_by(session)
+            result = order_by_initdate(test)
 
     else:
         # TODO: Start to implement pagination, and sorted search results.
@@ -262,6 +266,7 @@ def get_query(session, userquery):
 
             for j in bla:
                 taglists.append(j)
+
 
     # apply filters to tags
     if query['filter'] != 'all':
@@ -290,8 +295,10 @@ def get_query(session, userquery):
         for x in item_list:
             result.append(x)
 
-    for x in result:
-        print(x.initdate)
+    print('ppppppppppppppppppppp')
+    print(item_list)
+    for x in item_list:
+        print(x)
 
     return result
 
