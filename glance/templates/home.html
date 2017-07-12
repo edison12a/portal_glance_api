@@ -3,11 +3,11 @@
 <div id="nav_item_panel_subitem">
   <small>
 {% for x in tags %}
-<span class="label label-default">{{x}}</span>
-
+<span class="label"><a href="/search?search={{x}}">{{x}}</a></span>
 {% endfor %}
 </small>
 </div>
+
 <div id="item_results">
 
 {% for x in collections %}
