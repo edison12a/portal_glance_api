@@ -104,6 +104,8 @@ def append_fav():
 def uploading():
     #TODO:  refactor.
     # TODO: user input sanitising? here or the api?
+    # TODO: emi persistant data users search term, imp into session?
+    data = {'query': "**"}
     if auth.logged_in(session):
         if request.method == 'POST':
             # Init dict and append user data
@@ -386,7 +388,7 @@ def uploading():
                     r = requests.post('{}'.format(API_ITEM), params=payload)
 
                     # return home()
-                    return render_template('collection.html', item=r.json()['POST: /item'])
+                    return render_template('collection.html', item=r.json()['POST: /item'], data=data)
 
             elif 'collection' in upload_data:
 
@@ -401,17 +403,17 @@ def uploading():
 
                 r = requests.post('{}'.format(API_ITEM), params=payload)
 
-                return render_template('collection.html', item=r.json()['POST: /item'])
+                return render_template('collection.html', item=r.json()['POST: /item'], data=data)
 
 
             if len(upload_data['items_for_collection']) > 1:
-                return render_template('uploadcomplete.html')
+                return render_template('uploadcomplete.html', data=data)
             elif len(upload_data['items_for_collection']) == 1:
                 # TODO: return actual items. instead of 'uploadcompelte.html'.
-                return render_template('uploadcomplete.html')
+                return render_template('uploadcomplete.html', data=data)
 
             else:
-                return render_template('uploadcomplete.html')
+                return render_template('uploadcomplete.html', data=data)
 
     else:
         return home()
@@ -556,6 +558,8 @@ def home():
     """Serves front page
     :return: dict. Each item tyoe.
     """
+    # TODO: emi persistant data users search term, imp into session?
+    data = {'query': "**"}
     # process and reverse data so the latest uploaded items are first.
     # Currently using the items `id`, but upload date would be better.
     reversed_list = []
@@ -570,14 +574,25 @@ def home():
     # TODO: Temp fix for hidding information when a user isn logged in.
     try:
         if session['logged_in'] == False:
-            return render_template('home.html')
+            return render_template('home.html', data=data)
     except:
-        return render_template('home.html')
+        return render_template('home.html', data=data)
 
     if 'GET assets' in res and res['GET assets']['Message'] == 'No assets in database':
-        return render_template('home.html')
+        return render_template('home.html', data=data)
 
     else:
+
+
+
+        # tags
+        tags = []
+        goo = [x['tags'] for x in res]
+
+        for x in res:
+            for j in x['tags']:
+                if j not in tags:
+                    tags.append(j)
 
         # latest ten collections
         collections = [x for x in res if x['item_type'] == 'collection'][0:9]
@@ -592,63 +607,69 @@ def home():
         people = [x for x in res if x['item_type'] == 'people'][0:9]
 
         # latest ten geometry
-        geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
-
+        geometry = [x for x in res if x['item_type'] == 'geometry'][0:9]
 
 
         return render_template(
             'home.html', collections=collections, images=images, footage=footage,
-            people=people, geometry=geometry
+            people=people, geometry=geometry, data=data, tags=tags[:160]
             )
 
 
 @app.route('/manage')
 def manage():
+    # TODO: emi persistant data users search term, imp into session?
+    data = {'query': "**"}
     # TODO: API needs to be able to serve, `item by author`.
     if auth.logged_in(session):
         # data to send... collections made by user
         r = requests.get(
-            '{}collection/author/{}'.format(API, session['user'])
+            '{}collection/author/{}'.format(API, session['user'], data=data)
         )
 
         data = ['test', 'test2']
 
-        return render_template('manage.html', collection=r.json(), items=data)
+        return render_template('manage.html', collection=r.json(), items=data, data=data)
     else:
         return home()
 
 
 @app.route('/upload')
 def upload():
+    # TODO: emi persistant data users search term, imp into session?
+    data = {'query': "**"}
+
     if auth.logged_in(session):
-        return render_template('upload.html')
+        return render_template('upload.html', data=data)
     else:
         return home()
 
 
 @app.route('/item/<id>/')
 def item(id):
+    # TODO: emi persistant data users search term, imp into session?
+    data = {'query': "**"}
 
     if id:
         r = requests.get('{}/{}'.format(API_ITEM, id))
 
         if r.json()['item'][0]['item_type'] == 'image':
-            return render_template('image.html', item=r.json()['item'])
+            return render_template('image.html', item=r.json()['item'], data=data)
 
         elif r.json()['item'][0]['item_type'] == 'collection':
-            return render_template('collection.html', item=r.json()['item'])
+            return render_template('collection.html', item=r.json()['item'], data=data)
 
         elif r.json()['item'][0]['item_type'] == 'footage':
-            return render_template('footage.html', item=r.json()['item'])
+            return render_template('footage.html', item=r.json()['item'], data=data)
 
         elif r.json()['item'][0]['item_type'] == 'geometry':
-            return render_template('geometry.html', item=r.json()['item'])
+            return render_template('geometry.html', item=r.json()['item'], data=data)
 
         elif r.json()['item'][0]['item_type'] == 'people':
             tags_from_api = r.json()['item'][0]['tags']
             people_tags = image.get_people_tags(tags_from_api)
 
-            return render_template('people.html', item=r.json()['item'], people_tags=people_tags)
+            return render_template('people.html', item=r.json()['item'], people_tags=people_tags, data=data)
 
 
         else:

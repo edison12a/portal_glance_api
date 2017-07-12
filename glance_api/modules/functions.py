@@ -210,8 +210,6 @@ def get_collection_by_author(session, author):
     return collection_by_author
 
 
-
-
 def get_query(session, userquery):
     """Get database objects based user term.
 
@@ -251,16 +249,18 @@ def get_query(session, userquery):
         #taglists = session.query(glance_api.modules.models.Tag).all()
         # TODO: imp item sorting
         if 'filter' in query and query['filter'] != 'all':
-            result = [x for x in session.query(glance_api.modules.models.Item).filter_by(type=query['filter']).all()]
+            print('ONE ONE ONE')
+            result = [x for x in session.query(glance_api.modules.models.Item).filter_by(type=query['filter']).limit(100)]
 
         else:
-            test = glance_api.modules.query.order_by(session)
-            result = order_by_initdate(test)
+            print('THREE THREE THREE THREE ')
+            result = [x for x in session.query(glance_api.modules.models.Item).limit(100)]
+            print(len(result))
 
     else:
         # TODO: Start to implement pagination, and sorted search results.
         for x in query['query'].split(' '):
-            bla = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).all()]
+            bla = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
 
             # Todo.query.order_by(Todo.pub_date.desc()).all()
 
@@ -295,10 +295,6 @@ def get_query(session, userquery):
         for x in item_list:
             result.append(x)
 
-    print('ppppppppppppppppppppp')
-    print(item_list)
-    for x in item_list:
-        print(x)
 
     return result
 
