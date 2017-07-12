@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <div id="nav_item_panel_subitem">
-  <small>
 {% for x in tags %}
-<span class="label"><a href="/search?search={{x}}">{{x}}</a></span>
+<span class="label label-default"><a style="color:white;" href="/search?search={{x}}">{{x}}</a></span>
 {% endfor %}
-</small>
 </div>
 
 <div id="item_results">

@@ -75,10 +75,13 @@ def signup():
             payload[form_input] = request.form[form_input]
 
         # TODO: below is for testing only. remove for prod
-        if payload['username'] != 'test':
+        dev_user = ['test', 'admin']
+        if payload['username'] not in dev_user:
             return render_template('signup.html')
-        elif payload['password'] != 'test':
+        elif payload['password'] not in dev_user:
             return render_template('signup.html')
+        print('oooooooooooooooooooooooooooo')
+        print(payload)
 
         r = requests.post('{}'.format(API_USER), params=payload)
 
@@ -582,8 +585,6 @@ def home():
         return render_template('home.html', data=data)
 
     else:
-
-
 
         # tags
         tags = []

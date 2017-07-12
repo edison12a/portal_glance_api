@@ -135,10 +135,13 @@
     </div>
 
     {% if session.logged_in == True %}
+    {% if session.user == "admin" %}
 
     <div id="nav_main_button">
       <a href='/upload'>upload</a>
     </div>
+
+    {% endif %}
 
 
     <div id="nav_main_button">

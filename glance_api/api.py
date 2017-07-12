@@ -187,6 +187,8 @@ def query():
 
     elif 'query' in request.args:
         # TODO: For some reason `functions.get_query()` only accepts a dict?
+        print('pppppppppppppppp')
+        print(request.args)
         session = Session()
         raw_items = functions.get_query(session, request.args)
         items = functions.to_dict(raw_items)

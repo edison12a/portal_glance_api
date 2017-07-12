@@ -233,6 +233,7 @@ def get_query(session, userquery):
     else:
         query['filter'] = data['filter']
 
+
     filter_people = []
     if 'filter_people' in data:
         filter_people = data['filter_people']
