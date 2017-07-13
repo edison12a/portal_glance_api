@@ -20,16 +20,23 @@ import glance.config.settings as settings
 def generate_tags(data):
     """Using AWS Rekognition, generate tags (labels).
 
-    :param data: -- ???
+    :param data: -- string
 
-    :return type: ???``
+    :return type: -- list
     """
-    client = auth.boto3_res_rek()
-    response = auth.boto3_rek_tag(client, data)
 
-    result = [x['Name'] for x in response['Labels']]
-    
-    return result
+    for x in data:
+        if x.endswith('.jpg'):
+
+            client = auth.boto3_res_rek()
+            response = auth.boto3_rek_tag(client, data)
+
+            result = [x['Name'] for x in response['Labels']]
+        else:
+            result = []
+
+
+        return result
 
 
 def thumb(dir, filename):

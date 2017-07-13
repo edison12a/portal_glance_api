@@ -26,7 +26,7 @@ def upload_handler(file, dst):
     # data structures
     items = []
     result = []
-    allowed = ['.jpg', '.zip', '.mp4']
+    allowed = ['.jpg', '.zip', '.mp4', '.png']
     # process filenames and add random characters to avoid duplication, and
     filename, ext = os.path.splitext(file.filename)
 
@@ -52,7 +52,7 @@ def upload_handler(file, dst):
     for item in items:
         filename, ext = os.path.splitext(item)
 
-        if ext == '.jpg':
+        if ext == '.jpg' or ext == '.png':
             # Make thumbnail and upload items to s3
             thumbnail = image.thumb(dst, '{}{}'.format(filename, ext))
             auth.boto3_s3_upload(s3, dst, item)

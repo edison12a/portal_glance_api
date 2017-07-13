@@ -300,7 +300,7 @@ def uploading():
                 for items in processed_files:
 
                     for item in processed_files[items]:
-                        if item.filename.endswith('.jpg'):
+                        if item.filename.endswith('.png'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
 
                             payload = {}
