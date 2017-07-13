@@ -12,14 +12,12 @@ body {
 }
 #section_header
 {
-  padding-top:15px;
-  padding-bottom:15px;
+  padding:15px;
   font-size: 30px;
 }
 #part_of_collection
 {
-padding-top: 30px;
-padding-bottom: 30px;
+background-color: lightgray;
 }
 #part_of_collection_item
 {
@@ -213,6 +211,7 @@ padding-bottom: 30px;
   padding-top:20px;
   padding-bottom:20px;
   box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.05);
+  text-align: justify;
 }
 #item_header_collection
 {
@@ -245,6 +244,7 @@ padding-bottom: 30px;
   display:flex;
   width:100%;
   position:relative;
+  background-color: lightgray;
 }
 .item
 {
@@ -286,7 +286,11 @@ padding-bottom: 30px;
     z-index:0;
   filter: grayscale(0%) brightness(1.05);
 }
-
+.content
+{
+  width:100%;
+  background-color: white;
+}
 #manage_content
 {
   width:70%;

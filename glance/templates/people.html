@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div style="width:100%;color:white;">
+<div class="content">
   <div style="text-align:center;">
     <img style="height:400px;" src="https://s3.amazonaws.com/{{bucketname}}/{{ item.0.item_loc }}" />
   </div>
@@ -31,35 +31,7 @@
 
 </div>
 
-<div id="apply_people_tags">
-
-  <form action="{{ url_for('patch_item') }}" method="POST">
-    <div class="form-group">
-      {% for k, v in people_tags.items() %}
-
-        <br>
-        <br>{{ k }}<br>
-
-        {% for g, h in v.items() %}
-          {% if h == 1%}
-
-            <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}" checked />{{g}}</label>
-
-          {% elif h == 0 %}
-
-            <label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}">{{g}}</label>
-
-          {% endif %}
-        {% endfor %}
-      {% endfor %}
-
-      <input type="hidden" name="id" value="{{item.0.id}}">
-      <br>
-      <button type="submit" class="btn btn-default">Submit</button>
-    </div>
-  </form>
-
-</div>
+<div id="section_header"><span class="glyphicon glyphicon-minus" aria-hidden="true">&emsp;</span>Info</div>
 
 <div id="item_info">
   {% for k, v in item.0.items() %}
@@ -69,27 +41,69 @@
   {% endfor %}
 </div>
 
+<div id="section_header"><span class="glyphicon glyphicon-minus" aria-hidden="true">&emsp;</span>Edit</div>
 
 <div id="item_edit">
+  <h3>Image Attributes</h3>
 
-  <form action="/item/delete/{{item.0.id}}" method="DELETE">
-    <div class="form-group">
-      <button type="submit" class="btn btn-default">Delete</button>
-    </div>
-  </form>
+  <small>
+    <form action="{{ url_for('patch_item') }}" method="POST">
+      <div class="form-group">
+
+        {% for k, v in people_tags.items() %}
+          <strong style="color:black;">{{ k }}</strong>
+
+          {% for g, h in v.items() %}
+            {% if h == 1%}
+
+              <span class="label label-primary"><label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}" checked />{{g}}</label></span>
+
+            {% elif h == 0 %}
+
+              <span class="label label-default"><label class="checkbox-inline"><input name="people_tags" id="people_tags" type="checkbox" value="{{g}}"/>{{g}}</label></span>
+
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+
+        <input type="hidden" name="id" value="{{item.0.id}}">
+        <br><br>
+        <button type="submit" class="btn btn-block btn-default">Submit Attributes</button>
+
+
+
+
+
+      </div>
+    </form>
+  </small>
+<h3>Item</h3>
+
 
   <form action="/patch" method="POST">
     <div class="form-group">
+<div style="display: inline-block; width:49.7%;">
+
+      <label for="">Add to collection</label>
+      <input style="width:100%; display:block;" type="text" class="form-control" id="" name="" />
+      <input type="hidden" name="" value="">
+      <small><small><p class="help-block">ID of collection.</p></small></small>
+</div>
+<div style="display: inline-block; width:49.7%;">
       <label for="append_collection">Append Tags</label>
-      <input style="width:300px;" type="text" class="form-control" id="append_tags" name="append_tags" />
+      <input style="width:100%; display:block;" type="text" class="form-control" id="append_tags" name="append_tags" />
       <input type="hidden" name="id" value="{{item.0.id}}">
       <small><small><p class="help-block">Enter words, separated by spaces.</p></small></small>
-
-      <br><br>
-
-      <button type="submit" class="btn btn-default">Submit</button>
+</div>
+<br>
+      <button type="submit" class="btn btn-default btn-block">Submit Changes</button>
     </div>
   </form>
+
+
+
+
+
 
 </div>
 
