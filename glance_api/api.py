@@ -187,8 +187,6 @@ def query():
 
     elif 'query' in request.args:
         # TODO: For some reason `functions.get_query()` only accepts a dict?
-        print('pppppppppppppppp')
-        print(request.args)
         session = Session()
         raw_items = functions.get_query(session, request.args)
         items = functions.to_dict(raw_items)
@@ -266,8 +264,6 @@ def patch_item():
     patch_data = {}
     for y in request.args:
         patch_data[y] = request.args[y]
-
-    print(patch_data)
 
     session = Session()
     raw_item = functions.Item(session).patch(patch_data)

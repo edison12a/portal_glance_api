@@ -227,12 +227,11 @@ def get_query(session, userquery):
     taglists = []
     query = {}
 
-    # collect data
+    # init query
     if 'filter' not in data:
         query['filter'] = 'all'
     else:
         query['filter'] = data['filter']
-
 
     filter_people = []
     if 'filter_people' in data:
@@ -245,31 +244,24 @@ def get_query(session, userquery):
         'query': data['query'][0]
     }
 
-    # get tags for query
-    if query['query'] == '**':
+    # get tags for query, append taglists
+    if query['query'] == '' or query['query'] == '**':
         #taglists = session.query(glance_api.modules.models.Tag).all()
         # TODO: imp item sorting
-        if 'filter' in query and query['filter'] != 'all':
-            print('ONE ONE ONE')
-            result = [x for x in session.query(glance_api.modules.models.Item).filter_by(type=query['filter']).limit(100)]
+        raw_tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
 
-        else:
-            print('THREE THREE THREE THREE ')
-            result = [x for x in session.query(glance_api.modules.models.Item).limit(100)]
-            print(len(result))
+        for tag in raw_tags:
+            taglists.append(tag)
 
     else:
         # TODO: Start to implement pagination, and sorted search results.
         for x in query['query'].split(' '):
-            bla = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
+            raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
 
-            # Todo.query.order_by(Todo.pub_date.desc()).all()
+            for tag in raw_tags:
+                taglists.append(tag)
 
-            for j in bla:
-                taglists.append(j)
-
-
-    # apply filters to tags
+    # apply filters to tag items return sppend item_list
     if query['filter'] != 'all':
         for tag in taglists:
             for item in tag.items:
@@ -281,6 +273,7 @@ def get_query(session, userquery):
                     result.append(item)
 
 
+    # if people item filter furter with 'filter_people' append result
     if query['filter'] == 'people':
         if len(query['filter_people']) != 0:
             for x in item_list:
