@@ -15,6 +15,23 @@ body {
   padding:15px;
   font-size: 30px;
 }
+#dropdown_header
+{
+  box-shadow:inset -5px -5px 0 0 rgba(0,0,0,1);
+  padding:15px;
+  font-size: 30px;
+  border: none;
+  cursor: pointer;
+}
+#dropdown_header:hover{
+    background: lightgray;
+    box-shadow:inset 5px 5px 0 0 rgba(0,0,0,1);
+
+}
+#dropdown_header:active{
+    background: lightgray;
+    box-shadow:inset 5px 5px 0 0 rgba(0,0,0,1);
+}
 #part_of_collection
 {
 background-color: lightgray;
@@ -38,7 +55,6 @@ background-color: lightgray;
 #item_info
 {
   width:100%;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 50;
   padding-left:10%;
@@ -350,4 +366,52 @@ background-color: lightgray;
   padding-bottom:30px;
   color:black;
   background-color:lightgray;
+}
+.collapse{
+  cursor: pointer;
+  display: block;
+}
+.collapse + input{
+  display: none; /* hide the checkboxes */
+}
+.collapse + input + div{
+  display:none;
+}
+.collapse + input:checked + div{
+  display:block;
+}
+/** CSS **/
+.clicky {
+  /** Offset the Position **/
+  position: relative;
+  top: 0;
+  margin-top: 0;
+  margin-bottom: 5px;
+
+  /** 3D Block Effect **/
+  box-shadow: 0 5px 0 darkgray;
+
+  /** Make it look pretty **/
+  display: block;
+  background: lightgray;
+  padding: .5em 1em;
+  border: 0;
+  cursor: pointer;
+}
+
+.clicky:active {
+  /** Remove 3D Block Effect on Click **/
+  box-shadow: none;
+  top: 10px;
+  margin-bottom: 0;
+}
+
+.clicky:hover {
+  opacity: .8;
+}
+
+.clicky:active,
+.clicky:focus {
+  /** Remove Chrome's Ugly Yellow Outline **/
+  outline: 0;
 }

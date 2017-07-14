@@ -33,42 +33,46 @@
   </div>
 
 
-  <div id="section_header"><span class="glyphicon glyphicon-minus" aria-hidden="true">&emsp;</span>Info</div>
+  <label class="collapse" for="_1"><div class="clicky"><div id="section_header"><span class="glyphicon glyphicon-option-vertical" aria-hidden="true">&emsp;</span>Info</div></div></label>
+  <input id="_1" type="checkbox">
 
-
-  <div id="item_info">
-    {% for k, v in item.0.items() %}
-      {% if k != 'items' %}
-        {{ k }} - {{ v }}<br>
-      {% endif %}
-    {% endfor %}
-  </div>
-  <div id="section_header"><span class="glyphicon glyphicon-minus" aria-hidden="true">&emsp;</span>Edit</div>
-
-  <div id="item_edit">
-    <h3>Item</h3>
-
-
-      <form action="/patch" method="POST">
-        <div class="form-group">
-    <div style="display: inline-block; width:49.7%;">
-
-          <label for="">Add to collection</label>
-          <input style="width:100%; display:block;" type="text" class="form-control" id="" name="" />
-          <input type="hidden" name="" value="">
-          <small><small><p class="help-block">ID of collection.</p></small></small>
+    <div id="item_info">
+      {% for k, v in item.0.items() %}
+        {% if k != 'items' %}
+          {{ k }} - {{ v }}<br>
+        {% endif %}
+      {% endfor %}
     </div>
-    <div style="display: inline-block; width:49.7%;">
-          <label for="append_collection">Append Tags</label>
-          <input style="width:100%; display:block;" type="text" class="form-control" id="append_tags" name="append_tags" />
-          <input type="hidden" name="id" value="{{item.0.id}}">
-          <small><small><p class="help-block">Enter words, separated by spaces.</p></small></small>
-    </div>
-    <br>
-          <button type="submit" class="btn btn-default btn-block">Submit Changes</button>
-        </div>
-      </form>
-    </div>
+
+
+
+    <label class="collapse" for="_2"><div class="clicky"><div id="section_header"><span class="glyphicon glyphicon-option-vertical" aria-hidden="true">&emsp;</span>Edit</div></div></label>
+  <input id="_2" type="checkbox">
+
+    <div id="item_edit">
+      <h3>Item</h3>
+
+
+        <form action="/patch" method="POST">
+          <div class="form-group">
+      <div style="display: inline-block; width:49.7%;">
+
+            <label for="">Add to collection</label>
+            <input style="width:100%; display:block;" type="text" class="form-control" id="" name="" />
+            <input type="hidden" name="" value="">
+            <small><small><p class="help-block">ID of collection.</p></small></small>
+      </div>
+      <div style="display: inline-block; width:49.7%;">
+            <label for="append_collection">Append Tags</label>
+            <input style="width:100%; display:block;" type="text" class="form-control" id="append_tags" name="append_tags" />
+            <input type="hidden" name="id" value="{{item.0.id}}">
+            <small><small><p class="help-block">Enter words, separated by spaces.</p></small></small>
+      </div>
+      <br>
+            <button type="submit" class="btn btn-default btn-block">Submit Changes</button>
+          </div>
+        </form>
+      </div>
 
 
 </div>

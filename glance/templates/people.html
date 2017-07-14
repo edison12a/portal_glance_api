@@ -31,17 +31,19 @@
 
 </div>
 
-<div id="section_header"><span class="glyphicon glyphicon-minus" aria-hidden="true">&emsp;</span>Info</div>
+<label class="collapse" for="_1"><div class="clicky"><div id="section_header"><span class="glyphicon glyphicon-option-vertical" aria-hidden="true">&emsp;</span>Info</div></div></label>
+<input id="_1" type="checkbox">
 
-<div id="item_info">
-  {% for k, v in item.0.items() %}
-    {% if k != 'items' %}
-      {{ k }} - {{ v }}<br>
-    {% endif %}
-  {% endfor %}
-</div>
+  <div id="item_info">
+    {% for k, v in item.0.items() %}
+      {% if k != 'items' %}
+        {{ k }} - {{ v }}<br>
+      {% endif %}
+    {% endfor %}
+  </div>
 
-<div id="section_header"><span class="glyphicon glyphicon-minus" aria-hidden="true">&emsp;</span>Edit</div>
+  <label class="collapse" for="_2"><div class="clicky"><div id="section_header"><span class="glyphicon glyphicon-option-vertical" aria-hidden="true">&emsp;</span>Edit</div></div></label>
+<input id="_2" type="checkbox">
 
 <div id="item_edit">
   <h3>Image Attributes</h3>
@@ -103,7 +105,7 @@
 
 
 
-
+</div>
 
 </div>
 
