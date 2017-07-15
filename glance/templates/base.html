@@ -151,6 +151,9 @@
     <div id="nav_main_button">
       <a href='/upload'>upload</a>
     </div>
+    <div id="nav_main_button">
+      <a href='/coll_list'>coll_list</a>
+    </div>
 
     {% endif %}
 
@@ -246,32 +249,32 @@
       </div>
     {%elif session.filter == 'geometry'%}
       <div id="nav_item_panel">
-        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a style='color:red;' href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a href="/search?search={{data.query}}&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a style='color:red;' href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a href="/coll_list">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
       </div>
 
     {%elif session.filter == 'footage'%}
       <div id="nav_item_panel">
-        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a style='color:red;' href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a href="/search?search={{data.query}}&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a style='color:red;' href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a href="/coll_list">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
       </div>
 
     {%elif session.filter == 'people'%}
       <div id="nav_item_panel">
-        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a  style='color:red;' href="/search?search={{data.query}}&filter=people">People</a> | <a href="/search?search={{data.query}}&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a  style='color:red;' href="/search?search={{data.query}}&filter=people">People</a> | <a href="/coll_list">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
       </div>
 
     {%elif session.filter == 'collection'%}
       <div id="nav_item_panel">
-        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a style='color:red;' href="/search?search={{data.query}}&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a style='color:red;' href="/coll_list">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
       </div>
 
     {%elif session.filter == 'all'%}
       <div id="nav_item_panel">
-        <small><small><small>VIEW:&emsp;</small> <a style='color:red;' href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a href="/search?search={{data.query}}&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+        <small><small><small>VIEW:&emsp;</small> <a style='color:red;' href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a href="/coll_list">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
       </div>
 
     {%else %}
       <div id="nav_item_panel">
-        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a href="/search?search={{data.query}}&filter=collection">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
+        <small><small><small>VIEW:&emsp;</small> <a href="/search?search={{data.query}}&filter=all">All</a> | <a href="/search?search={{data.query}}&filter=image">Images</a> | <a href="/search?search={{data.query}}&filter=geometry">Geometry</a> | <a href="/search?search={{data.query}}&filter=footage">Footage</a> | <a href="/search?search={{data.query}}&filter=people">People</a> | <a href="/coll_list">Collection</a> | <s>Project</s> | <s>Archive</s></small></small>
       </div>
 
     {%endif%}

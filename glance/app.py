@@ -33,6 +33,7 @@ API_ITEM = '{}item'.format(settings.api_root)
 API_PATCH = '{}item/patch'.format(settings.api_root)
 API_COLLECTION = '{}collection'.format(settings.api_root)
 API_USER = '{}user'.format(settings.api_root)
+API_QUERY = '{}query'.format(settings.api_root)
 
 '''Routes'''
 # auth
@@ -633,6 +634,18 @@ def manage():
         return render_template('manage.html', collection=r.json(), items=data, data=data)
     else:
         return home()
+
+
+@app.route('/coll_list')
+def coll_list():
+    data = []
+
+    auth.SessionHandler(session).filter('collection')
+    r = requests.get("{}?query=**&filter=collection".format(API_QUERY))
+    collection = r.json()
+
+
+    return render_template('coll_list.html', data=data, collection=collection)
 
 
 @app.route('/upload')
