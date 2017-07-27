@@ -252,7 +252,7 @@ background-color: lightgray;
   text-align:center;
   font-size:30px;
 }
-#item_results
+.item_results
 {
   width: 100%;
   z-index:0;
