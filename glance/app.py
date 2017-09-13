@@ -427,23 +427,31 @@ def patch_item():
     if request.method == 'POST':
         form = request.form
         for k in form:
-            if k == 'append_collection':
+            if k == 'id':
+                data['id'] = form[k]
+
+            elif k == 'append_collection' and form[k] != '':
                 data['items'] = form[k]
 
-            elif k == 'append_tags':
+            elif k == 'append_tags' and form[k] != '':
                 data['tags'] = form[k]
 
-            elif k == 'people_tags':
+            elif k == 'people_tags' and form[k] != '':
                 tags = ' '.join(form.getlist('people_tags'))
                 data['people_tags'] = tags
 
-            else:
+            elif k == 'collection_rename' and form[k] != '':
                 data[k] = form[k]
+                if 'tags' in data and data['tags'] != '':
+                    data['tags'] += f"{data['tags']} {data[k]}"
+                else:
+                    data['tags'] = data[k]
 
         if 'change_cover' in request.files:
             cover_image = request.files['change_cover']
             if cover_image.filename == '':
                 pass
+
             else:
                 uploaded_file = file.upload_handler(cover_image, app.config['UPLOAD_FOLDER'])
                 data = {}

@@ -432,6 +432,7 @@ class Item():
 
 
     def patch(self, kwarg):
+        print(kwarg)
         """updates asset fields using user data"""
         # TODO: This is a pretty heftly function... needs refactoring
 
@@ -448,10 +449,13 @@ class Item():
             # additional many-to-many data
             if k == 'collections':
                 query[k] = v.split()
+            elif k == 'collection_rename':
+                query[k] = v
             elif k == 'items':
                 query[k] = v.split()
             elif k == 'tags':
                 query['tags'] = v.split()
+                print(query['tags'])
             elif k == 'people_tags':
                 # get items current tags
                 current_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
@@ -475,6 +479,9 @@ class Item():
             elif k == 'item_loc':
                 asset.item_loc = v
 
+            elif k == 'collection_rename':
+                asset.name = v
+
             elif k == 'item_thumb':
                 asset.item_thumb = v
 
@@ -482,6 +489,7 @@ class Item():
                 asset.attached = v
 
             elif k == 'tags':
+                print('theres tags!!')
                 # process asset tags
                 # remove dups
                 item_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
@@ -573,16 +581,6 @@ class Item():
 
             else:
                 pass
-
-        # if replacing a collections cover image, delete previous
-        """
-        if 'item_loc' and 'item_thumb' in query:
-            if asset.item_loc == 'site/default_cover.jpg' and asset.item_thumb == 'site/default_cover.jpg':
-                pass
-            else:
-                to_delete_from_s3 = [asset.item_loc, asset.item_thumb, 'None']
-                auth.delete_from_s3(to_delete_from_s3)
-        """
 
         # Finish asset object
         # append object moddate
