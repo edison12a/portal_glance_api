@@ -432,7 +432,6 @@ class Item():
 
 
     def patch(self, kwarg):
-        print(kwarg)
         """updates asset fields using user data"""
         # TODO: This is a pretty heftly function... needs refactoring
 
@@ -455,7 +454,6 @@ class Item():
                 query[k] = v.split()
             elif k == 'tags':
                 query['tags'] = v.split()
-                print(query['tags'])
             elif k == 'people_tags':
                 # get items current tags
                 current_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
@@ -489,17 +487,14 @@ class Item():
                 asset.attached = v
 
             elif k == 'tags':
-                print('theres tags!!')
-                # process asset tags
-                # remove dups
-                item_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
+                asset_tags = [x.name for x in asset.tags]
 
-                tag_list = list(set(v))
+                user_input_tags = list(set(v))
                 add_tag = []
                 remove_tag = []
                 people_tag = []
 
-                for tag in tag_list:
+                for tag in user_input_tags:
                     if tag.startswith('-'):
                         remove_tag.append(tag)
 
@@ -516,7 +511,7 @@ class Item():
                     asset.tags.append(newtag)
 
                 for tag in people_tag:
-                    current_people_tags = [x for x in item_tags if x.startswith('_')]
+                    current_people_tags = [x for x in asset_tags if x.startswith('_')]
                     # create new Tag object and append to asset object
                     newtag = glance_api.modules.models.Tag(name=str(tag))
                     self.session.add(newtag)
@@ -524,25 +519,10 @@ class Item():
                     asset.tags.append(newtag)
 
                 for tag in remove_tag:
-                    item = self.session.query(glance_api.modules.models.Item).filter_by(id='{}'.format(int(kwarg['id']))).first()
-                    for x in item.tags:
+                    for x in asset.tags:
                         if x.name == tag[1:]:
                             self.session.delete(x)
                             self.session.commit()
-
-                    # check if any assciations remain on `Tag` if None then delete it.
-                    # TODO: this should problely be handled by something else tag related?
-                    """
-                    for x in item.tags:
-                        if len(x.items) > 0:
-                            pass
-                        else:
-                            # delete the tag
-                            print('deleting {}'.format(x))
-                            self.session.delete(x)
-
-                    self.session.commit()
-                    """
 
             elif k == 'items':
                 # process asset tags

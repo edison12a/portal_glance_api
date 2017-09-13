@@ -13,161 +13,53 @@
 
 
 
+
+{% for x in item.0['items']%}
+{% if loop.index0 % 5 == 0 %}
 <div class="item_results">
+{% endif %}
 
-  {% for k, v in item.0.items() %}
-  {% if k == 'items' %}
-  {% for j,item in v.items() %}
 
-  {% if item.item_type == 'image' %}
 
-    <div class="item">
-          <a href="/item/{{ item.id }}">
-              <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-          </a>
-      <div class="item_header_type">
-          <div style="text-align:center;">
-              <small><strong>Image</strong></small>
-          </div>
+
+<div class="item">
+      <a href="/item/{{item.0['items'][x]['id']}}">
+          <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.0['items'][x]['item_thumb']}}" />
+      </a>
+  <div class="item_header_type">
+      <div style="text-align:center;">
+          <small><strong>{{item.0['items'][x]['item_type']}}</strong></small>
       </div>
+  </div>
 
-      <div class="item_panel">
-          <div style="text-align:center;">
-
-              <a href="#">
-              <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-          </a>
-          <a href="#">
-              <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-          </a>
+  <div class="item_panel">
+      <div style="text-align:center;">
 
           <a href="#">
-              <small><strong><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></strong></small>
-          </a>
+          <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+      </a>
+      <a href="#">
+          <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
+      </a>
 
-          </div>
+      <a href="#">
+          <small><strong><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></strong></small>
+      </a>
+
       </div>
-
-    </div>
-
-    {% elif item.item_type == 'people' %}
-
-
-
-        <div class="item">
-                <a href="/item/{{ item.id }}">
-                    <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                </a>
-            <div class="item_header_type">
-                <div style="text-align:center;">
-                    <small><strong>People</strong></small>
-                </div>
-            </div>
-
-              <div class="item_panel">
-                <div style="text-align:center;">
-                    <a href="#">
-                    <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                </a>
-                <a href="#">
-                    <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-                </a>
-                </div>
-            </div>
-          </div>
-
-
-
-
-          {% elif item.item_type == 'footage' %}
-
-
-
-              <div class="item">
-                      <a href="/item/{{ item.id }}">
-                          <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                      </a>
-                    <div class="item_header_type">
-                      <div style="text-align:center;">
-                          <small><strong>Footage</strong></small>
-                      </div>
-                  </div>
-
-                    <div class="item_panel">
-                      <div style="text-align:center;">
-                          <a href="#">
-                          <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                      </a>
-                      <a href="#">
-                          <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-                      </a>
-                      </div>
-                  </div>
-                  </div>
-
-
-                {% elif item.item_type == 'geometry' %}
-
-
-
-                    <div class="item">
-                            <a href="/item/{{ item.id }}">
-                                <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                            </a>
-                          <div class="item_header_type">
-                          <div style="text-align:center;">
-                                <small><strong>Geometry</strong></small>
-                            </div>
-                        </div>
-
-                          <div class="item_panel">
-                            <div style="text-align:center;">
-                                <a href="#">
-                                <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                            </a>
-                            <a href="#">
-                                <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-                            </a>
-                            </div>
-                        </div>
-                        </div>
-
-
-
-                  {% elif item.item_type == 'collection' %}
-
-
-
-                      <div class="item">
-                              <a href="/item/{{ item.id }}">
-                                  <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-                              </a>
-                            <div class="item_header_type">
-                              <div style="text-align:center;">
-                                  <small><strong>Collecton</strong></small>
-                              </div>
-                          </div>
-
-                              <div class="item_panel">
-                                <div style="text-align:center;">
-                                  <a href="#">
-                                  <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-                              </a>
-                              <a href="#">
-                                  <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-                              </a>
-                              </div>
-                          </div>
-                          </div>
-
-{% endif %}
-{% endfor %}
-{% endif %}
-{% endfor %}
-
-
+  </div>
 
 </div>
+
+
+
+{% if loop.index0 % 5 == 4 or loop.last %}
+      </div>
+      {% endif %}
+
+
+{% endfor %}
+
 
 
 

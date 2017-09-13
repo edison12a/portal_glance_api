@@ -21,6 +21,10 @@ import glance.modules.image as image
 from config import settings
 
 
+# TODO: collection is set to loop on 5. do this to the other pages?
+# search results, front page etc.
+
+
 '''Flask Config'''
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = settings.tmp_upload
