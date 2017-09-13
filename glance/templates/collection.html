@@ -192,7 +192,7 @@
     <div id="item_edit">
       <h3>Item</h3>
 
-        <form action="/patch" method="POST">
+        <form action="/patch" method="POST" enctype=multipart/form-data>
           <div class="form-group">
 
       <div style="display: inline-block; width:49.7%;">
@@ -206,6 +206,8 @@
 
         <label for="change_cover">Change Cover Image</label>
         <input style="width:100%; display:block;" type="file" id="change_cover" name="change_cover">
+        <input type="hidden" name="del_item_loc" value="{{item.0.item_loc}}">
+        <input type="hidden" name="del_item_thumb" value="{{item.0.item_thumb}}">
         <small><small><p class="help-block">Cover Image should be .jpg</p></small></small>
 
 

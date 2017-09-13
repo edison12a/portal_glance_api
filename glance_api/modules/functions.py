@@ -293,88 +293,6 @@ def get_query(session, userquery):
     return result
 
 
-# crud
-'''
-# TODO: refactor to Item() class
-def post_collection(session, **kwarg):
-    """Add new collection Item to database.
-
-    Keyword arguments:
-    session -- Sqlalchemy session object.
-    kwarg -- ???
-
-    Return: Item
-    """
-    payload = {}
-    data = {}
-
-    # process user input
-    for k, v in kwarg.items():
-        payload[k] = v
-
-    # remove attri that arnt in the database
-    for column in glance_api.modules.models.Collection.__table__.columns:
-        if column.name in payload:
-            data[column.name] = payload[column.name]
-        elif column.name not in payload:
-            data[column.name] = None
-        else:
-            pass
-
-    # Database entry
-    item = glance_api.modules.models.Collection(
-        name = data['name'],
-        item_loc = data['item_loc'],
-        item_thumb = data['item_thumb'],
-        author = data['author']
-
-    )
-
-    # after entry is commited then hit the database with any new tags?
-    # is this the best way?
-    if 'tags' in payload:
-        tag_list = payload['tags'].split(' ')
-        for tag in tag_list:
-
-            # TODO: refactor the below its checking to see if the tags exists already
-            #if it does then just append that tag with the item object.
-            #else make a new tag object
-            test = session.query(glance_api.modules.models.Tag).filter_by(name=tag).first()
-
-            if test:
-                test.items.append(item)
-                session.add(test)
-                session.commit()
-            else:
-                newtag = glance_api.modules.models.Tag(name=str(tag))
-                session.add(newtag)
-                session.commit()
-
-                item.tags.append(newtag)
-    else:
-        payload['tags'] = ''
-
-    if 'items' in payload:
-
-        collection = session.query(glance_api.modules.models.Collection).get(item.id)
-
-        for item_id in payload['items'].split(' '):
-            item_to_append = session.query(glance_api.modules.models.Item).get(int(item_id))
-            collection.items.append(item_to_append)
-            session.add(collection)
-            session.commit()
-
-    else:
-        payload['items'] = ''
-
-    # TODO: sort out tags
-    session.add(item)
-    # commit changes to database
-    session.commit()
-
-    return item
-'''
-
 class Item():
     """Constructs a generic :class:`Item`"""
     def __init__(self, session):
@@ -525,7 +443,6 @@ class Item():
         id = int(kwarg['id'])
 
         # build list of assets column names for validation
-
         # validate user data and build query dict, from data.
         for k, v in kwarg.items():
             # additional many-to-many data
@@ -547,7 +464,6 @@ class Item():
             else:
                 query[k] = v
 
-
         # once all user data is validated and ready to append, get asset object.
         asset = self.session.query(glance_api.modules.models.Item).get(id)
         # Process user data and update asset object fields.
@@ -556,11 +472,11 @@ class Item():
             if k == 'name':
                 asset.name = v
 
-            elif k == 'image':
-                asset.image = v
+            elif k == 'item_loc':
+                asset.item_loc = v
 
-            elif k == 'image_thumb':
-                asset.image_thumb = v
+            elif k == 'item_thumb':
+                asset.item_thumb = v
 
             elif k == 'attached':
                 asset.attached = v
@@ -622,13 +538,11 @@ class Item():
 
             elif k == 'items':
                 # process asset tags
-                print('api:functions:patch:items')
 
                 for item in v:
                     item_to_collection = self.session.query(glance_api.modules.models.Item).get(int(item))
                     asset.items.append(item_to_collection)
                     self.session.add(asset)
-
 
             elif k == 'flag':
                 # process flag field
@@ -659,6 +573,16 @@ class Item():
 
             else:
                 pass
+
+        # if replacing a collections cover image, delete previous
+        """
+        if 'item_loc' and 'item_thumb' in query:
+            if asset.item_loc == 'site/default_cover.jpg' and asset.item_thumb == 'site/default_cover.jpg':
+                pass
+            else:
+                to_delete_from_s3 = [asset.item_loc, asset.item_thumb, 'None']
+                auth.delete_from_s3(to_delete_from_s3)
+        """
 
         # Finish asset object
         # append object moddate

@@ -255,6 +255,7 @@ def delete_asset(asset_id):
             return jsonify({'DELETE asset/delete/': result})
 
     session.close()
+
     return jsonify({'DELETE asset/delete/': 'error?'})
 
 
@@ -264,8 +265,6 @@ def patch_item():
     patch_data = {}
     for y in request.args:
         patch_data[y] = request.args[y]
-
-    print(patch_data)
 
     session = Session()
     raw_item = functions.Item(session).patch(patch_data)

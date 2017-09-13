@@ -81,8 +81,6 @@ def signup():
             return render_template('signup.html')
         elif payload['password'] not in dev_user:
             return render_template('signup.html')
-        print('oooooooooooooooooooooooooooo')
-        print(payload)
 
         r = requests.post('{}'.format(API_USER), params=payload)
 
@@ -435,29 +433,40 @@ def patch_item():
             elif k == 'append_tags':
                 data['tags'] = form[k]
 
-            elif k == 'change_cover':
-                pass
-
             elif k == 'people_tags':
-
                 tags = ' '.join(form.getlist('people_tags'))
                 data['people_tags'] = tags
 
             else:
                 data[k] = form[k]
 
-            print(data)
+        if 'change_cover' in request.files:
+            cover_image = request.files['change_cover']
+            if cover_image.filename == '':
+                pass
+            else:
+                uploaded_file = file.upload_handler(cover_image, app.config['UPLOAD_FOLDER'])
+                data = {}
+                data['item_loc'] = uploaded_file[0]
+                data['item_thumb'] = uploaded_file[1]
+                data['id'] = form['id']
+
+                data['del_item_loc'] = form['del_item_loc']
+                data['del_item_thumb'] = form['del_item_thumb']
+
+                # delete old collection cover
+                if 'del_item_loc' and 'del_item_thumb' in data:
+                    to_delete_from_s3 = [data['del_item_loc'], data['del_item_thumb'], 'None']
+                    auth.delete_from_s3(to_delete_from_s3)
 
     r = requests.patch('{}/patch'.format(API_ITEM), params=data)
+
 
     return redirect(f"item/{data['id']}")
 
 
 @app.route('/manage_selection', methods=['GET', 'POST'])
 def manage_selection():
-
-    print(request.form.to_dict())
-
     if 'collection_append' in request.form and request.form['collection_append'] != '':
         payload = {}
         payload['id'] = request.form['collection_append']
@@ -484,10 +493,8 @@ def manage_selection():
         for x in form_dict:
             if form_dict[x] == 'on':
                 ids.append(x)
-        print(ids)
 
         # get tags
-        print(request.form['tags'])
 
         payload = {}
 
@@ -529,8 +536,6 @@ def manage_selection():
             else:
                 print('empty else')
                 pass
-
-
 
     return home()
 

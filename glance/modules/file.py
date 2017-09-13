@@ -107,6 +107,7 @@ def upload_handler(file, dst):
 
 
 def process_raw_files(files):
+    print(files)
     """pairs images to attachments.
 
     :param files: ???

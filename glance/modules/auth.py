@@ -200,7 +200,8 @@ def delete_from_s3(data):
     """
     # refactor below
     # get s3 resource
-    # TODO: dont not delete thumbnail?
+    print('ddaatteerersdfsdfsdf')
+    print(data)
     s3 = boto3_res_s3()
 
     bucket = s3.Bucket(settings.config_type['AWS_BUCKET'])
