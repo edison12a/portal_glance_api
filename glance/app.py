@@ -299,9 +299,8 @@ def uploading():
                 # build payload for api
 
                 for items in processed_files:
-
                     for item in processed_files[items]:
-                        if item.filename.endswith('.png'):
+                        if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
 
                             payload = {}

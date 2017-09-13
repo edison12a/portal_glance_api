@@ -1,24 +1,38 @@
 {% from "base.html" import bucketname with context %}
-<div id="manage_content">
 
-  <div class="item">
+<div class="item">
 
-    <div style="position:relative;">
-      <a href="item/{{ item.id }}">
-        <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
-      </a>
-    </div>
-
-    <div class="item_header_type">
-      <div style="text-align:center;">
-        <small><strong>{{ item.item_type|capitalize }}</strong></small>
-      </div>
-    </div>
-    <div class="item_panel">
-      <div style="text-align:center;">
-        <small><strong>{{item.name}}</strong></small>
-      </div>
-    </div>
+  <div style="position:relative;">
+    <a href="item/{{ item.id }}">
+      <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{item.item_thumb}}" />
+    </a>
   </div>
 
+  <div class="item_header_type">
+    <div style="text-align:center;">
+      <small><strong>{{ item.item_type|capitalize }}</strong></small>
+    </div>
+  </div>
+<!--
+  <div class="item_panel">
+
+    <div style="text-align:center;">
+      <div class="add_to_selection" style="display:inline-block;text-align:center;">
+
+        <form class="form-signin"  role="form">
+          <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
+          <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
+          ❤
+        </form>
+
+      </div>
+
+      <a href="#">
+        <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+      </a>
+
+    </div>
+
+  </div>
+  !-->
 </div>

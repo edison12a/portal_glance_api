@@ -21,8 +21,8 @@ engine = create_engine(settings.POSTGRES_DATABASE, echo=False)
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
 
-'''development tools'''
 """
+'''development tools'''
 # functions
 session = Session()
 functions.__reset_db(session, engine)
