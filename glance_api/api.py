@@ -265,6 +265,8 @@ def patch_item():
     for y in request.args:
         patch_data[y] = request.args[y]
 
+    print(patch_data)
+
     session = Session()
     raw_item = functions.Item(session).patch(patch_data)
     item = functions.to_dict((raw_item,))

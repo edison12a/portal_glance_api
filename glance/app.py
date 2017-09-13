@@ -12,7 +12,7 @@ import string
 import re
 
 import requests
-from flask import Flask, render_template, request, session, jsonify, url_for
+from flask import Flask, render_template, request, session, jsonify, url_for, redirect
 
 import glance.modules.auth as auth
 import glance.modules.file as file
@@ -446,9 +446,11 @@ def patch_item():
             else:
                 data[k] = form[k]
 
+            print(data)
+
     r = requests.patch('{}/patch'.format(API_ITEM), params=data)
 
-    return home()
+    return redirect(f"item/{data['id']}")
 
 
 @app.route('/manage_selection', methods=['GET', 'POST'])
