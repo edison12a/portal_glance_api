@@ -450,6 +450,8 @@ class Item():
                 query[k] = v.split()
             elif k == 'collection_rename':
                 query[k] = v
+            elif k == 'append_to_collection':
+                query[k] = v
             elif k == 'items':
                 query[k] = v.split()
             elif k == 'tags':
@@ -482,6 +484,10 @@ class Item():
 
             elif k == 'item_thumb':
                 asset.item_thumb = v
+
+            elif k == 'append_to_collection':
+                collection = self.session.query(glance_api.modules.models.Item).get(38)
+                collection.items.append(asset)
 
             elif k == 'attached':
                 asset.attached = v

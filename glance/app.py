@@ -437,6 +437,10 @@ def patch_item():
             elif k == 'append_collection' and form[k] != '':
                 data['items'] = form[k]
 
+            elif k == 'append_to_collection' and form[k] != '':
+                print('appending to collection')
+                data['append_to_collection'] = form[k]
+
             elif k == 'append_tags' and form[k] != '':
                 data['tags'] = form[k]
 
