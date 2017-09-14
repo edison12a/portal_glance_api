@@ -40,6 +40,12 @@
         {{ k }} - {{ v }}<br>
       {% endif %}
     {% endfor %}
+
+    <hr>
+    {% if item.0.attached != 'None' %}
+    <a href="https://s3.amazonaws.com/{{bucketname}}/{{item.0.attached}}" class="btn btn-primary btn-sm" role="button" aria-pressed="true">Download</a>
+    {% endif %}
+
   </div>
 
   <label class="collapse" for="_2"><div class="clicky"><div id="section_header"><span class="glyphicon glyphicon-option-vertical" aria-hidden="true">&emsp;</span>Edit</div></div></label>

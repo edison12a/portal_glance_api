@@ -37,7 +37,7 @@
 
 
 
-<label class="collapse" for="_1"><div class="clicky"><div id="section_header"><span class="glyphicon glyphicon-option-vertical" aria-hidden="true">&emsp;</span>Info</div></div></label>
+<label class="collapse" for="_1"><div class="clicky"><div id="section_header">Info</div></div></label>
 <input id="_1" type="checkbox">
 
   <div id="item_info">
@@ -46,12 +46,16 @@
         {{ k }} - {{ v }}<br>
       {% endif %}
     {% endfor %}
+    <hr>
+    <a href="https://s3.amazonaws.com/{{bucketname}}/{{item.0.attached}}" class="btn btn-primary btn-sm" role="button" aria-pressed="true">Download</a>
   </div>
 
 
 
 
-  <label class="collapse" for="_2"><div class="clicky"><div id="section_header"><span class="glyphicon glyphicon-option-vertical" aria-hidden="true">&emsp;</span>Edit</div></div></label>
+
+
+  <label class="collapse" for="_2"><div class="clicky"><div id="section_header">Edit</div></div></label>
 <input id="_2" type="checkbox">
 
   <div id="item_edit">

@@ -24,19 +24,16 @@ def generate_tags(data):
 
     :return type: -- list
     """
+    if data.endswith('.jpg'):
 
-    for x in data:
-        if x.endswith('.jpg'):
+        client = auth.boto3_res_rek()
+        response = auth.boto3_rek_tag(client, data)
 
-            client = auth.boto3_res_rek()
-            response = auth.boto3_rek_tag(client, data)
+        result = [x['Name'] for x in response['Labels']]
+    else:
+        result = []
 
-            result = [x['Name'] for x in response['Labels']]
-        else:
-            result = []
-
-
-        return result
+    return result
 
 
 def thumb(dir, filename):

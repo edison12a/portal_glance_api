@@ -393,7 +393,7 @@ background-color: lightgray;
 
   /** Make it look pretty **/
   display: block;
-  background: lightgray;
+  background: rgb(190, 190, 190);
   padding: .5em 1em;
   border: 0;
   cursor: pointer;
