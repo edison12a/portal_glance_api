@@ -10,7 +10,7 @@ config = configparser.ConfigParser()
 project_root = Path(os.path.dirname(__file__)).parent
 config.read(os.path.join(project_root, 'config', 'config.ini'))
 
-# select config type.
+# select config type
 config_type = config['dev']
 
 # flask settings

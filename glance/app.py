@@ -1,4 +1,4 @@
-f"""
+"""
 glance web app
 """
 
@@ -13,6 +13,7 @@ import re
 
 import requests
 from flask import Flask, render_template, request, session, jsonify, url_for, redirect
+from requests.auth import HTTPBasicAuth
 
 import glance.modules.auth as auth
 import glance.modules.file as file
@@ -33,10 +34,11 @@ app.secret_key = settings.secret_key
 '''API SHORTHAND'''
 # TODO: Lazy?
 API = settings.api_root
-API_ITEM = '{}item'.format(settings.api_root)
-API_PATCH = '{}item/patch'.format(settings.api_root)
+API_ACCOUNTS = '{}items'.format(settings.api_root)
+API_ITEM = '{}items'.format(settings.api_root)
+API_PATCH = '{}items/patch'.format(settings.api_root)
 API_COLLECTION = '{}collection'.format(settings.api_root)
-API_USER = '{}user'.format(settings.api_root)
+API_USER = '{}accounts'.format(settings.api_root)
 API_QUERY = '{}query'.format(settings.api_root)
 
 '''Routes'''
@@ -46,19 +48,13 @@ def login():
     if request.method == 'POST':
         form = request.form
 
-        data = {
-            'username': form['username'],
-            'password': form['password']
-        }
-
-        if auth.check_login_details(**data):
-            auth.SessionHandler(session).open(form['username'])
+        if auth.SessionHandler(session).open(username=form['username'], password=form['password']):
+            return home()
 
         else:
             auth.SessionHandler(session).close()
 
     else:
-
         return render_template('login.html')
 
     return home()
@@ -66,10 +62,9 @@ def login():
 
 @app.route("/logout")
 def logout():
-
     auth.SessionHandler(session).close()
 
-    return home()
+    return login()
 
 
 @app.route("/signup", methods=['GET', 'POST'])
@@ -584,6 +579,7 @@ def home():
     """Serves front page
     :return: dict. Each item tyoe.
     """
+
     # TODO: emi persistant data users search term, imp into session?
     data = {'query': "**"}
     # process and reverse data so the latest uploaded items are first.
@@ -594,21 +590,15 @@ def home():
     payload['filter'] = 'all'
     auth.SessionHandler(session).filter(payload['filter'])
 
-    g = requests.get('{}'.format(API_ITEM))
-    res = g.json()
+    account_session = auth.SessionHandler(session).get()
 
-    # TODO: Temp fix for hidding information when a user isn logged in.
-    try:
-        if session['logged_in'] == False:
-            return render_template('home.html', data=data)
-    except:
-        return render_template('home.html', data=data)
+    r = requests.get('{}items'.format(settings.api_root), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+    res = r.json()['data']
 
-    if 'GET assets' in res and res['GET assets']['Message'] == 'No assets in database':
+    if 'status' in res and res['status']['Message'] == 'failed':
         return render_template('home.html', data=data)
 
     else:
-
         # tags
         tags = []
         goo = [x['tags'] for x in res]
@@ -616,21 +606,16 @@ def home():
         for x in res:
             for j in x['tags']:
                 if j not in tags:
-                    tags.append(j)
+                    tags.append(j['name'])
 
-        # latest ten collections
         collections = [x for x in res if x['item_type'] == 'collection'][0:9]
 
-        # latest ten image
         images = [x for x in res if x['item_type'] == 'image'][0:9]
 
-        # latest ten collections
         footage = [x for x in res if x['item_type'] == 'footage'][0:9]
 
-        # latest ten people
         people = [x for x in res if x['item_type'] == 'people'][0:9]
 
-        # latest ten geometry
         geometry = [x for x in res if x['item_type'] == 'geometry'][0:9]
 
 
@@ -687,25 +672,28 @@ def item(id):
     data = {'query': "**"}
 
     if id:
-        r = requests.get('{}/{}'.format(API_ITEM, id))
+        account_session = auth.SessionHandler(session).get()
+        r = requests.get('{}items/{}'.format(settings.api_root, id), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
-        if r.json()['item'][0]['item_type'] == 'image':
-            return render_template('image.html', item=r.json()['item'], data=data)
+        print(r.json())
 
-        elif r.json()['item'][0]['item_type'] == 'collection':
-            return render_template('collection.html', item=r.json()['item'], data=data)
+        if r.json()['data'][0]['item_type'] == 'image':
+            return render_template('image2.html', item=r.json()['data'][0], data=data)
 
-        elif r.json()['item'][0]['item_type'] == 'footage':
-            return render_template('footage.html', item=r.json()['item'], data=data)
+        elif r.json()['data'][0]['item_type'] == 'collection':
+            return render_template('collection.html', item=r.json()['data'], data=data)
 
-        elif r.json()['item'][0]['item_type'] == 'geometry':
-            return render_template('geometry.html', item=r.json()['item'], data=data)
+        elif r.json()['data'][0]['item_type'] == 'footage':
+            return render_template('footage2.html', item=r.json()['data'][0], data=data)
 
-        elif r.json()['item'][0]['item_type'] == 'people':
-            tags_from_api = r.json()['item'][0]['tags']
+        elif r.json()['data'][0]['item_type'] == 'geometry':
+            return render_template('geometry2.html', item=r.json()['data'][0], data=data)
+
+        elif r.json()['data'][0]['item_type'] == 'people':
+            tags_from_api = r.json()['data'][0]['tags']
             people_tags = image.get_people_tags(tags_from_api)
 
-            return render_template('people.html', item=r.json()['item'], people_tags=people_tags, data=data)
+            return render_template('people2.html', item=r.json()['data'][0], people_tags=people_tags, data=data)
 
 
         else:

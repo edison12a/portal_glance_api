@@ -258,16 +258,20 @@ class ItemsL(Resource):
         parser.add_argument('item_thumb', type=str, help='help text')
         parser.add_argument('attached', type=str, help='help text')
         parser.add_argument('item_type', type=str, help='help text')
+        parser.add_argument('tags', type=str, help='help text')
         args = parser.parse_args()
 
         session = Session()
         args['author'] = auth.username()
         new_item = functions.Item(session).post(args)
+        if new_item:
+            response = resp(message='New item created')
 
-        response = resp(message='New item created')
+            session.close()
+            return response
 
-        session.close()
-        return response
+        else:
+            response=resp(status='failed', error='somethings wrong')
 
 
 class Tags(Resource):
@@ -278,6 +282,7 @@ class Tags(Resource):
     @auth.login_required
     def put(self, id):
         pass
+
 
     @auth.login_required
     def delete(self, id):

@@ -9,6 +9,7 @@ __license__ = ""
 import os
 import requests
 import boto3
+from requests.auth import HTTPBasicAuth
 
 import glance.config.settings as settings
 import glance.modules.struct as struct
@@ -40,7 +41,15 @@ def check_login_details(**data):
 
     :return type: Bool
     """
-    r = requests.get('{}user'.format(settings.api_root), params=data)
+    # r = requests.get('{}user'.format(settings.api_root), params=data)
+
+    r = requests.get(
+            '{}/accounts'.format(settings.api_root),
+            auth=HTTPBasicAuth(data['username'], data['password'])
+            )
+    response = r.status_code
+    print('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
+    print(response)
 
     if 'user details' in r.json():
         if r.json()['user details']:
@@ -71,12 +80,25 @@ class SessionHandler():
         self.session = session
 
 
-    def open(self, data):
-        self.session['logged_in'] = True
-        self.session['user'] = data
-        self.session['filter'] = 'all'
-        self.session['fav'] = {}
-        self.session['filter_people'] = struct.structure_people_tags()
+    def open(self, username, password, data=None):
+        r = requests.get('{}accounts'.format(settings.api_root), auth=HTTPBasicAuth(username, password))
+        if r.status_code == 200:
+            self.session['logged_in'] = True
+            self.session['username'] = username
+            self.session['password'] = password
+            self.session['filter'] = 'all'
+            self.session['fav'] = {}
+            self.session['filter_people'] = struct.structure_people_tags()
+            return True
+
+        elif r.status_code != 200:
+            return False
+
+    def get(self):
+        result = {}
+        for k in self.session:
+            result[k] = self.session[k]
+        return result
 
 
     def filter(self, data):
