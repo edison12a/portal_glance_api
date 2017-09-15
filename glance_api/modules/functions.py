@@ -592,7 +592,7 @@ class Item():
 
         # Finish asset object
         # append object moddate
-        asset.moddate = datetime.datetime.utcnow()
+        asset.moddate = str(datetime.datetime.utcnow())
 
         self.session.add(asset)
         self.session.commit()

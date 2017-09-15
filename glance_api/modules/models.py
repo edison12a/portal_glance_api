@@ -97,6 +97,7 @@ class Image(Item):
     Inherits from Item.
     """
     __tablename__ = 'image'
+
     id = Column(Integer, ForeignKey('item.id'), primary_key=True)
     name = Column(String)
     item_loc = Column(String)

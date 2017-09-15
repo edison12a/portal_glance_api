@@ -1,5 +1,4 @@
 import sqlite3
-import datetime
 import uuid
 
 from flask import Flask, jsonify
@@ -27,6 +26,13 @@ auth = HTTPBasicAuth()
 
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
+
+"""
+'''development tools'''
+# functions
+session = Session()
+functions.__reset_db(session, engine)
+"""
 
 # helpers
 def resp(status=None, data=None, link=None, error=None, message=None):
@@ -186,7 +192,19 @@ class AccountsL(Resource):
 class Items(Resource):
     @auth.login_required
     def get(self, id):
-        pass
+
+        session = Session()
+        raw_item = functions.Item(session).get(id)
+        if raw_item:
+            response = resp(data=convert.jsonify((raw_item,)))
+
+            session.close()
+            return response
+
+        else:
+            response = resp(status='failed', error='item id doesnt exist')
+            session.close()
+            return response
 
     @auth.login_required
     def put(self, id):
@@ -194,17 +212,62 @@ class Items(Resource):
 
     @auth.login_required
     def delete(self, id):
-        pass
+        session = Session()
+        raw_account = session.query(models.Account).filter_by(username=auth.username()).first()
+        raw_item = session.query(models.Item).filter_by(id=id).first()
+
+        if auth.username() == raw_account.username:
+            session.delete(raw_item)
+            session.commit()
+
+            response = resp(status='success', message='item successfully deleted')
+
+            session.close()
+            return response
+
+        else:
+            session.close()
+            return resp(message='Items can only be deleted by the account of the uploader.')
 
 
 class ItemsL(Resource):
     @auth.login_required
     def get(self):
-        pass
+        session = Session()
+        raw_items = functions.Item(session).get()
+        if raw_items:
+
+            response = resp(data=convert.jsonify(raw_items))
+
+            session.close()
+            return response
+
+        else:
+            response = resp(status='failed', error='nothing in database')
+
+            session.close()
+            return response
 
     @auth.login_required
     def post(self):
-        pass
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('name', type=str, help='help text')
+        parser.add_argument('item_loc', type=str, help='help text')
+        parser.add_argument('item_thumb', type=str, help='help text')
+        parser.add_argument('attached', type=str, help='help text')
+        parser.add_argument('item_type', type=str, help='help text')
+        args = parser.parse_args()
+
+        session = Session()
+        args['author'] = auth.username()
+        new_item = functions.Item(session).post(args)
+
+        response = resp(message='New item created')
+
+        session.close()
+        return response
 
 
 class Tags(Resource):
