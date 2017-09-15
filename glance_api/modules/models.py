@@ -6,6 +6,8 @@ __author__ = ""
 __version__ = ""
 __license__ = ""
 
+import datetime
+
 from sqlalchemy import (
     Column, func, Integer, Table, String, ForeignKey, DateTime
 )
@@ -32,6 +34,22 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String)
     password = Column(String)
+
+
+    def __init__(self, username, password):
+
+        self.username = username
+        self.password = password
+
+
+class Account(Base):
+    """Account Table"""
+    __tablename__ = "account"
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String)
+    password = Column(String)
+    initdate = Column(String, default=str(datetime.datetime.utcnow()))
 
 
     def __init__(self, username, password):

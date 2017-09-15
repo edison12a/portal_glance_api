@@ -145,6 +145,28 @@ def get_user(session, **kwarg):
 
     return result
 
+def get_account(session, **kwarg):
+    """Checks database to see if users credentials are correct.
+
+    :param session: 'sqlalchemy.orm.session.Session'.
+    :param kwarg:
+    :param username: str.
+    :param password: str.
+
+    :return type: bool
+    """
+    # TODO: consider renaming, `check_user` or something.
+    # TODO: if test == NONETYPE, return False
+
+    test = session.query(glance_api.modules.models.Account).filter_by(username=kwarg['username']).first()
+
+    if test is not None and test.password == kwarg['password']:
+        result = True
+    else:
+        result = False
+
+    return result
+
 
 def post_user(session, **kwarg):
     """Creates a new user
