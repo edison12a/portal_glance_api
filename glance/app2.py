@@ -551,9 +551,10 @@ def manage_selection():
 
 @app.route('/item/delete/<int:id>')
 def delete(id):
-    g = requests.get('{}/{}'.format(API_ITEM, id))
-    resp = g.json()['item'][0]
-    r = requests.delete('{}/delete/{}'.format(API_ITEM, id))
+    account_session = auth.SessionHandler(session).get()
+    g = requests.get('{}items/{}'.format(settings.api_root, id), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+
+    resp = g.json()['data'][0]
     data = []
     if 'item_loc' in resp:
         data.append(resp['item_loc'])
@@ -565,7 +566,7 @@ def delete(id):
     # delete from s3 and database
     # TODO: IMP something safer.
     auth.delete_from_s3(data)
-    r = requests.delete('{}/delete/{}'.format(API_ITEM, id))
+    requests.delete('{}items/{}'.format(settings.api_root, id), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
 
     return home()

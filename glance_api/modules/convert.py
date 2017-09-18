@@ -47,6 +47,4 @@ def jsonify(query):
 
         result.append(to_append)
 
-    print(result)
-
     return result

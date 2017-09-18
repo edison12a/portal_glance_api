@@ -86,19 +86,17 @@ def save_frame(dst, file):
 
 def get_people_tags(data):
 
-    list_of_people_tags = [x for x in data if x['name'].startswith('_')]
-    bla = structure_people_tags()
+    list_of_people_tags = [x['name'] for x in data if x['name'].startswith('_')]
+    people_struct = structure_people_tags()
 
-    for x in bla:
-        for g in bla[x]:
+    for group in people_struct:
+        for g in people_struct[group]:
             if g in list_of_people_tags:
-                bla[x][g] = 1
+                people_struct[group][g] = 1
             else:
-                bla[x][g] = 0
+                people_struct[group][g] = 0
 
-    result = structure_people_tags()
-
-    return bla
+    return people_struct
 
 
 def update_people_tags(data):

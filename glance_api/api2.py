@@ -220,13 +220,19 @@ class Items(Resource):
         parser.add_argument('item_type', type=str, help='help text')
         parser.add_argument('tags', type=str, help='help text')
         parser.add_argument('items', type=str, help='help text')
+        parser.add_argument('append_to_collection', type=str, help='help text')
+        parser.add_argument('people_tags', type=str, help='help text')
         args = parser.parse_args()
 
         session = Session()
 
         put_item = functions.Item(session).patch(args)
-        print('ooooooooooooooooooooooooooooo')
-        print(put_item)
+
+        response = resp(status='success', data=convert.jsonify((put_item,)))
+
+        session.close()
+        return response
+
 
     @auth.login_required
     def delete(self, id):
@@ -245,7 +251,7 @@ class Items(Resource):
 
         else:
             session.close()
-            return resp(message='Items can only be deleted by the account of the uploader.')
+            return resp(message='Item can only be deleted by the account of the uploader.')
 
 
 class ItemsL(Resource):

@@ -463,8 +463,6 @@ class Item():
         query['tags'] = []
 
         # asset id
-        print('666666666666666666666666666666666')
-        print(kwarg)
         id = int(kwarg['id'])
 
         # build list of assets column names for validation
@@ -482,14 +480,7 @@ class Item():
             elif k == 'tags' and v != None:
                 query['tags'] = v.split()
             elif k == 'people_tags' and v != None:
-                # get items current tags
-                current_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
-                # append new tags only if they arent in current_tags
-                for x in kwarg[k].split(' '):
-                    if x not in current_tags:
-                        query['tags'].append(x)
-                    else:
-                        pass
+                query[k] = v.split(' ')
             else:
                 query[k] = v
 
@@ -511,7 +502,7 @@ class Item():
                 asset.item_thumb = v
 
             elif k == 'append_to_collection' and v != None:
-                collection = self.session.query(glance_api.modules.models.Item).get(38)
+                collection = self.session.query(glance_api.modules.models.Item).get(v)
                 collection.items.append(asset)
 
             elif k == 'attached' and v != None:
@@ -528,21 +519,10 @@ class Item():
                 for tag in user_input_tags:
                     if tag.startswith('-'):
                         remove_tag.append(tag)
-
-                    elif tag.startswith('_'):
-                        people_tag.append(tag)
                     else:
                         add_tag.append(tag)
 
                 for tag in add_tag:
-                    # create new Tag object and append to asset object
-                    newtag = glance_api.modules.models.Tag(name=str(tag))
-                    self.session.add(newtag)
-
-                    asset.tags.append(newtag)
-
-                for tag in people_tag:
-                    current_people_tags = [x for x in asset_tags if x.startswith('_')]
                     # create new Tag object and append to asset object
                     newtag = glance_api.modules.models.Tag(name=str(tag))
                     self.session.add(newtag)
@@ -555,9 +535,26 @@ class Item():
                             self.session.delete(x)
                             self.session.commit()
 
+            elif k == 'people_tags' and v != None:
+                current_people_tags = [x for x in asset.tags if x.name.startswith('_')]
+                print(current_people_tags)
+                print(v)
+
+                for x in current_people_tags:
+                    if x.name not in v:
+                        self.session.delete(x)
+
+                for x in v:
+                    new_tag = glance_api.modules.models.Tag(name=str(x))
+                    self.session.add(new_tag)
+
+                    asset.tags.append(new_tag)
+
+
+
+
             elif k == 'items' and v != None:
                 # process asset tags
-
                 for item in v:
                     item_to_collection = self.session.query(glance_api.modules.models.Item).get(int(item))
                     asset.items.append(item_to_collection)

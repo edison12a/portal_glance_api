@@ -220,15 +220,12 @@ def delete_from_s3(data):
     """
     # refactor below
     # get s3 resource
-    print('ddaatteerersdfsdfsdf')
-    print(data)
     s3 = boto3_res_s3()
 
     bucket = s3.Bucket(settings.config_type['AWS_BUCKET'])
 
     objects_to_delete = []
     for obj in data:
-        print(obj)
         if obj == 'site/default_cover.jpg':
             return True
         else:
