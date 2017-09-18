@@ -37,6 +37,7 @@ functions.__reset_db(session, engine)
 # helpers
 def resp(status=None, data=None, link=None, error=None, message=None):
     """Function im using to build responses"""
+    # TODO: make better
     response = {
         'status': status, 'data': data, 'link': link,
         'error': error, 'message': message
@@ -208,7 +209,24 @@ class Items(Resource):
 
     @auth.login_required
     def put(self, id):
-        pass
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('id', type=str, help='help text')
+        parser.add_argument('name', type=str, help='help text')
+        parser.add_argument('item_loc', type=str, help='help text')
+        parser.add_argument('item_thumb', type=str, help='help text')
+        parser.add_argument('attached', type=str, help='help text')
+        parser.add_argument('item_type', type=str, help='help text')
+        parser.add_argument('tags', type=str, help='help text')
+        parser.add_argument('items', type=str, help='help text')
+        args = parser.parse_args()
+
+        session = Session()
+
+        put_item = functions.Item(session).patch(args)
+        print('ooooooooooooooooooooooooooooo')
+        print(put_item)
 
     @auth.login_required
     def delete(self, id):
@@ -259,13 +277,14 @@ class ItemsL(Resource):
         parser.add_argument('attached', type=str, help='help text')
         parser.add_argument('item_type', type=str, help='help text')
         parser.add_argument('tags', type=str, help='help text')
+        parser.add_argument('items', type=str, help='help text')
         args = parser.parse_args()
 
         session = Session()
         args['author'] = auth.username()
         new_item = functions.Item(session).post(args)
         if new_item:
-            response = resp(message='New item created')
+            response = resp(status='success', message='New item created', data=convert.jsonify((new_item,)))
 
             session.close()
             return response
@@ -297,10 +316,6 @@ class TagsL(Resource):
     @auth.login_required
     def post(self):
         pass
-
-
-
-
 
 
 

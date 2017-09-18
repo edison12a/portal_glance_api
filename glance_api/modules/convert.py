@@ -26,7 +26,7 @@ def jsonify(query):
                         for relationship_row in getattr(row, column_name):
                             item = {}
                             for data in relationship_row.__table__.columns:
-                                item[str(data).split('.')[1]] = getattr(relationship_row, str(data).split('.')[1])
+                                item[str(data).split('.')[1]] = str(getattr(relationship_row, str(data).split('.')[1]))
 
                             item_collect.append(item)
 

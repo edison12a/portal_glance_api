@@ -48,8 +48,6 @@ def check_login_details(**data):
             auth=HTTPBasicAuth(data['username'], data['password'])
             )
     response = r.status_code
-    print('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
-    print(response)
 
     if 'user details' in r.json():
         if r.json()['user details']:
@@ -134,7 +132,7 @@ class SessionHandler():
     def close(self):
         self.session['logged_in'] = False
         self.session.pop('filter', None)
-        self.session.pop('user', None)
+        self.session.pop('username', None)
         self.session.pop('fav', None)
         self.session.pop('filter_people', None)
 

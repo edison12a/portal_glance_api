@@ -145,6 +145,7 @@ def get_user(session, **kwarg):
 
     return result
 
+
 def get_account(session, **kwarg):
     """Checks database to see if users credentials are correct.
 
@@ -462,23 +463,25 @@ class Item():
         query['tags'] = []
 
         # asset id
+        print('666666666666666666666666666666666')
+        print(kwarg)
         id = int(kwarg['id'])
 
         # build list of assets column names for validation
         # validate user data and build query dict, from data.
         for k, v in kwarg.items():
             # additional many-to-many data
-            if k == 'collections':
+            if k == 'collections' and v != None:
                 query[k] = v.split()
-            elif k == 'collection_rename':
+            elif k == 'collection_rename' and v != None:
                 query[k] = v
-            elif k == 'append_to_collection':
+            elif k == 'append_to_collection' and v != None:
                 query[k] = v
-            elif k == 'items':
+            elif k == 'items' and v != None:
                 query[k] = v.split()
-            elif k == 'tags':
+            elif k == 'tags' and v != None:
                 query['tags'] = v.split()
-            elif k == 'people_tags':
+            elif k == 'people_tags' and v != None:
                 # get items current tags
                 current_tags = to_dict((self.session.query(glance_api.modules.models.Item).get(kwarg['id']),))[0]['tags']
                 # append new tags only if they arent in current_tags
@@ -495,26 +498,26 @@ class Item():
         # Process user data and update asset object fields.
         # TODO: is there a better way to handle these sort of 'flags'?
         for k, v in query.items():
-            if k == 'name':
+            if k == 'name' and v != None:
                 asset.name = v
 
-            elif k == 'item_loc':
+            elif k == 'item_loc' and v != None:
                 asset.item_loc = v
 
-            elif k == 'collection_rename':
+            elif k == 'collection_rename' and v != None:
                 asset.name = v
 
-            elif k == 'item_thumb':
+            elif k == 'item_thumb' and v != None:
                 asset.item_thumb = v
 
-            elif k == 'append_to_collection':
+            elif k == 'append_to_collection' and v != None:
                 collection = self.session.query(glance_api.modules.models.Item).get(38)
                 collection.items.append(asset)
 
-            elif k == 'attached':
+            elif k == 'attached' and v != None:
                 asset.attached = v
 
-            elif k == 'tags':
+            elif k == 'tags' and v != None:
                 asset_tags = [x.name for x in asset.tags]
 
                 user_input_tags = list(set(v))
@@ -552,7 +555,7 @@ class Item():
                             self.session.delete(x)
                             self.session.commit()
 
-            elif k == 'items':
+            elif k == 'items' and v != None:
                 # process asset tags
 
                 for item in v:
@@ -560,7 +563,7 @@ class Item():
                     asset.items.append(item_to_collection)
                     self.session.add(asset)
 
-            elif k == 'flag':
+            elif k == 'flag' and v != None:
                 # process flag field
                 # if 'flag' is true value is increased
                 if int(query['flag']) == 1:
@@ -580,7 +583,7 @@ class Item():
                 else:
                     pass
 
-            elif k == 'collections':
+            elif k == 'collections' and v != None:
                 for collection_id in query['collections']:
                     # get Collection object using collection.id
                     existingcollection = self.session.query(glance_api.modules.models.Collection).get(collection_id)

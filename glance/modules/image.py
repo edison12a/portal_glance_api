@@ -86,7 +86,7 @@ def save_frame(dst, file):
 
 def get_people_tags(data):
 
-    list_of_people_tags = [x for x in data if x.startswith('_')]
+    list_of_people_tags = [x for x in data if x['name'].startswith('_')]
     bla = structure_people_tags()
 
     for x in bla:

@@ -11,11 +11,14 @@
 
 <div class="content">
   <div id="part_of_collection">
-      {% for k, v in item.items() %}
-        {% if k == 'collections' %}
-        {{k}}: {{v}}
-        {% endif %}
-      {% endfor %}
+
+    {% for k, v in item.items() %}
+      {% if k == 'collections' %}
+        {% for x in v %}
+        <a href="/item/{{x['id']}}"><img src="https://s3.amazonaws.com/{{bucketname}}/{{x['item_thumb']}}" /></a>
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
   </div>
 
   <label class="collapse" for="_1"><div class="clicky"><div id="section_header">Info</div></div></label>
