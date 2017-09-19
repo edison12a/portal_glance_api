@@ -30,7 +30,6 @@ Session = sessionmaker(bind=engine)
 """
 '''development tools'''
 # functions
-session = Session()
 functions.__reset_db(session, engine)
 """
 
@@ -324,6 +323,28 @@ class TagsL(Resource):
         pass
 
 
+class Query(Resource):
+    @auth.login_required
+    def get(self):
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('filter', type=str, help='help text')
+        parser.add_argument('filter_people', type=str, help='help text')
+        parser.add_argument('query', type=str, help='help text')
+        args = parser.parse_args()
+
+
+        session = Session()
+        test = functions.get_query(session, args)
+
+        print('EXIT EXIT EXIOT EXIT')
+        print(test)
+
+        response = resp(status='success', data=convert.jsonify(test))
+
+        session.close()
+        return response
 
 
 
@@ -462,6 +483,7 @@ api.add_resource(Items, '/items/<id>')
 api.add_resource(ItemsL, '/items')
 api.add_resource(Tags, '/tags/<id>')
 api.add_resource(TagsL, '/tags')
+api.add_resource(Query, '/query')
 
 
 if __name__ == '__main__':

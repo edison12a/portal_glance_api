@@ -234,6 +234,8 @@ def get_collection_by_author(session, author):
 
 
 def get_query(session, userquery):
+    print('ENTER ENTER ENTER ENTER')
+    print(userquery)
     """Get database objects based user term.
 
     Keyword arguments:
@@ -262,9 +264,9 @@ def get_query(session, userquery):
 
     # construct query
     query = {
-        'filter': data['filter'][0],
+        'filter': data['filter'],
         'filter_people': filter_people,
-        'query': data['query'][0]
+        'query': data['query']
     }
 
     # get tags for query, append taglists
@@ -278,8 +280,11 @@ def get_query(session, userquery):
 
     else:
         # TODO: Start to implement pagination, and sorted search results.
+        print(query['query'])
         for x in query['query'].split(' '):
+            print(x)
             raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
+            print(raw_tags)
 
             for tag in raw_tags:
                 taglists.append(tag)
