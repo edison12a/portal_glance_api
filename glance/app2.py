@@ -473,7 +473,7 @@ def patch_item():
 
 @app.route('/manage_selection', methods=['GET', 'POST'])
 def manage_selection():
-    test = SessionHandler(session).get()['username']
+    account_session = auth.SessionHandler(session).get()
 
     if 'collection_append' in request.form and request.form['collection_append'] != '':
         payload = {}
@@ -488,7 +488,7 @@ def manage_selection():
 
         payload['items'] = ' '.join(ids)
 
-        r = requests.patch('{}'.format(API_PATCH), params=payload)
+        r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
 
     if 'tags' in request.form and request.form['tags'] != '':
@@ -510,7 +510,11 @@ def manage_selection():
             payload['id'] = x
             payload['tags'] = request.form['tags']
 
-            r = requests.patch('{}'.format(API_PATCH), params=payload)
+            r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+
+    # TODO: IMP clearing of all selections
+    if 'clear_selection' in request.form and request.form['clear_selection'] != '':
+        account_session['fav'] = {}
 
 
     if 'collection_name' in request.form and request.form['collection_name'] != '':
@@ -527,23 +531,17 @@ def manage_selection():
             'item_thumb': 'site/default_cover.jpg',
             'tags': request.form['collection_name'].split(' '),
             'items': ' '.join(items),
-            'author': SessionHandler(session).get()['username']
+            'author': account_session['username']
         }
 
-        r = requests.post('{}'.format(API_ITEM), params=payload)
+        # r = requests.post('{}'.format(API_ITEM), params=payload)
+        r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
         #clean up session object
-        SessionHandler(session).get()['fav'] = {}
+        # account_session['fav'] = {}
 
-        res = r.json()['POST: /item']
-        for x in res:
-            if x == 'responce':
-                if res['responce'] == 'successful':
-                    collection_id = res['location'].split('/')[-1:][0]
-                    return item(collection_id)
-            else:
-                print('empty else')
-                pass
+        if 'status' in r.json() and r.json()['status'] == 'success':
+            return item(r.json()['data'][0]['id'])
 
 
     return home()

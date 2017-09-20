@@ -283,7 +283,7 @@ def get_query(session, userquery):
     query['query'] = data['query']
 
     # filter items with [query]
-    if query['query'] == '**':
+    if query['query'] == '**' or query['query'] == '':
         tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
     else:
 

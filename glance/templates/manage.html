@@ -83,8 +83,8 @@
           <br>
           <small><strong>Contains</strong></small><br>
           {% for bla in x['items'] %}
-          <a href="/item/{{bla}}">
-            <img style="width:50px;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{x['items'][bla].item_thumb}}">
+          <a href="/item/{{bla.id}}">
+            <img style="width:50px;height:auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{bla.item_thumb}}">
           </a>
 
           {% endfor %}
