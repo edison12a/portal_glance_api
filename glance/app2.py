@@ -650,8 +650,8 @@ def manage():
 def coll_list():
     data = []
 
-    auth.SessionHandler(session).filter('collection')
-    r = requests.get("{}?query=**&filter=collection".format(API_QUERY))
+    account_session = auth.SessionHandler(session).get()
+    r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
     collection = r.json()
 
 
@@ -734,9 +734,12 @@ def search():
         else:
             session['filter_people'] = {}
 
-    r = requests.get('{}query'.format(API), params=data)
+    data['filter_people'] = ' '.join(data['filter_people'])
 
-    return render_template('search.html', data=data, items=r.json()['result'])
+    account_session = auth.SessionHandler(session).get()
+    r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+
+    return render_template('search.html', data=data, items=r.json())
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% for item in items %}
+{% for item in items.data %}
   {% if item.item_type == 'collection' %}
 
       {% include 'thumb_col.html' %}

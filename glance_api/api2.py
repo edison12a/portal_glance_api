@@ -30,7 +30,6 @@ Session = sessionmaker(bind=engine)
 """
 '''development tools'''
 # functions
-session = Session()
 functions.__reset_db(session, engine)
 """
 
@@ -324,135 +323,25 @@ class TagsL(Resource):
         pass
 
 
-
-
-
-'''
-
-class Galleries(Resource):
-    def get(self, id):
-        raw_gallery = Gallery.query.filter_by(id=id).first()
-
-        if raw_gallery != None:
-
-            response = resp(data=convert.jsonify((raw_gallery,)), status='success')
-            return response, 200
-
-        else:
-            response = resp(status='failed', error='no such gallery id')
-            return response, 400
-
-
+class Query(Resource):
     @auth.login_required
-    def put(self, id):
-        parser = reqparse.RequestParser()
-        parser.add_argument('snaps', type=str, help='help text')
-        parser.add_argument('private', type=str, help='help text')
-        parser.add_argument('theme', type=str, help='help text')
-        args = parser.parse_args()
-
-        get_gallery = Gallery.query.filter_by(id=id).first()
-
-        if get_gallery != None:
-            if args['snaps']:
-                raw_snap = Snap.query.filter_by(id=args['snaps']).first()
-                if raw_snap != None:
-                    get_gallery.snaps.append(raw_snap)
-                    db.session.commit()
-                    print('snaps is in there')
-
-                else:
-                    return resp(error='no such snap id')
-
-            if args['private']:
-                if get_gallery.private:
-                    get_gallery.private = False
-                    db.session.commit()
-                else:
-                    get_gallery.private = True
-                    db.session.commit()
-
-            if args['theme']:
-                get_theme = Theme.query.filter_by(name=args['theme']).first()
-                if get_theme:
-                    get_gallery.theme.remove(get_gallery.theme[0])
-                    get_gallery.theme.append(get_theme)
-                    db.session.commit()
-
-                    return resp(message='Theme has been changed.')
-
-
-                else:
-                    print('No such theme id')
-            else:
-                pass
-
-        else:
-            return resp(error='no such gallery id')
-
-
-    @auth.login_required
-    def delete(self, id):
-        get_gallery = Gallery.query.filter_by(id=id).first()
-        get_account = Account.query.filter_by(username=auth.username()).first()
-
-        if get_gallery in get_account.galleries:
-            db.session.delete(get_gallery)
-            db.session.commit()
-
-            response = resp(status='success', message='gallery successfully deleted')
-
-            return response, 201
-
-        else:
-            return resp(message='gallery can only deleted by the account that posted it')
-
-
-class GalleriesL(Resource):
     def get(self):
-        accounts_galleries = Account.query.filter_by(username=auth.username()).first()
-        if accounts_galleries:
-            accounts_galleries = accounts_galleries.galleries
-
-            response = resp(data=convert.jsonify(accounts_galleries), status='success')
-            return response, 200
-
-        else:
-            response = resp(status='failed', error='Returned NoneType')
-            return response, 401
-
-
-    @auth.login_required
-    def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('title', type=str, help='helper text')
+
+        # accepted ARGs from api
+        parser.add_argument('filter', type=str, help='help text')
+        parser.add_argument('filter_people', type=str, help='help text')
+        parser.add_argument('query', type=str, help='help text')
         args = parser.parse_args()
 
-        if args['title'] != None:
-            raw_account = Account.query.filter_by(username=auth.username()).first()
-            default_theme = Theme.query.filter_by(name='default').first()
+        session = Session()
+        query_results = functions.get_query(session, args)
 
-            new_gallery = Gallery(title=args['title'])
-            new_gallery.shareuuid = str(uuid.uuid4())
-            new_gallery.theme.append(default_theme)
-            new_gallery.account.append(raw_account)
+        response = resp(status='success', data=convert.jsonify(query_results))
 
-            db.session.add(new_gallery)
-            db.session.commit()
+        session.close()
+        return response
 
-            response = resp(
-                data=convert.jsonify((new_gallery,)),
-                link='/galleries/{}'.format(new_gallery.id),
-                status='success'
-            )
-
-            return response, 201
-
-        else:
-            response = resp(error='missing required data', message='')
-            return response, 400
-
-'''
 
 # routes
 api.add_resource(Entry, '/')
@@ -462,6 +351,7 @@ api.add_resource(Items, '/items/<id>')
 api.add_resource(ItemsL, '/items')
 api.add_resource(Tags, '/tags/<id>')
 api.add_resource(TagsL, '/tags')
+api.add_resource(Query, '/query')
 
 
 if __name__ == '__main__':

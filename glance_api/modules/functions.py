@@ -246,74 +246,57 @@ def get_query(session, userquery):
 
     # init structures
     result = []
-    item_list = []
-    taglists = []
+    items = []
+    tags = []
     query = {}
+    items_matching_filter = []
 
-    # init query
+    # init query object
     if 'filter' not in data:
         query['filter'] = 'all'
     else:
         query['filter'] = data['filter']
 
-    filter_people = []
-    if 'filter_people' in data:
-        filter_people = data['filter_people']
-
-    # construct query
-    query = {
-        'filter': data['filter'][0],
-        'filter_people': filter_people,
-        'query': data['query'][0]
-    }
-
-    # get tags for query, append taglists
-    if query['query'] == '' or query['query'] == '**':
-        #taglists = session.query(glance_api.modules.models.Tag).all()
-        # TODO: imp item sorting
-        raw_tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
-
-        for tag in raw_tags:
-            taglists.append(tag)
-
+    if 'filter_people' not in data or data['filter_people'] == None:
+        query['filter_people'] = None
     else:
-        # TODO: Start to implement pagination, and sorted search results.
-        for x in query['query'].split(' '):
-            raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
+        query['filter_people'] = data['filter_people']
 
+    query['query'] = data['query']
+
+    # filter items with [query]
+    if query['query'] == '**':
+        tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
+    else:
+        for tag in query['query'].split(' '):
+            raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()]
             for tag in raw_tags:
-                taglists.append(tag)
-
-    # apply filters to tag items return sppend item_list
-    if query['filter'] != 'all':
-        for tag in taglists:
-            for item in tag.items:
-                if item.item_type == query['filter']:
-                    item_list.append(item)
-    else:
-        for tag in taglists:
-            for item in tag.items:
-                    result.append(item)
-
-
-    # if people item filter furter with 'filter_people' append result
+                tags.append(tag)
+    # further filter items with [filter]
+    for tag in tags:
+        for item in tag.items:
+            # TODO: for some reason a shitload of dupilicate items are appearing here.
+            if query['filter'] == 'all':
+                items.append(item)
+            else:
+                if item.type == query['filter']:
+                    items.append(item)
+    # if [filter] == people further filter with [people_tags]
     if query['filter'] == 'people':
-        if len(query['filter_people']) != 0:
-            for x in item_list:
-                for k in x.tags:
-                    if k.name not in query['filter_people']:
-                        pass
-                    else:
-                        result.append(x)
+        if query['filter_people'] != '':
+            items = set(items)
+            for item in items:
+                for tag in item.tags:
+                    if tag.name in query['filter_people'].split(' '):
+                        if tag.name == '':
+                            pass
+                        else:
+                            result.append(item)
+            return result
         else:
-            for x in item_list:
-                result.append(x)
-    else:
-        for x in item_list:
-            result.append(x)
+            return set(items)
 
-
-    return result
+    return set(items)
 
 
 class Item():
@@ -415,7 +398,7 @@ class Item():
         )
 
         if payload['item_type'] == 'collection':
-            if 'items' in payload:
+            if 'items' in payload and payload['items'] != None:
                 for x in payload['items'].split(' '):
                     item.items.append(self.session.query(glance_api.modules.models.Item).get(x))
 
