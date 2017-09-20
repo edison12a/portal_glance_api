@@ -334,6 +334,95 @@ class Query(Resource):
         parser.add_argument('query', type=str, help='help text')
         args = parser.parse_args()
 
+
+        session = Session()
+        test = functions.get_query(session, args)
+
+        print('EXIT EXIT EXIOT EXIT')
+        print(test)
+
+        response = resp(status='success', data=convert.jsonify(test))
+
+        session.close()
+        return response
+
+
+
+'''
+
+class Galleries(Resource):
+    def get(self, id):
+        raw_gallery = Gallery.query.filter_by(id=id).first()
+
+        if raw_gallery != None:
+
+            response = resp(data=convert.jsonify((raw_gallery,)), status='success')
+            return response, 200
+
+        else:
+            response = resp(status='failed', error='no such gallery id')
+            return response, 400
+
+
+    @auth.login_required
+    def put(self, id):
+        parser = reqparse.RequestParser()
+        parser.add_argument('snaps', type=str, help='help text')
+        parser.add_argument('private', type=str, help='help text')
+        parser.add_argument('theme', type=str, help='help text')
+        args = parser.parse_args()
+
+        get_gallery = Gallery.query.filter_by(id=id).first()
+
+        if get_gallery != None:
+            if args['snaps']:
+                raw_snap = Snap.query.filter_by(id=args['snaps']).first()
+                if raw_snap != None:
+                    get_gallery.snaps.append(raw_snap)
+                    db.session.commit()
+                    print('snaps is in there')
+
+                else:
+                    return resp(error='no such snap id')
+
+            if args['private']:
+                if get_gallery.private:
+                    get_gallery.private = False
+                    db.session.commit()
+                else:
+                    get_gallery.private = True
+                    db.session.commit()
+
+            if args['theme']:
+                get_theme = Theme.query.filter_by(name=args['theme']).first()
+                if get_theme:
+                    get_gallery.theme.remove(get_gallery.theme[0])
+                    get_gallery.theme.append(get_theme)
+                    db.session.commit()
+
+                    return resp(message='Theme has been changed.')
+
+
+                else:
+                    print('No such theme id')
+            else:
+                pass
+
+        else:
+            return resp(error='no such gallery id')
+
+
+>>>>>>> 4059890b92f6774ca4299f057f372da4d8ff886e
+    @auth.login_required
+    def get(self):
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('filter', type=str, help='help text')
+        parser.add_argument('filter_people', type=str, help='help text')
+        parser.add_argument('query', type=str, help='help text')
+        args = parser.parse_args()
+
         session = Session()
         query_results = functions.get_query(session, args)
 

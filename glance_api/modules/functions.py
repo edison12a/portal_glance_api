@@ -257,10 +257,28 @@ def get_query(session, userquery):
     else:
         query['filter'] = data['filter']
 
+
     if 'filter_people' not in data or data['filter_people'] == None:
         query['filter_people'] = None
     else:
         query['filter_people'] = data['filter_people']
+
+    filter_people = []
+    if 'filter_people' in data:
+        filter_people = data['filter_people']
+
+    # construct query
+    query = {
+        'filter': data['filter'],
+        'filter_people': filter_people,
+        'query': data['query']
+    }
+
+    # get tags for query, append taglists
+    if query['query'] == '' or query['query'] == '**':
+        #taglists = session.query(glance_api.modules.models.Tag).all()
+        # TODO: imp item sorting
+        raw_tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
 
     query['query'] = data['query']
 
@@ -268,8 +286,17 @@ def get_query(session, userquery):
     if query['query'] == '**':
         tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
     else:
+
         for tag in query['query'].split(' '):
             raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()]
+
+        # TODO: Start to implement pagination, and sorted search results.
+        print(query['query'])
+        for x in query['query'].split(' '):
+            print(x)
+            raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
+            print(raw_tags)
+
             for tag in raw_tags:
                 tags.append(tag)
     # further filter items with [filter]
