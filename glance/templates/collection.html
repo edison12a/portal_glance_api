@@ -12,42 +12,12 @@
 {{item}}
 
 
-{% for x in item.0['items']%}
+{% for item in item.0['items']%}
 {% if loop.index0 % 5 == 0 %}
 <div class="item_results">
 {% endif %}
 
-
-<div class="item">
-      <a href="/item/{{x['id']}}">
-          <img width="100%" src="https://s3.amazonaws.com/{{bucketname}}/{{x['item_thumb']}}" />
-      </a>
-  <div class="item_header_type">
-      <div style="text-align:center;">
-          <small><strong>{{x['item_type']}}</strong></small>
-      </div>
-  </div>
-
-  <div class="item_panel">
-      <div style="text-align:center;">
-
-          <a href="#">
-          <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
-      </a>
-      <a href="#">
-          <small><strong><span class="glyphicon glyphicon-heart" aria-hidden="true"></span></strong></small>
-      </a>
-
-      <a href="#">
-          <small><strong><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></strong></small>
-      </a>
-
-      </div>
-  </div>
-
-</div>
-
-
+  {% include 'thumb.html' %}
 
 {% if loop.index0 % 5 == 4 or loop.last %}
       </div>

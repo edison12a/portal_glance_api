@@ -635,7 +635,7 @@ def manage():
     if 'username' in account_session:
         r = requests.get('{}items'.format(settings.api_root), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
         res = r.json()['data']
-        collections = [x for x in res if x['item_type'] == 'collection']
+        collections = [x for x in res if x['item_type'] == 'collection' and x['author'] == account_session['username']]
 
         data = ['test', 'test2']
 
