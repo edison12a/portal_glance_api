@@ -437,7 +437,7 @@ class Item():
 
         # after entry is commited then hit the database with any new tags?
         # is this the best way?
-        if 'tags' in payload:
+        if 'tags' in payload and payload['tags'] != None:
             tag_list = payload['tags'].split(' ')
             for tag in tag_list:
 

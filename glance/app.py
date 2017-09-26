@@ -128,7 +128,7 @@ def uploading():
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload = {}
                             payload['name'] = items
-                            payload['author'] = session['user']
+                            payload['author'] = session['username']
                             payload['tags'] = upload_data['tags']
                             payload['item_type'] = upload_data['itemradio']
                             payload['item_loc'] = uploaded_file[0]
@@ -163,17 +163,19 @@ def uploading():
                             payload['attached'] = uploaded_file
 
                     # post payload to api
-                    r = requests.post('{}'.format(API_ITEM), params=payload)
+                    account_session = auth.SessionHandler(session).get()
+                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+                    res = r.json()['data']
                     # collect uploaded item ids from respoce object in a list
                     # incase its this also a collection...
                     # TODO: above comment makes no sence... can i check if its a
                     # collection at the beginning? does it matter? Its not dry.
                     # TODO: Make this a helper
-                    res = r.json()
+                    # res = r.json()
 
                     # append Item ids for Collection
                     for x in res:
-                        item_id = res['POST: /item'][0]['id']
+                        item_id = x['id']
                         upload_data['items_for_collection'].append(item_id)
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'footage':
@@ -186,7 +188,7 @@ def uploading():
 
                             payload = {}
                             payload['name'] = items
-                            payload['author'] = session['user']
+                            payload['author'] = session['username']
                             payload['tags'] = upload_data['tags']
                             payload['item_type'] = upload_data['itemradio']
                             payload['item_loc'] = uploaded_file[0]
@@ -227,13 +229,14 @@ def uploading():
 
 
                     # post payload to api
-                    r = requests.post('{}'.format(API_ITEM), params=payload)
+                    account_session = auth.SessionHandler(session).get()
+                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+                    res = r.json()['data']
                     payload['tags'] = ''
 
                     # append Item ids for Collection
-                    res = r.json()
                     for x in res:
-                        item_id = res['POST: /item'][0]['id']
+                        item_id = x['id']
                         upload_data['items_for_collection'].append(item_id)
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'geometry':
@@ -248,7 +251,7 @@ def uploading():
 
                             payload = {}
                             payload['name'] = items
-                            payload['author'] = session['user']
+                            payload['author'] = session['username']
                             payload['tags'] = upload_data['tags']
                             payload['item_type'] = upload_data['itemradio']
                             payload['item_loc'] = uploaded_file[0]
@@ -283,13 +286,13 @@ def uploading():
 
 
                     # post payload to api
-                    r = requests.post('{}'.format(API_ITEM), params=payload)
+                    account_session = auth.SessionHandler(session).get()
+                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+                    res = r.json()['data']
                     # collect uploaded item ids from respoce object.
-                    # payload['tags'] = ''
-                    res = r.json()
                     # append Item ids for Collection
                     for x in res:
-                        item_id = res['POST: /item'][0]['id']
+                        item_id = x['id']
                         upload_data['items_for_collection'].append(item_id)
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'people':
@@ -302,7 +305,7 @@ def uploading():
 
                             payload = {}
                             payload['name'] = items
-                            payload['author'] = session['user']
+                            payload['author'] = session['username']
                             payload['tags'] = upload_data['tags']
                             payload['item_type'] = upload_data['itemradio']
                             payload['item_loc'] = uploaded_file[0]
@@ -337,13 +340,14 @@ def uploading():
 
 
                     # post payload to api
-                    r = requests.post('{}'.format(API_ITEM), params=payload)
+                    account_session = auth.SessionHandler(session).get()
+                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+                    res = r.json()['data']
                     # collect uploaded item ids from respoce object.
                     # TODO: Make this a helper
                     # append Item ids for Collection
-                    res = r.json()
                     for x in res:
-                        item_id = res['POST: /item'][0]['id']
+                        item_id = x['id']
                         upload_data['items_for_collection'].append(item_id)
 
             # Runs if collection has been requested aswell as the uploading of files.
@@ -356,7 +360,8 @@ def uploading():
                         for x in tags_from_name:
                             upload_data['tags'] += ' ' + str(x)
                     else:
-                        upload_data['tags'] = upload_data['collection']
+                        for x in tags_from_name:
+                            upload_data['tags'] += ' ' + str(x)
 
                     payload = {
                         'name': upload_data['collection'],
@@ -365,45 +370,37 @@ def uploading():
                         'item_thumb': 'site/default_cover.jpg',
                         'tags': upload_data['tags'],
                         'items': ' '.join(upload_data['items_for_collection']),
-                        'author': session['user']
+                        'author': session['username']
                     }
 
-                    # append name to tags
-                    # remove punc
-                    payload_name = ''
-                    for x in payload['name']:
-                        if x == '_' or x == '-':
-                            payload_name += ' '
-                            pass
-                        elif x in string.punctuation:
-                            pass
-                        else:
-                            payload_name += x
-                    # apend payload_name to tag string for posting.
-                    if payload['tags'] == '':
-                        payload['tags'] = payload_name.lower()
-                    else:
-                        payload['tags'] += ' {}'.format(payload_name.lower())
+                    account_session = auth.SessionHandler(session).get()
+                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
-                    r = requests.post('{}'.format(API_ITEM), params=payload)
+                    res = r.json()['data']
 
                     # return home()
-                    return render_template('collection.html', item=r.json()['POST: /item'], data=data)
+                    return render_template('collection.html', item=res, data=data)
 
             elif 'collection' in upload_data:
+                print('NO HIT')
 
                 payload = {
                     'name': upload_data['collection'],
                     'item_type': 'collection',
                     'item_loc': 'site/default_cover.jpg',
                     'item_thumb': 'site/default_cover.jpg',
-                    'tags': "upload_data['tags']",
-                    'author': session['user']
+                    'tags': upload_data['tags'],
+                    'author': session['username']
                 }
 
-                r = requests.post('{}'.format(API_ITEM), params=payload)
+                if payload['tags'] == '':
+                    del payload['tags']
 
-                return render_template('collection.html', item=r.json()['POST: /item'], data=data)
+                account_session = auth.SessionHandler(session).get()
+                r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+                res = r.json()['data']
+
+                return render_template('collection.html', item=res, data=data)
 
 
             if len(upload_data['items_for_collection']) > 1:
@@ -433,7 +430,6 @@ def patch_item():
                 data['items'] = form[k]
 
             elif k == 'append_to_collection' and form[k] != '':
-                print('appending to collection')
                 data['append_to_collection'] = form[k]
 
             elif k == 'append_tags' and form[k] != '':
@@ -470,7 +466,9 @@ def patch_item():
                     to_delete_from_s3 = [data['del_item_loc'], data['del_item_thumb'], 'None']
                     auth.delete_from_s3(to_delete_from_s3)
 
-    r = requests.patch('{}/patch'.format(API_ITEM), params=data)
+    account_session = auth.SessionHandler(session).get()
+    r = requests.put('{}items/{}'.format(settings.api_root, data['id']), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+    res = r.json()
 
 
     return redirect(f"item/{data['id']}")
@@ -478,6 +476,8 @@ def patch_item():
 
 @app.route('/manage_selection', methods=['GET', 'POST'])
 def manage_selection():
+    account_session = auth.SessionHandler(session).get()
+
     if 'collection_append' in request.form and request.form['collection_append'] != '':
         payload = {}
         payload['id'] = request.form['collection_append']
@@ -491,7 +491,7 @@ def manage_selection():
 
         payload['items'] = ' '.join(ids)
 
-        r = requests.patch('{}'.format(API_PATCH), params=payload)
+        r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
 
     if 'tags' in request.form and request.form['tags'] != '':
@@ -513,7 +513,11 @@ def manage_selection():
             payload['id'] = x
             payload['tags'] = request.form['tags']
 
-            r = requests.patch('{}'.format(API_PATCH), params=payload)
+            r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+
+    # TODO: IMP clearing of all selections
+    if 'clear_selection' in request.form and request.form['clear_selection'] != '':
+        account_session['fav'] = {}
 
 
     if 'collection_name' in request.form and request.form['collection_name'] != '':
@@ -530,32 +534,28 @@ def manage_selection():
             'item_thumb': 'site/default_cover.jpg',
             'tags': request.form['collection_name'].split(' '),
             'items': ' '.join(items),
-            'author': session['user']
+            'author': account_session['username']
         }
 
-        r = requests.post('{}'.format(API_ITEM), params=payload)
+        # r = requests.post('{}'.format(API_ITEM), params=payload)
+        r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
         #clean up session object
-        session['fav'] = {}
+        # account_session['fav'] = {}
 
-        res = r.json()['POST: /item']
-        for x in res:
-            if x == 'responce':
-                if res['responce'] == 'successful':
-                    collection_id = res['location'].split('/')[-1:][0]
-                    return item(collection_id)
-            else:
-                print('empty else')
-                pass
+        if 'status' in r.json() and r.json()['status'] == 'success':
+            return item(r.json()['data'][0]['id'])
+
 
     return home()
 
 
 @app.route('/item/delete/<int:id>')
 def delete(id):
-    g = requests.get('{}/{}'.format(API_ITEM, id))
-    resp = g.json()['item'][0]
-    r = requests.delete('{}/delete/{}'.format(API_ITEM, id))
+    account_session = auth.SessionHandler(session).get()
+    g = requests.get('{}items/{}'.format(settings.api_root, id), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+
+    resp = g.json()['data'][0]
     data = []
     if 'item_loc' in resp:
         data.append(resp['item_loc'])
@@ -567,7 +567,7 @@ def delete(id):
     # delete from s3 and database
     # TODO: IMP something safer.
     auth.delete_from_s3(data)
-    r = requests.delete('{}/delete/{}'.format(API_ITEM, id))
+    requests.delete('{}items/{}'.format(settings.api_root, id), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
 
     return home()
@@ -591,14 +591,17 @@ def home():
     auth.SessionHandler(session).filter(payload['filter'])
 
     account_session = auth.SessionHandler(session).get()
+    if 'username' not in account_session:
+        return redirect(url_for('login'))
 
     r = requests.get('{}items'.format(settings.api_root), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-    res = r.json()['data']
+    res = r.json()
 
-    if 'status' in res and res['status']['Message'] == 'failed':
+    if 'status' in res and res['status'] == 'failed':
         return render_template('home.html', data=data)
 
     else:
+        res = res['data']
         # tags
         tags = []
         goo = [x['tags'] for x in res]
@@ -630,15 +633,23 @@ def manage():
     # TODO: emi persistant data users search term, imp into session?
     data = {'query': "**"}
     # TODO: API needs to be able to serve, `item by author`.
-    if auth.logged_in(session):
-        # data to send... collections made by user
-        r = requests.get(
-            '{}collection/author/{}'.format(API, session['user'], data=data)
-        )
+    # data to send... collections made by user
+    # TODO: data=data somethings up here.
+    account_session = auth.SessionHandler(session).get()
+    if 'username' in account_session:
+        r = requests.get('{}items'.format(settings.api_root), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+        res = r.json()
+        if 'status' in r.json() and r.json()['status'] == 'sucess':
+            res = r.json()['data']
+            collections = [x for x in res if x['item_type'] == 'collection' and x['author'] == account_session['username']]
+            data = []
 
-        data = ['test', 'test2']
+            return render_template('manage.html', collection=collections, items=data, data=data)
 
-        return render_template('manage.html', collection=r.json(), items=data, data=data)
+        else:
+            collections = []
+            data = []
+            return render_template('manage.html', collection=collections, items=data, data=data)
     else:
         return home()
 
@@ -647,8 +658,8 @@ def manage():
 def coll_list():
     data = []
 
-    auth.SessionHandler(session).filter('collection')
-    r = requests.get("{}?query=**&filter=collection".format(API_QUERY))
+    account_session = auth.SessionHandler(session).get()
+    r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
     collection = r.json()
 
 
@@ -675,25 +686,23 @@ def item(id):
         account_session = auth.SessionHandler(session).get()
         r = requests.get('{}items/{}'.format(settings.api_root, id), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
-        print(r.json())
-
         if r.json()['data'][0]['item_type'] == 'image':
-            return render_template('image2.html', item=r.json()['data'][0], data=data)
+            return render_template('image.html', item=r.json()['data'][0], data=data)
 
         elif r.json()['data'][0]['item_type'] == 'collection':
             return render_template('collection.html', item=r.json()['data'], data=data)
 
         elif r.json()['data'][0]['item_type'] == 'footage':
-            return render_template('footage2.html', item=r.json()['data'][0], data=data)
+            return render_template('footage.html', item=r.json()['data'][0], data=data)
 
         elif r.json()['data'][0]['item_type'] == 'geometry':
-            return render_template('geometry2.html', item=r.json()['data'][0], data=data)
+            return render_template('geometry.html', item=r.json()['data'][0], data=data)
 
         elif r.json()['data'][0]['item_type'] == 'people':
             tags_from_api = r.json()['data'][0]['tags']
             people_tags = image.get_people_tags(tags_from_api)
 
-            return render_template('people2.html', item=r.json()['data'][0], people_tags=people_tags, data=data)
+            return render_template('people.html', item=r.json()['data'][0], people_tags=people_tags, data=data)
 
 
         else:
@@ -733,9 +742,20 @@ def search():
         else:
             session['filter_people'] = {}
 
-    r = requests.get('{}query'.format(API), params=data)
 
-    return render_template('search.html', data=data, items=r.json()['result'])
+    data['filter_people'] = ' '.join(data['filter_people'])
+
+    account_session = auth.SessionHandler(session).get()
+    r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+
+
+    # r = requests.get('{}query'.format(API), params=data)
+
+    account_session = auth.SessionHandler(session).get()
+    r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+
+
+    return render_template('search.html', data=data, items=r.json())
 
 
 if __name__ == "__main__":

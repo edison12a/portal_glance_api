@@ -4,46 +4,35 @@
 
 <div id="footage_display">
       <video style="width:100%;height:auto;" controls>
-        <source src="https://s3.amazonaws.com/{{bucketname}}/{{ item.0.item_loc }}" type="video/mp4">
+        <source src="https://s3.amazonaws.com/{{bucketname}}/{{ item.item_loc }}" type="video/mp4">
         Your browser does not support HTML5 video.
       </video>
 </div>
 
 <div class="content">
   <div id="part_of_collection">
-      {% for k, v in item.0.items() %}
-        {% if k == 'collections' %}
-          {% for x, g in v.items() %}
 
-            <div id="part_of_collection_item">
-              <a href="/item/{{ g.id }}">
-                <img style="max-width:300px; height: auto;" src="https://s3.amazonaws.com/{{bucketname}}/{{ g.item_thumb }}" />
-              </a>
-
-              <div id="part_of_collection_item_header">
-                <div style="text-align:center;">
-                  <small><strong>Collection</strong></small>
-                </div>
-              </div>
-            </div>
-
-          {% endfor %}
-        {% endif %}
-      {% endfor %}
+    {% for k, v in item.items() %}
+      {% if k == 'collections' %}
+        {% for x in v %}
+        <a href="/item/{{x['id']}}"><img src="https://s3.amazonaws.com/{{bucketname}}/{{x['item_thumb']}}" /></a>
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
   </div>
 
   <label class="collapse" for="_1"><div class="clicky"><div id="section_header">Info</div></div></label>
   <input id="_1" type="checkbox">
 
     <div id="item_info">
-      {% for k, v in item.0.items() %}
+      {% for k, v in item.items() %}
         {% if k != 'items' %}
           {{ k }} - {{ v }}<br>
         {% endif %}
       {% endfor %}
 
       <hr>
-      <a href="https://s3.amazonaws.com/{{bucketname}}/{{item.0.item_loc}}" class="btn btn-primary btn-sm" role="button" aria-pressed="true">Download</a>
+      <a href="https://s3.amazonaws.com/{{bucketname}}/{{item.item_loc}}" class="btn btn-primary btn-sm" role="button" aria-pressed="true">Download</a>
     </div>
 
 
@@ -61,13 +50,13 @@
 
             <label for="">Add to collection</label>
             <input style="width:100%; display:block;" type="text" class="form-control" id="append_to_collection" name="append_to_collection" />
-            <input type="hidden" name="id" value="{{item.0.id}}">
+            <input type="hidden" name="id" value="{{item.id}}">
             <small><small><p class="help-block">ID of collection.</p></small></small>
       </div>
       <div style="display: inline-block; width:49.7%;">
             <label for="append_collection">Append Tags</label>
             <input style="width:100%; display:block;" type="text" class="form-control" id="append_tags" name="append_tags" />
-            <input type="hidden" name="id" value="{{item.0.id}}">
+            <input type="hidden" name="id" value="{{item.id}}">
             <small><small><p class="help-block">Enter words, separated by spaces.</p></small></small>
       </div>
       <br>
@@ -76,7 +65,7 @@
         </form>
 
 
-        <form action="/item/delete/{{item.0.id}}" method="DELETE">
+        <form action="/item/delete/{{item.id}}" method="DELETE">
           <div class="form-group">
           <button type="submit" class="btn btn-default">Delete</button>
           </div>

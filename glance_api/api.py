@@ -1,22 +1,28 @@
-"""
-glance api
-"""
+import sqlite3
+import uuid
 
-__author__ = ""
-__version__ = ""
-__license__ = ""
-
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, jsonify
+from flask_restful import reqparse, abort, Api, Resource, fields, marshal_with
+from flask_httpauth import HTTPBasicAuth
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
 from config import settings
-import modules.functions as functions
+from modules import convert
+from modules import models
+from modules import functions
 
+# Config
+# init app and db
 app = Flask(__name__)
+# conn = sqlite3.connect('example.db')
 
-# database
+# config
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.POSTGRES_DATABASE
 engine = create_engine(settings.POSTGRES_DATABASE, echo=False)
+api = Api(app, '/glance/v2')
+# db = SQLAlchemy(app)
+auth = HTTPBasicAuth()
 
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
@@ -24,255 +30,333 @@ Session = sessionmaker(bind=engine)
 """
 '''development tools'''
 # functions
-session = Session()
 functions.__reset_db(session, engine)
 """
 
-# info
-@app.route('{}'.format(settings.ROUTE))
-def api():
-    """ Returns avaliable methods for the api """
-    info = {
-        'End Points': {
-            'POST': {
-                '/asset?[key]=[value]': 'Create a new asset object',
-                '/collection?[key]=[value]': 'Create a new collection object'
-            }, 'GET': {
-                '/asset': 'Retrieve list of assets',
-                '/asset/<int>': 'Retrieve single asset by ID',
-                '/footage': 'Retrieve list of assets',
-                '/footage/<int>': 'Retrieve single asset by ID',
-                '/collection': 'Retrieve list of collections',
-                '/collection/<int>': 'Retrieve single collection by ID',
-                '/query?query=<str>': 'Retrieve asset/collections that match query',
-
-            }, 'PATCH': {
-                '/asset/patch?[key]=[value]': 'Update asset using key/value pairs',
-                '/collection/patch?[key]=[value]': 'Update collection using key/value pairs',
-            }, 'DELETE': {
-                '/asset/delete/<int>': 'Remove asset via id',
-                '/collection/delete/<int>': 'Remove collection via id',
-            }, 'Parameters': {
-                'Asset': {
-                    'name': 'string', 'image': 'string', 'image_thumb': 'string',
-                    'attached': 'string', 'tag': 'string',
-                },
-                'Collection': {
-                    'name': 'string', 'image': 'string', 'image_thumb': 'string',
-                    'attached': 'string', 'tag': 'string, separate with a single space only.'
-                }
-            }
-        },
-        'Maintainers': {
-            'Visualhouse': 'rory.jarrel@visualhouse.co'
-        }
+# helpers
+def resp(status=None, data=None, link=None, error=None, message=None):
+    """Function im using to build responses"""
+    # TODO: make better
+    response = {
+        'status': status, 'data': data, 'link': link,
+        'error': error, 'message': message
     }
-    return jsonify({'Glance WebAPI': info})
 
+    remove_none = []
+
+    for x in response:
+        if response[x] == None:
+            remove_none.append(x)
+
+    for x in remove_none:
+        del response[x]
+
+    return response
 
 # auth
-@app.route('{}/user'.format(settings.ROUTE), methods=['POST', 'GET'])
-def user():
+# Basic HTTP auth
+@auth.verify_password
+def verify(username, password):
+    account_details = {'username': username, 'password': password}
 
-    if request.method=='POST':
-        post_data = {}
-
-        for x in request.args:
-            post_data[x] = request.args.get(x)
-
-        session = Session()
-        posted_user = functions.post_user(session, **post_data)
-        session.close()
-
-        return jsonify({'user': str(type(posted_user))})
-
-    elif request.method=='GET':
-        user_details = {}
-
-        username = request.args.get('username')
-        password = request.args.get('password')
-
-        session = Session()
-
-        user_details['username'] = username
-        user_details['password'] = password
-
-        user_cred = functions.get_user(session, **user_details)
-
-    session.close()
-
-    return jsonify({'user details': user_cred})
-
-
-# process
-@app.route('{}/item'.format(settings.ROUTE), methods=['POST', 'GET'])
-def item():
-    """Endpoint that returns asset objects"""
-    if request.method=='POST':
-        query = {}
-        for x in request.args:
-            query[x] = request.args[x]
-
-        session = Session()
-        test = functions.Item(session).post(query)
-        result = functions.to_dict((test,))
-        session.close()
-
-        return make_response(
-            jsonify(
-                {
-                    'POST: /item': result
-                }
-            )
-        ), 200
-
-    elif request.method=='GET':
-        session = Session()
-
-        if 'filter' in request.args:
-            raw_items = functions.Item(session).get(filter=request.args['filter'])
-            result = functions.to_dict(raw_items)
-        else:
-            raw_items = functions.Item(session).get()
-            result = functions.to_dict(raw_items)
-
-        if len(result) == 0:
-            session.close()
-            return make_response(
-                jsonify(
-                    {
-                        'GET assets': {
-                            'Status': 'Successful',
-                            'Message': 'No assets in database'
-                        }
-                    }
-                )
-            ), 200
-        # sorts items by initdate
-        result.sort(key=lambda r: r["initdate"], reverse=True)
-
-        session.close()
-
-        return make_response(
-            jsonify(result)
-        ), 200
-
-    else:
-        session.close()
-        return jsonify({'Asset': 'This endpoint only accepts POST, GET methods.'})
-
-
-@app.route('{}/tag'.format(settings.ROUTE))
-def tag():
     session = Session()
-
-    data = None
-    result = functions.get_tag(session, data)
+    validate_account = functions.get_account(session, **account_details)
     session.close()
 
-    return jsonify({'tags': result})
+    return validate_account
 
 
-# queries
-@app.route('{}/query'.format(settings.ROUTE), methods=['GET'])
-def query():
-    """ returns results from querys
-    'flag': takes key/value, returns
-    'query': takes list of string, returns list of dict
-    'filter': takes str, affects 'query'
-    'filter_people': ???
-    """
-    if 'flag' in request.args:
+# API resources
+class Entry(Resource):
+    @auth.login_required
+    def get(self):
+        entry = {
+            'name': 'gallery api',
+            'version': 'v2',
+            'resources': ''
+        }
+
+        return entry, 200
+
+
+class Accounts(Resource):
+    @auth.login_required
+    def get(self, id):
+        session = Session()
+        raw_account = session.query(models.Account).filter_by(id=id).first()
+        session.close()
+
+        response = resp(status='success', data=convert.jsonify((raw_account,)))
+        return response, 200
+
+
+    @auth.login_required
+    def put(self, id):
+        parser = reqparse.RequestParser()
+        parser.add_argument('galleries', type=str, help='help text')
+        args = parser.parse_args()
+
+        raw_account = models.Account.query.filter_by(id=id).first()
+
+        if raw_account != None:
+            if 'galleries' in args and args['galleries'] != None:
+                raw_gallery = Gallery.query.filter_by(id=args['galleries']).first()
+
+                if raw_gallery != None:
+                    raw_account.galleries.append(raw_gallery)
+                    db.session.commit()
+
+                    response = resp(
+                        status='success', link='/accounts/{}'.format(raw_account.id)
+                        ), 201
+
+                    return response
+
+                else:
+                    return resp(error='no such gallery id')
+
+            else:
+                return resp(error='must enter gallery id')
+
+        else:
+            return resp(error='no such account id')
+
+
+    @auth.login_required
+    def delete(self, id):
+        session = Session()
+        raw_account = session.query(models.Account).filter_by(id=id).first()
+
+        if auth.username() == raw_account.username:
+            session.delete(raw_account)
+            session.commit()
+
+            response = resp(status='success', message='account successfully deleted')
+
+            session.close()
+            return response
+
+        else:
+            session.close()
+            return resp(message='Account can only be if logged in as the same account.')
+
+
+class AccountsL(Resource):
+    @auth.login_required
+    def get(self):
+        session = Session()
+        raw_account = session.query(models.Account).all()
+
+        response = resp(data=convert.jsonify(raw_account), status='success')
+
+        session.close()
+        return response, 200
+
+
+    def post(self):
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('username', type=str, help='help text')
+        parser.add_argument('password', type=str, help='help text')
+        args = parser.parse_args()
+
+        #process user input
+        if args['username'] != None and args['password'] != None:
+            session = Session()
+            existing_account = session.query(models.Account).filter_by(username=args['username']).first()
+            if existing_account:
+                response = resp(error='Account name already exists', status='failed')
+
+                session.close()
+                return response, 400
+
+            new_account = models.Account(username=args['username'], password=args['password'])
+            session.add(new_account)
+            session.commit()
+
+            response = resp(
+                data=convert.jsonify((new_account,)),
+                link='/accounts/{}'.format(new_account.id),
+                status='success'
+            )
+
+            session.close()
+            return response, 201
+
+        else:
+            response = resp(error='No post data', status='failed')
+            return response, 400
+
+
+class Items(Resource):
+    @auth.login_required
+    def get(self, id):
+
+        session = Session()
+        raw_item = functions.Item(session).get(id)
+        if raw_item:
+            response = resp(data=convert.jsonify((raw_item,)))
+
+            session.close()
+            return response
+
+        else:
+            response = resp(status='failed', error='item id doesnt exist')
+            session.close()
+            return response
+
+    @auth.login_required
+    def put(self, id):
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('id', type=str, help='help text')
+        parser.add_argument('name', type=str, help='help text')
+        parser.add_argument('item_loc', type=str, help='help text')
+        parser.add_argument('item_thumb', type=str, help='help text')
+        parser.add_argument('attached', type=str, help='help text')
+        parser.add_argument('item_type', type=str, help='help text')
+        parser.add_argument('tags', type=str, help='help text')
+        parser.add_argument('items', type=str, help='help text')
+        parser.add_argument('append_to_collection', type=str, help='help text')
+        parser.add_argument('people_tags', type=str, help='help text')
+        args = parser.parse_args()
+
+        session = Session()
+
+        put_item = functions.Item(session).patch(args)
+
+        response = resp(status='success', data=convert.jsonify((put_item,)))
+
+        session.close()
+        return response
+
+
+    @auth.login_required
+    def delete(self, id):
+        session = Session()
+        raw_account = session.query(models.Account).filter_by(username=auth.username()).first()
+        raw_item = session.query(models.Item).filter_by(id=id).first()
+
+        if auth.username() == raw_account.username:
+            session.delete(raw_item)
+            session.commit()
+
+            response = resp(status='success', message='item successfully deleted')
+
+            session.close()
+            return response
+
+        else:
+            session.close()
+            return resp(message='Item can only be deleted by the account of the uploader.')
+
+
+class ItemsL(Resource):
+    @auth.login_required
+    def get(self):
+        session = Session()
+        raw_items = functions.Item(session).get()
+        if raw_items:
+
+            response = resp(data=convert.jsonify(raw_items))
+
+            session.close()
+            return response
+
+        else:
+            response = resp(status='failed', error='nothing in database')
+
+            session.close()
+            return response
+
+    @auth.login_required
+    def post(self):
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('name', type=str, help='help text')
+        parser.add_argument('item_loc', type=str, help='help text')
+        parser.add_argument('item_thumb', type=str, help='help text')
+        parser.add_argument('attached', type=str, help='help text')
+        parser.add_argument('item_type', type=str, help='help text')
+        parser.add_argument('tags', type=str, help='help text')
+        parser.add_argument('items', type=str, help='help text')
+        args = parser.parse_args()
+
+        session = Session()
+        args['author'] = auth.username()
+        new_item = functions.Item(session).post(args)
+        if new_item:
+            response = resp(status='success', message='New item created', data=convert.jsonify((new_item,)))
+
+            session.close()
+            return response
+
+        else:
+            response=resp(status='failed', error='somethings wrong')
+
+
+class Tags(Resource):
+    @auth.login_required
+    def get(self, id):
         pass
 
-    elif 'query' in request.args:
-        # TODO: For some reason `functions.get_query()` only accepts a dict?
+    @auth.login_required
+    def put(self, id):
+        pass
+
+
+    @auth.login_required
+    def delete(self, id):
+        pass
+
+
+class TagsL(Resource):
+    @auth.login_required
+    def get(self):
+        pass
+
+    @auth.login_required
+    def post(self):
+        pass
+
+
+class Query(Resource):
+    @auth.login_required
+    def get(self):
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('filter', type=str, help='help text')
+        parser.add_argument('filter_people', type=str, help='help text')
+        parser.add_argument('query', type=str, help='help text')
+        args = parser.parse_args()
+
+
         session = Session()
-        raw_items = functions.get_query(session, request.args)
-        items = functions.to_dict(raw_items)
-        # sorts items by date
-        items.sort(key=lambda r: r["initdate"], reverse=True)
+        test = functions.get_query(session, args)
+
+        print('EXIT EXIT EXIOT EXIT')
+        print(test)
+
+        response = resp(status='success', data=convert.jsonify(test))
 
         session.close()
-
-        return jsonify({'result': items})
-
-    return jsonify({'result': ''})
+        return response
 
 
-@app.route('{}/collection/author/<author>'.format(settings.ROUTE))
-def get_collection_author(author):
-    session = Session()
 
-    raw_result = functions.get_collection_by_author(session, author)
-    result = functions.to_dict(raw_result)
-
-    session.close()
-
-    return jsonify({'result': result})
-
-
-@app.route('{}/item/<int:item_id>'.format(settings.ROUTE), methods=['GET'])
-def get_item(item_id):
-    # TODO: Doc string
-    if request.method=='GET':
-        session = Session()
-        raw_asset = functions.Item(session).get(item_id)
-        asset = functions.to_dict((raw_asset, ))
-
-    else:
-
-        session.close()
-        return jsonify({'item': 'failed - endpoint only accepts GET methods'})
-
-    session.close()
-    return jsonify({'item': asset})
-
-
-# crud
-@app.route('{}/item/delete/<int:asset_id>'.format(settings.ROUTE), methods=['DELETE'])
-def delete_asset(asset_id):
-    # TODO: make better responce
-    if request.method=='DELETE':
-        session = Session()
-        asset = functions.Item(session).delete(asset_id)
-
-        if asset:
-            result = {
-                'Action': 'successful',
-                'asset id': 'IMP'
-            }
-            session.close()
-            return jsonify({'DELETE asset/delete/': result})
-
-        else:
-            result = {
-                'Action': 'fail',
-                'asset id': 'IMP'
-            }
-            session.close()
-
-            return jsonify({'DELETE asset/delete/': result})
-
-    session.close()
-
-    return jsonify({'DELETE asset/delete/': 'error?'})
-
-
-@app.route('{}/item/patch'.format(settings.ROUTE), methods=['PATCH'])
-def patch_item():
-
-    patch_data = {}
-    for y in request.args:
-        patch_data[y] = request.args[y]
-
-    session = Session()
-    raw_item = functions.Item(session).patch(patch_data)
-    item = functions.to_dict((raw_item,))
-    session.close()
-
-    return jsonify({'PATCH': item})
-
+# routes
+api.add_resource(Entry, '/')
+api.add_resource(Accounts, '/accounts/<id>')
+api.add_resource(AccountsL, '/accounts')
+api.add_resource(Items, '/items/<id>')
+api.add_resource(ItemsL, '/items')
+api.add_resource(Tags, '/tags/<id>')
+api.add_resource(TagsL, '/tags')
+api.add_resource(Query, '/query')
 
 
 if __name__ == '__main__':
