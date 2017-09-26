@@ -27,11 +27,14 @@ auth = HTTPBasicAuth()
 # Init sessionmaker
 Session = sessionmaker(bind=engine)
 
-"""
+
 '''development tools'''
 # functions
-functions.__reset_db(session, engine)
-"""
+# session = Session()
+# functions.__reset_db(session, engine)
+# functions.__drop_table(session, engine)
+# functions.__create_table(session, engine)
+
 
 # helpers
 def resp(status=None, data=None, link=None, error=None, message=None):

@@ -46,6 +46,15 @@ def __reset_db(session, engine):
     # TODO: is return True 'pythonic', something better?
     return True
 
+def __drop_table(session, engine):
+    session.close()
+    glance_api.modules.models.Account.__table__.drop(engine)
+
+def __create_table(session, engine):
+    session.close()
+    glance_api.modules.models.Account.__table__.create(engine)
+
+
 
 # helper functions
 def to_dict(item_list):
