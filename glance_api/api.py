@@ -263,7 +263,7 @@ class ItemsL(Resource):
         raw_items = functions.Item(session).get()
         if raw_items:
 
-            response = resp(data=convert.jsonify(raw_items))
+            response = resp(status='success', data=convert.jsonify(raw_items))
 
             session.close()
             return response
