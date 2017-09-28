@@ -791,12 +791,6 @@ def search():
     r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
 
-    # r = requests.get('{}query'.format(API), params=data)
-
-    account_session = auth.SessionHandler(session).get()
-    r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-
-
     return render_template('search.html', data=data, items=r.json())
 
 

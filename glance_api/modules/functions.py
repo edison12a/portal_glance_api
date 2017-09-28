@@ -251,6 +251,8 @@ def get_query(session, userquery):
 
     Return: List
     """
+    # TODO: if an item doesnt have any tags, it isnt returned at all.
+    # maybe find a better system to query with, instead of using tags?
     data = dict(userquery)
 
     # init structures
@@ -283,14 +285,6 @@ def get_query(session, userquery):
         'query': data['query']
     }
 
-    # get tags for query, append taglists
-    if query['query'] == '' or query['query'] == '**':
-        #taglists = session.query(glance_api.modules.models.Tag).all()
-        # TODO: imp item sorting
-        raw_tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
-
-    query['query'] = data['query']
-
     # filter items with [query]
     if query['query'] == '**' or query['query'] == '':
         tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
@@ -300,15 +294,13 @@ def get_query(session, userquery):
             raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()]
 
         # TODO: Start to implement pagination, and sorted search results.
-        print(query['query'])
         for x in query['query'].split(' '):
-            print(x)
             raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
-            print(raw_tags)
 
             for tag in raw_tags:
                 tags.append(tag)
     # further filter items with [filter]
+    print(tags)
     for tag in tags:
         for item in tag.items:
             # TODO: for some reason a shitload of dupilicate items are appearing here.
@@ -317,6 +309,7 @@ def get_query(session, userquery):
             else:
                 if item.type == query['filter']:
                     items.append(item)
+
     # if [filter] == people further filter with [people_tags]
     if query['filter'] == 'people':
         if query['filter_people'] != '':
@@ -332,15 +325,19 @@ def get_query(session, userquery):
         else:
             return set(items)
 
+    print('llllllllllllllllllllllllllllllllllllllllllllllll')
+    print(len(items))
+
     return set(items)
 
 
 class Item():
     """Constructs a generic :class:`Item`"""
+    # TODO: IMP function `get_query` into here somewhere.
     def __init__(self, session):
         self.session = session
 
-    def get(self, id=None, filter=None):
+    def get(self, id=None, filter=None, query=None):
         """get item.
 
         id: primary key of database item, `None` returns all

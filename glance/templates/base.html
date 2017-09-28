@@ -234,7 +234,7 @@
 
   </div>
 
-  <p style="height:42px;"></p>
+  <p style="height:34px;"></p>
 
   {% if session.logged_in == true %}
 
@@ -287,7 +287,7 @@
         <strong style="color:black;">{{k.capitalize()}} | </strong>
       {% for x, z in v.items() %}
       {% if z == 0 %}
-        <a style="color:gray" href="/search?search={{data.query}}&filter_people={{x}}">{{x}}, </a>
+        <a style="color:white" href="/search?search={{data.query}}&filter_people={{x}}">{{x}}, </a>
       {% else %}
         <a style="color:red" href="/search?search={{data.query}}&filter_people={{x}}">{{x}}, </a>
       {% endif %}

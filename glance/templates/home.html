@@ -4,7 +4,7 @@
 <!-- tag list !-->
 <div id="nav_item_panel_subitem">
   {% for tag in tags %}
-    <span class="badge badge-pill badge-light"><a style="color:rgba(44, 46, 48, .96);" href="/search?search={{tag}}">{{tag}}</a></span>
+    <a class="badge badge-light" style="color:rgba(44, 46, 48, .96);" href="/search?search={{tag}}">{{tag}}</a>
   {% endfor %}
 </div>
 

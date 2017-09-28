@@ -94,7 +94,7 @@ background-color: lightgray;
   background-color: rgba(44, 46, 48, .96);
   padding-left:50px;
   padding-right:10%;
-  box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.5);
 }
 #nav_main_logo
 {
@@ -215,20 +215,30 @@ background-color: lightgray;
 .right-addon input { padding-right: 30px; }
 
 #nav_item_panel {
-    z-index: 100;
+    position: relative;
+    z-index: 10;
     padding-left:10%;
     min-width:100%;
     background-color: rgba(220, 220, 220, .96);
+    border-bottom-style: solid;
+    border-width: 1px;
+    border-color: rgba(44, 46, 48, .5);
+    box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2);
 }
 #nav_item_panel_subitem
 {
+  position: relative;
+  z-index: 5;
   width:100%;
   color:gray;
   padding-top:10px;
   padding-bottom:10px;
-  box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.05);
   background-color: darkgray;
   text-align: justify;
+  border-bottom-style: solid;
+  border-width: 1px;
+  border-color: rgba(44, 46, 48, .2);
+  box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2);
 }
 #item_header_collection
 {

@@ -259,11 +259,14 @@ class Items(Resource):
 class ItemsL(Resource):
     @auth.login_required
     def get(self):
+        print('ooooooooooooooooooooooooooooooooooooooooooo')
         session = Session()
         raw_items = functions.Item(session).get()
         if raw_items:
 
             response = resp(status='success', data=convert.jsonify(raw_items))
+            print('00000000000000000000000000000000000000000')
+            print(len(response['data']))
 
             session.close()
             return response
