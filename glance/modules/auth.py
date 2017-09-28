@@ -121,9 +121,12 @@ class SessionHandler():
 
         return self.session
 
-    def fav(self, id, item_thumb):
+    def fav(self, id, item_thumb=None):
         if id not in self.session['fav']:
             self.session['fav'][id] = item_thumb
+            self.session.modified = True
+        else:
+            del self.session['fav'][id]
             self.session.modified = True
 
         return self.session

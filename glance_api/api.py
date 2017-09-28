@@ -199,7 +199,7 @@ class Items(Resource):
         session = Session()
         raw_item = functions.Item(session).get(id)
         if raw_item:
-            response = resp(data=convert.jsonify((raw_item,)))
+            response = resp(status='success', data=convert.jsonify((raw_item,)))
 
             session.close()
             return response

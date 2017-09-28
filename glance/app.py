@@ -476,7 +476,7 @@ def patch_item():
 
 @app.route('/manage_selection', methods=['GET', 'POST'])
 def manage_selection():
-    account_session = auth.SessionHandler(session).get()
+    account_session = auth.SessionHandler(session)
 
     if 'collection_append' in request.form and request.form['collection_append'] != '':
         payload = {}
@@ -491,7 +491,7 @@ def manage_selection():
 
         payload['items'] = ' '.join(ids)
 
-        r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+        r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password']))
 
 
     if 'tags' in request.form and request.form['tags'] != '':
@@ -513,11 +513,22 @@ def manage_selection():
             payload['id'] = x
             payload['tags'] = request.form['tags']
 
-            r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+            r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password']))
 
     # TODO: IMP clearing of all selections
-    if 'clear_selection' in request.form and request.form['clear_selection'] != '':
-        account_session['fav'] = {}
+    if 'clear_selection' in request.form and request.form['clear_selection'] == 'True':
+        args = request.form.to_dict()
+
+        items_to_remove_from_selection = []
+        for k in args:
+            if args[k] == 'on':
+                items_to_remove_from_selection.append(k)
+
+        for item in items_to_remove_from_selection:
+            if item in account_session.get()['fav']:
+                account_session.fav(item)
+
+        return manage()
 
 
     if 'collection_name' in request.form and request.form['collection_name'] != '':
@@ -534,17 +545,48 @@ def manage_selection():
             'item_thumb': 'site/default_cover.jpg',
             'tags': request.form['collection_name'].split(' '),
             'items': ' '.join(items),
-            'author': account_session['username']
+            'author': account_session.get()['username']
         }
 
-        # r = requests.post('{}'.format(API_ITEM), params=payload)
-        r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
-        #clean up session object
-        # account_session['fav'] = {}
+        # r = requests.post('{}'.format(API_ITEM), params=payload)
+        r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password']))
 
         if 'status' in r.json() and r.json()['status'] == 'success':
             return item(r.json()['data'][0]['id'])
+
+
+    if 'delete_selection' in request.form and request.form['delete_selection'] == 'True':
+        args = request.form.to_dict()
+
+        items_for_deletion = []
+        for k in args:
+            if args[k] == 'on':
+                items_for_deletion.append(k)
+
+        for item in items_for_deletion:
+            g = requests.get('{}items/{}'.format(settings.api_root, item), auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password'])).json()
+
+            if 'status' in g and g['status'] == 'success':
+                resp = g['data'][0]
+                data = []
+                if 'item_loc' in resp:
+                    data.append(resp['item_loc'])
+                if 'item_thumb' in resp:
+                    data.append(resp['item_thumb'])
+                if 'attached' in resp:
+                    data.append(resp['attached'])
+
+                # delete from s3 and database
+                # TODO: IMP something safer.
+                if item in account_session.get()['fav']:
+                    account_session.fav(item)
+
+                auth.delete_from_s3(data)
+                requests.delete('{}items/{}'.format(settings.api_root, item), auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password']))
+
+
+        return manage()
 
 
     return home()
