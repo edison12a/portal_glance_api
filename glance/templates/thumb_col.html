@@ -10,15 +10,15 @@
 
   <div class="item_header_type">
     <div style="text-align:center;">
-      <small><strong>{{ item.item_type|capitalize }}</strong></small>
+      <span class="badge badge-pill badge-dark">{{ item.item_type|capitalize }}</span>
     </div>
   </div>
   <div class="item_panel">
 
     <div style="text-align:center;">
 
-      <a href="#">
-        <small>{{item.name}}</small>
+      <a href="/item/{{item.id}}">
+        <span class="badge badge-pill badge-dark">{{item.name}}</span>
       </a>
 
     </div>

@@ -653,15 +653,15 @@ def home():
                 if j not in tags:
                     tags.append(j['name'])
 
-        collections = [x for x in res if x['item_type'] == 'collection'][0:9]
+        collections = [x for x in res if x['item_type'] == 'collection'][0:10]
 
-        images = [x for x in res if x['item_type'] == 'image'][0:9]
+        images = [x for x in res if x['item_type'] == 'image'][0:10]
 
-        footage = [x for x in res if x['item_type'] == 'footage'][0:9]
+        footage = [x for x in res if x['item_type'] == 'footage'][0:10]
 
-        people = [x for x in res if x['item_type'] == 'people'][0:9]
+        people = [x for x in res if x['item_type'] == 'people'][0:10]
 
-        geometry = [x for x in res if x['item_type'] == 'geometry'][0:9]
+        geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
 
 
         return render_template(

@@ -227,6 +227,7 @@ background-color: lightgray;
   padding-top:10px;
   padding-bottom:10px;
   box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.05);
+  background-color: darkgray;
   text-align: justify;
 }
 #item_header_collection
@@ -273,24 +274,14 @@ background-color: lightgray;
 }
 .item_header_type
 {
-  padding-left:10px;
-  padding-right:10px;
-  border-radius: 10px;
   position:absolute;
   top:0;
-  height:20px;
-  background-color:rgba(255, 255, 255, .5);
   margin:10px;
 }
 .item_panel
 {
-  padding-left:10px;
-  padding-right:10px;
-  border-radius: 10px;
   position:absolute;
   bottom:0;
-  height:20px;
-  background-color:rgba(255, 255, 255, .5);
   margin:10px;
 }
 .item img {

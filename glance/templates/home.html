@@ -4,93 +4,73 @@
 <!-- tag list !-->
 <div id="nav_item_panel_subitem">
   {% for tag in tags %}
-    <span class="badge badge-pill badge-primary"><a style="color:white;" href="/search?search={{tag}}">{{tag}}</a></span>
+    <span class="badge badge-pill badge-light"><a style="color:rgba(44, 46, 48, .96);" href="/search?search={{tag}}">{{tag}}</a></span>
   {% endfor %}
 </div>
 
 <!-- latest collections !-->
+{% for item in collections %}
+{% if loop.index0 % 5 == 0 %}
 <div class="item_results">
-  {% for item in collections %}
-    {% if loop.index < 6 %}
-        {% include 'thumb_col.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+{% endif %}
 
-<div class="item_results">
-  {% for item in collections %}
-    {% if loop.index > 4 %}
-      {% include 'thumb_col.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+  {% include 'thumb_col.html' %}
+
+{% if loop.index0 % 5 == 4 or loop.last %}
+      </div>
+      {% endif %}
+{% endfor %}
 
 <!-- latest images !-->
+{% for item in images %}
+{% if loop.index0 % 5 == 0 %}
 <div class="item_results">
-  {% for item in images %}
-    {% if loop.index < 6 %}
-      {% include 'thumb.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+{% endif %}
 
-<div class="item_results">
-  {% for item in images %}
-    {% if loop.index > 4 %}
-      {% include 'thumb.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+  {% include 'thumb.html' %}
+
+{% if loop.index0 % 5 == 4 or loop.last %}
+      </div>
+      {% endif %}
+{% endfor %}
 
 <!-- latest footage -->
+{% for item in footage %}
+{% if loop.index0 % 5 == 0 %}
 <div class="item_results">
-  {% for item in footage %}
-    {% if loop.index < 6 %}
-      {% include 'thumb.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+{% endif %}
 
-<div class="item_results">
-  {% for item in footage %}
-    {% if loop.index > 4 %}
-      {% include 'thumb.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+  {% include 'thumb.html' %}
+
+{% if loop.index0 % 5 == 4 or loop.last %}
+      </div>
+      {% endif %}
+{% endfor %}
 
 <!-- latest geometry !-->
+{% for item in geometry %}
+{% if loop.index0 % 5 == 0 %}
 <div class="item_results">
-  {% for item in geometry %}
-    {% if loop.index < 6 %}
-      {% include 'thumb.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+{% endif %}
 
-<div class="item_results">
-  {% for item in geometry %}
-    {% if loop.index > 4 %}
-      {% include 'thumb.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+  {% include 'thumb.html' %}
+
+{% if loop.index0 % 5 == 4 or loop.last %}
+      </div>
+      {% endif %}
+{% endfor %}
 
 <!-- latest people !-->
+{% for item in people %}
+{% if loop.index0 % 5 == 0 %}
 <div class="item_results">
-  {% for item in people %}
-    {% if loop.index < 6 %}
-      {% include 'thumb.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+{% endif %}
 
-<div class="item_results">
-  {% for item in people %}
-    {% if loop.index > 4 %}
-      {% include 'thumb.html' %}
-    {% endif %}
-  {% endfor %}
-</div>
+  {% include 'thumb.html' %}
+
+{% if loop.index0 % 5 == 4 or loop.last %}
+      </div>
+      {% endif %}
+{% endfor %}
 
 {% endblock %}
