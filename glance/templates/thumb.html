@@ -16,15 +16,19 @@
 
   <div class="item_panel">
     <div style="text-align:center;">
-      <div class="add_to_selection" style="display:inline-block;text-align:center;">
+      <div class="add_to_selection badge badge-pill badge-dark" style="display:inline-block;text-align:center;">
 
         <form class="form-signin"  role="form">
           <input type="hidden" id="item_id" value="{{item.id}}" class="form-control">
           <input type="hidden" id="item_thumb" value="{{item.item_thumb}}" class="form-control">
-          <span class="badge badge-pill badge-dark">❤</span>
+          ❤
         </form>
 
       </div>
+
+      <a href="#">
+        <small><strong><span class="glyphicon glyphicon-save" aria-hidden="true"></span></strong></small>
+      </a>
 
     </div>
   </div>

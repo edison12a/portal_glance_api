@@ -92,7 +92,6 @@ def signup():
 # utility
 @app.route('/append_fav', methods=['GET','POST'])
 def append_fav():
-
     item_id = request.args['item_id']
     item_thumb = request.args['item_thumb']
 
