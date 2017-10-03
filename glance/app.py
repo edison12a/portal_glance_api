@@ -81,8 +81,6 @@ def signup():
         elif payload['password'] not in dev_user:
             return render_template('signup.html')
 
-        r = requests.post('{}'.format(API_USER), params=payload)
-
         return home()
 
     elif request.method == 'GET':
@@ -111,7 +109,6 @@ def uploading():
             # Init dict and append user data
             upload_data = {}
             upload_data['items_for_collection'] = []
-            items_for_collection = []
 
             for form_input in request.form:
                 upload_data[form_input] = request.form[form_input]
@@ -125,37 +122,7 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload = {}
-                            payload['name'] = items
-                            payload['author'] = session['username']
-                            payload['tags'] = upload_data['tags']
-                            payload['item_type'] = upload_data['itemradio']
-                            payload['item_loc'] = uploaded_file[0]
-                            payload['item_thumb'] = uploaded_file[1]
-
-                            # AWS REKOGNITION
-                            for tag in image.generate_tags(uploaded_file[0]):
-                                if payload['tags'] == '':
-                                    payload['tags'] = tag.lower()
-                                else:
-                                    payload['tags'] +=  ' ' + tag.lower()
-
-                            # append name to tags
-                            # remove punc
-                            payload_name = ''
-                            for x in payload['name']:
-                                if x == '_' or x == '-':
-                                    payload_name += ' '
-                                    pass
-                                elif x in string.punctuation:
-                                    pass
-                                else:
-                                    payload_name += x
-                            # apend payload_name to tag string for posting.
-                            if payload['tags'] == '':
-                                payload['tags'] = payload_name.lower()
-                            else:
-                                payload['tags'] += ' {}'.format(payload_name.lower())
+                            payload = file.create_payload(session, upload_data, items, uploaded_file)
 
                         else:
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
@@ -165,12 +132,6 @@ def uploading():
                     account_session = auth.SessionHandler(session).get()
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
                     res = r.json()['data']
-                    # collect uploaded item ids from respoce object in a list
-                    # incase its this also a collection...
-                    # TODO: above comment makes no sence... can i check if its a
-                    # collection at the beginning? does it matter? Its not dry.
-                    # TODO: Make this a helper
-                    # res = r.json()
 
                     # append Item ids for Collection
                     for x in res:
@@ -183,55 +144,16 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.mp4'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            item_thumb_filename, item_thumb_ext = os.path.splitext(uploaded_file[0])
-
-                            payload = {}
-                            payload['name'] = items
-                            payload['author'] = session['username']
-                            payload['tags'] = upload_data['tags']
-                            payload['item_type'] = upload_data['itemradio']
-                            payload['item_loc'] = uploaded_file[0]
-                            payload['item_thumb'] = uploaded_file[1]
-
-                            # AWS REKOGNITION
-                            # TODO: currently running `generate_tags` on the
-                            # thumbnail. Needs to be run on the extracted image.
-                            for tag in image.generate_tags(uploaded_file[1]):
-                                payload['tags'] +=  ' ' + tag.lower()
-
+                            payload = file.create_payload(session, upload_data, items, uploaded_file)
 
                         else:
                             # Use to validate wether item is a valid format
                             pass
-                            """
-                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload['attached'] = uploaded_file
-                            """
-
-                    # append name to tags
-                    # remove punc
-                    payload_name = ''
-                    for x in payload['name']:
-                        if x == '_' or x == '-':
-                            payload_name += ' '
-                            pass
-                        elif x in string.punctuation:
-                            pass
-                        else:
-                            payload_name += x
-                    # apend payload_name to tag string for posting.
-                    if payload['tags'] == '':
-                        payload['tags'] = payload_name.lower()
-                    else:
-                        payload['tags'] += ' {}'.format(payload_name.lower())
-
-
 
                     # post payload to api
                     account_session = auth.SessionHandler(session).get()
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
                     res = r.json()['data']
-                    payload['tags'] = ''
 
                     # append Item ids for Collection
                     for x in res:
@@ -247,42 +169,11 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-
-                            payload = {}
-                            payload['name'] = items
-                            payload['author'] = session['username']
-                            payload['tags'] = upload_data['tags']
-                            payload['item_type'] = upload_data['itemradio']
-                            payload['item_loc'] = uploaded_file[0]
-                            payload['item_thumb'] = uploaded_file[1]
-
-                            # AWS REKOGNITION
-                            for tag in image.generate_tags(uploaded_file[0]):
-                                payload['tags'] +=  ' ' + tag.lower()
+                            payload = file.create_payload(session, upload_data, items, uploaded_file)
 
                         else:
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
-
-
-                    # append name to tags
-                    # remove punc
-                    payload_name = ''
-                    for x in payload['name']:
-                        if x == '_' or x == '-':
-                            payload_name += ' '
-                            pass
-                        elif x in string.punctuation:
-                            pass
-                        else:
-                            payload_name += x
-                    # apend payload_name to tag string for posting.
-                    if payload['tags'] == '':
-                        payload['tags'] = payload_name.lower()
-                    else:
-                        payload['tags'] += ' {}'.format(payload_name.lower())
-
-
 
                     # post payload to api
                     account_session = auth.SessionHandler(session).get()
@@ -301,42 +192,11 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-
-                            payload = {}
-                            payload['name'] = items
-                            payload['author'] = session['username']
-                            payload['tags'] = upload_data['tags']
-                            payload['item_type'] = upload_data['itemradio']
-                            payload['item_loc'] = uploaded_file[0]
-                            payload['item_thumb'] = uploaded_file[1]
-
-                            # AWS REKOGNITION
-                            for tag in image.generate_tags(uploaded_file[0]):
-                                payload['tags'] +=  ' ' + tag.lower()
+                            payload = file.create_payload(session, upload_data, items, uploaded_file)
 
                         else:
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
-
-
-                    # append name to tags
-                    # remove punc
-                    payload_name = ''
-                    for x in payload['name']:
-                        if x == '_' or x == '-':
-                            payload_name += ' '
-                            pass
-                        elif x in string.punctuation:
-                            pass
-                        else:
-                            payload_name += x
-                    # apend payload_name to tag string for posting.
-                    if payload['tags'] == '':
-                        payload['tags'] = payload_name.lower()
-                    else:
-                        payload['tags'] += ' {}'.format(payload_name.lower())
-
-
 
                     # post payload to api
                     account_session = auth.SessionHandler(session).get()
@@ -467,7 +327,6 @@ def patch_item():
 
     account_session = auth.SessionHandler(session).get()
     r = requests.put('{}items/{}'.format(settings.api_root, data['id']), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-    res = r.json()
 
 
     return redirect(f"item/{data['id']}")
@@ -625,7 +484,6 @@ def home():
     data = {'query': "**"}
     # process and reverse data so the latest uploaded items are first.
     # Currently using the items `id`, but upload date would be better.
-    reversed_list = []
 
     payload = {}
     payload['filter'] = 'all'

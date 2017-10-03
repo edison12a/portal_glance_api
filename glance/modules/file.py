@@ -8,8 +8,7 @@ __license__ = ""
 
 import os
 import secrets
-
-import boto3
+import string
 
 import glance.modules.image as image
 import glance.modules.auth as auth
@@ -105,9 +104,44 @@ def upload_handler(file, dst):
     # `TODO: error
     return result
 
+def create_payload(session, upload_data, name, uploaded_file):
+    """"""
+    payload = {}
+    payload['name'] = name
+    payload['author'] = session['username']
+    payload['tags'] = upload_data['tags']
+    payload['item_type'] = upload_data['itemradio']
+    payload['item_loc'] = uploaded_file[0]
+    payload['item_thumb'] = uploaded_file[1]
+
+    # AWS REKOGNITION
+    for tag in image.generate_tags(uploaded_file[0]):
+        if payload['tags'] == '':
+            payload['tags'] = tag.lower()
+        else:
+            payload['tags'] += ' ' + tag.lower()
+
+    # Process image name
+    payload_name = ''
+    for x in payload['name']:
+        if x == '_' or x == '-':
+            payload_name += ' '
+            pass
+        elif x in string.punctuation:
+            pass
+        else:
+            payload_name += x
+
+    # apend payload_name to tag string for posting.
+    if payload['tags'] == '':
+        payload['tags'] = payload_name.lower()
+    else:
+        payload['tags'] += ' {}'.format(payload_name.lower())
+
+    return payload
+
 
 def process_raw_files(files):
-    print(files)
     """pairs images to attachments.
 
     :param files: ???
@@ -124,6 +158,3 @@ def process_raw_files(files):
             collector[filename].append(x)
 
     return collector
-
-
-    return True
