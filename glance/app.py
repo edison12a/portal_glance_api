@@ -107,6 +107,7 @@ def uploading():
     if auth.logged_in(session):
         if request.method == 'POST':
             # Init dict and append user data
+            account_session = auth.SessionHandler(session).get()
             upload_data = {}
             upload_data['items_for_collection'] = []
 
@@ -139,7 +140,6 @@ def uploading():
                         upload_data['items_for_collection'].append(item_id)
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'footage':
-                # build payload for api
                 for items in processed_files:
                     for item in processed_files[items]:
                         if item.filename.endswith('.mp4'):
@@ -161,11 +161,7 @@ def uploading():
                         upload_data['items_for_collection'].append(item_id)
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'geometry':
-                # build payload for api
-
                 for items in processed_files:
-                    # payload['name'] = items
-
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
@@ -186,8 +182,6 @@ def uploading():
                         upload_data['items_for_collection'].append(item_id)
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'people':
-                # build payload for api
-
                 for items in processed_files:
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
@@ -241,8 +235,6 @@ def uploading():
                     return render_template('collection.html', item=res, data=data)
 
             elif 'collection' in upload_data:
-                print('NO HIT')
-
                 payload = {
                     'name': upload_data['collection'],
                     'item_type': 'collection',
@@ -261,12 +253,21 @@ def uploading():
 
                 return render_template('collection.html', item=res, data=data)
 
-
+            # upload output
             if len(upload_data['items_for_collection']) > 1:
-                return render_template('uploadcomplete.html', data=data)
+                data = "**"
+                items = {'status': 'success', 'data': []}
+                print('whaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                # return render_template('uploadcomplete.html', data=data)
+
+                for item_id in upload_data['items_for_collection']:
+                    r = requests.get('{}items/{}'.format(settings.api_root, item_id), auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()['data'][0]
+                    items['data'].append(r)
+
+                return render_template('search.html', data=data, items=items)
+
             elif len(upload_data['items_for_collection']) == 1:
-                # TODO: return actual items. instead of 'uploadcompelte.html'.
-                return render_template('uploadcomplete.html', data=data)
+                return redirect(f"item/{upload_data['items_for_collection'][0]}")
 
             else:
                 return render_template('uploadcomplete.html', data=data)
@@ -647,7 +648,8 @@ def search():
     account_session = auth.SessionHandler(session).get()
     r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
-
+    print('0000000000000000000000000000000000000')
+    print(r.json())
     return render_template('search.html', data=data, items=r.json())
 
 
