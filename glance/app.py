@@ -19,11 +19,7 @@ import glance.modules.auth as auth
 import glance.modules.file as file
 import glance.modules.image as image
 
-from config import settings
-
-
-# TODO: collection is set to loop on 5. do this to the other pages?
-# search results, front page etc.
+from glance.config import settings
 
 
 '''Flask Config'''
@@ -88,7 +84,7 @@ def signup():
 
 
 # utility
-@app.route('/append_fav', methods=['GET','POST'])
+@app.route('/append_fav', methods=['GET', 'POST'])
 def append_fav():
     item_id = request.args['item_id']
     item_thumb = request.args['item_thumb']
@@ -100,7 +96,7 @@ def append_fav():
 
 @app.route('/uploading', methods=['POST'])
 def uploading():
-    #TODO:  refactor.
+    # TODO:  refactor.
     # TODO: user input sanitising? here or the api?
     # TODO: emi persistant data users search term, imp into session?
     data = {'query': "**"}
@@ -123,14 +119,13 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload = file.create_payload(session, upload_data, items, uploaded_file)
+                            payload = file.create_payload(account_session, upload_data, items, uploaded_file)
 
                         else:
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
                     # post payload to api
-                    account_session = auth.SessionHandler(session).get()
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
                     res = r.json()['data']
 
@@ -144,14 +139,13 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.mp4'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload = file.create_payload(session, upload_data, items, uploaded_file)
+                            payload = file.create_payload(account_session, upload_data, items, uploaded_file)
 
                         else:
                             # Use to validate wether item is a valid format
                             pass
 
                     # post payload to api
-                    account_session = auth.SessionHandler(session).get()
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
                     res = r.json()['data']
 
@@ -165,14 +159,13 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload = file.create_payload(session, upload_data, items, uploaded_file)
+                            payload = file.create_payload(account_session, upload_data, items, uploaded_file)
 
                         else:
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
                     # post payload to api
-                    account_session = auth.SessionHandler(session).get()
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
                     res = r.json()['data']
                     # collect uploaded item ids from respoce object.
@@ -186,14 +179,13 @@ def uploading():
                     for item in processed_files[items]:
                         if item.filename.endswith('.jpg'):
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload = file.create_payload(session, upload_data, items, uploaded_file)
+                            payload = file.create_payload(account_session, upload_data, items, uploaded_file)
 
                         else:
                             uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
                             payload['attached'] = uploaded_file
 
                     # post payload to api
-                    account_session = auth.SessionHandler(session).get()
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
                     res = r.json()['data']
                     # collect uploaded item ids from respoce object.
@@ -226,7 +218,6 @@ def uploading():
                         'author': session['username']
                     }
 
-                    account_session = auth.SessionHandler(session).get()
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
                     res = r.json()['data']
@@ -234,6 +225,7 @@ def uploading():
                     # return home()
                     return render_template('collection.html', item=res, data=data)
 
+            # runs if a collection name has been entered, only.
             elif 'collection' in upload_data:
                 payload = {
                     'name': upload_data['collection'],
@@ -247,7 +239,6 @@ def uploading():
                 if payload['tags'] == '':
                     del payload['tags']
 
-                account_session = auth.SessionHandler(session).get()
                 r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
                 res = r.json()['data']
 
@@ -257,8 +248,6 @@ def uploading():
             if len(upload_data['items_for_collection']) > 1:
                 data = "**"
                 items = {'status': 'success', 'data': []}
-                print('whaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-                # return render_template('uploadcomplete.html', data=data)
 
                 for item_id in upload_data['items_for_collection']:
                     r = requests.get('{}items/{}'.format(settings.api_root, item_id), auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()['data'][0]
@@ -270,7 +259,7 @@ def uploading():
                 return redirect(f"item/{upload_data['items_for_collection'][0]}")
 
             else:
-                return render_template('uploadcomplete.html', data=data)
+                return render_template('uploadcomplete.html')
 
     else:
         return home()
@@ -327,7 +316,7 @@ def patch_item():
                     auth.delete_from_s3(to_delete_from_s3)
 
     account_session = auth.SessionHandler(session).get()
-    r = requests.put('{}items/{}'.format(settings.api_root, data['id']), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+    requests.put('{}items/{}'.format(settings.api_root, data['id']), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
 
     return redirect(f"item/{data['id']}")
@@ -500,32 +489,30 @@ def home():
     if 'status' in res and res['status'] == 'failed':
         return render_template('home.html', data=data)
 
-    else:
-        res = res['data']
-        # tags
-        tags = []
-        goo = [x['tags'] for x in res]
+    res = res['data']
+    # tags
+    tags = []
 
-        for x in res:
-            for j in x['tags']:
-                if j not in tags:
-                    tags.append(j['name'])
+    for x in res:
+        for j in x['tags']:
+            if j not in tags:
+                tags.append(j['name'])
 
-        collections = [x for x in res if x['item_type'] == 'collection'][0:10]
+    collections = [x for x in res if x['item_type'] == 'collection'][0:10]
 
-        images = [x for x in res if x['item_type'] == 'image'][0:10]
+    images = [x for x in res if x['item_type'] == 'image'][0:10]
 
-        footage = [x for x in res if x['item_type'] == 'footage'][0:10]
+    footage = [x for x in res if x['item_type'] == 'footage'][0:10]
 
-        people = [x for x in res if x['item_type'] == 'people'][0:10]
+    people = [x for x in res if x['item_type'] == 'people'][0:10]
 
-        geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
+    geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
 
 
-        return render_template(
-            'home.html', collections=collections, images=images, footage=footage,
-            people=people, geometry=geometry, data=data, tags=tags[:160]
-            )
+    return render_template(
+        'home.html', collections=collections, images=images, footage=footage,
+        people=people, geometry=geometry, data=data, tags=tags[:160]
+        )
 
 
 @app.route('/manage')
@@ -546,12 +533,12 @@ def manage():
 
             return render_template('manage.html', collection=collections, items=data, data=data)
 
-        else:
-            collections = []
-            data = []
-            return render_template('manage.html', collection=collections, items=data, data=data)
-    else:
-        return home()
+
+        collections = []
+        data = []
+        return render_template('manage.html', collection=collections, items=data, data=data)
+
+    return home()
 
 
 @app.route('/coll_list')
@@ -573,13 +560,12 @@ def upload():
 
     if auth.logged_in(session):
         return render_template('upload.html', data=data)
-    else:
-        return home()
+
+    return home()
 
 
 @app.route('/item/<id>/')
 def item(id):
-    # TODO: emi persistant data users search term, imp into session?
     data = {'query': "**"}
 
     if id:

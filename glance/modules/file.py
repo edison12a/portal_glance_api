@@ -104,11 +104,11 @@ def upload_handler(file, dst):
     # `TODO: error
     return result
 
-def create_payload(session, upload_data, name, uploaded_file):
+def create_payload(account_session, upload_data, item_name, uploaded_file):
     """"""
     payload = {}
-    payload['name'] = name
-    payload['author'] = session['username']
+    payload['name'] = item_name
+    payload['author'] = account_session['username']
     payload['tags'] = upload_data['tags']
     payload['item_type'] = upload_data['itemradio']
     payload['item_loc'] = uploaded_file[0]
