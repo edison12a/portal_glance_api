@@ -31,3 +31,6 @@ tests/sqlite_test_database.db
 # Flask stuff:
 instance/
 .webassets-cache
+
+# vs code stuff
+.vscode/
