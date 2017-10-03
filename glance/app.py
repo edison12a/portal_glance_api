@@ -14,10 +14,12 @@ import re
 import requests
 from flask import Flask, render_template, request, session, jsonify, url_for, redirect
 from requests.auth import HTTPBasicAuth
+from celery import Celery
 
 import glance.modules.auth as auth
 import glance.modules.file as file
 import glance.modules.image as image
+import glance.modules.tasks
 
 from glance.config import settings
 
@@ -26,6 +28,12 @@ from glance.config import settings
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = settings.tmp_upload
 app.secret_key = settings.secret_key
+
+app.config['CELERY_BROKER_URL'] = 'pyamqp://guest@localhost//'
+# app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.update(app.config)
 
 '''API SHORTHAND'''
 # TODO: Lazy?
@@ -45,6 +53,8 @@ def login():
         form = request.form
 
         if auth.SessionHandler(session).open(username=form['username'], password=form['password']):
+            glance.modules.tasks.add.delay(4, 4)
+
             return home()
 
         else:
