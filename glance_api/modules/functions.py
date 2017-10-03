@@ -321,7 +321,7 @@ def get_query(session, userquery):
                             pass
                         else:
                             result.append(item)
-            return result
+            return set(result)
         else:
             return set(items)
 

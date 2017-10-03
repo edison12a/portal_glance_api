@@ -259,14 +259,11 @@ class Items(Resource):
 class ItemsL(Resource):
     @auth.login_required
     def get(self):
-        print('ooooooooooooooooooooooooooooooooooooooooooo')
         session = Session()
         raw_items = functions.Item(session).get()
         if raw_items:
 
             response = resp(status='success', data=convert.jsonify(raw_items))
-            print('00000000000000000000000000000000000000000')
-            print(len(response['data']))
 
             session.close()
             return response
@@ -340,12 +337,8 @@ class Query(Resource):
         parser.add_argument('query', type=str, help='help text')
         args = parser.parse_args()
 
-
         session = Session()
         test = functions.get_query(session, args)
-
-        print('EXIT EXIT EXIOT EXIT')
-        print(test)
 
         response = resp(status='success', data=convert.jsonify(test))
 
