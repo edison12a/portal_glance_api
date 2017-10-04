@@ -91,6 +91,7 @@ def local_clean_up(dst, filename):
     return filename
 
 
+# TODO: IMP celery for create_payload, and aws rekignition
 def create_payload(account_session, upload_data, item_name, **files):
     """"""
     payload = {}
