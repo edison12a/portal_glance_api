@@ -12,16 +12,9 @@ import string
 
 import glance.modules.image as image
 import glance.modules.auth as auth
+import glance.app
 
 ALLOWED_FILE_TYPES = ['.jpg', '.zip', '.mp4']
-
-# helpers
-def local_rename_file_with_salt(root, ext):
-    salt = secrets.token_urlsafe(4)
-    root = '{}_{}'.format(root, salt)
-
-    return (root, ext)
-
 
 def upload_handler(dst, filelist):
     if isinstance(filelist, list):
@@ -38,18 +31,15 @@ def upload_handler(dst, filelist):
 
         if ext == '.jpg' or ext == '.mp4':
             dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
-            local_file_to_s3(dst, filename)
-            local_clean_up(dst, filename)
+            local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
             result['filename'] = filename
 
-            local_file_to_s3(dst, thumbnail)
-            local_clean_up(dst, thumbnail)
+            local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(dst, thumbnail))
             result['thumbnail'] = thumbnail
 
         if ext == '.zip':
             filename = f'{root}{ext}'
-            local_file_to_s3(dst, filename)
-            local_clean_up(dst, filename)
+            local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
             result['attachment'] = filename
 
     return result
@@ -67,6 +57,13 @@ def local_save_file(dst, fileobj):
     return (dst, root, ext)
 
 
+def local_rename_file_with_salt(root, ext):
+    salt = secrets.token_urlsafe(4)
+    root = '{}_{}'.format(root, salt)
+
+    return (root, ext)
+
+
 def local_make_thumbnail(dst, root, ext):
     if ext == '.jpg':
         thumbnail = image.thumb(dst, f'{root}{ext}')
@@ -80,14 +77,14 @@ def local_make_thumbnail(dst, root, ext):
 
     return (dst, f'{root}{ext}', thumbnail)
 
-
+@glance.app.celery.task
 def local_file_to_s3(dst, filename):
     s3 = auth.boto3_res_s3()
     auth.boto3_s3_upload(s3, dst, filename)
 
     return (dst, filename)
 
-
+@glance.app.celery.task
 def local_clean_up(dst, filename):
     os.remove(os.path.join(dst, filename))
 
@@ -106,12 +103,14 @@ def create_payload(account_session, upload_data, item_name, **files):
     if 'attachment' in files and files['attachment']:
         payload['attached'] = files['attachment']
 
+    """
     # AWS REKOGNITION
     for tag in image.generate_tags(files['filename']):
         if payload['tags'] == '':
             payload['tags'] = tag.lower()
         else:
             payload['tags'] += ' ' + tag.lower()
+    """
 
     # Process image name
     payload_name = ''

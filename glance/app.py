@@ -17,9 +17,8 @@ from requests.auth import HTTPBasicAuth
 from celery import Celery
 
 import glance.modules.auth as auth
-import glance.modules.file as file
+import glance.modules.file
 import glance.modules.image as image
-import glance.modules.tasks
 
 from glance.config import settings
 
@@ -53,7 +52,6 @@ def login():
         form = request.form
 
         if auth.SessionHandler(session).open(username=form['username'], password=form['password']):
-            glance.modules.tasks.add.delay(4, 4)
 
             return home()
 
@@ -126,14 +124,14 @@ def uploading():
                 upload_data[form_input] = request.form[form_input]
 
             # process all uploaded files.
-            processed_files = file.process_raw_files(request.files.getlist('file'))
+            processed_files = glance.modules.file.process_raw_files(request.files.getlist('file'))
 
             # process remaining item data
             if 'itemradio' in upload_data and upload_data['itemradio'] == 'image':
                 for items in processed_files:
-                    uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
+                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
                     if uploaded_file != False:
-                        payload = file.create_payload(account_session, upload_data, items, **uploaded_file)
+                        payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
@@ -146,9 +144,9 @@ def uploading():
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'footage':
                 for items in processed_files:
-                    uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
+                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
                     if uploaded_file != False:
-                        payload = file.create_payload(account_session, upload_data, items, **uploaded_file)
+                        payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
@@ -161,9 +159,9 @@ def uploading():
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'geometry':
                 for items in processed_files:
-                    uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
+                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
                     if uploaded_file != False:
-                        payload = file.create_payload(account_session, upload_data, items, **uploaded_file)
+                        payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
@@ -177,9 +175,9 @@ def uploading():
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'people':
                 for items in processed_files:
-                    uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
+                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
                     if uploaded_file != False:
-                        payload = file.create_payload(account_session, upload_data, items, **uploaded_file)
+                        payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
@@ -298,7 +296,7 @@ def patch_item():
                 pass
 
             else:
-                uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], cover_image)
+                uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], cover_image)
                 payload = {}
                 payload['item_loc'] = uploaded_file['filename']
                 payload['item_thumb'] = uploaded_file['thumbnail']
