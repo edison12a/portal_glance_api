@@ -13,109 +13,101 @@ import string
 import glance.modules.image as image
 import glance.modules.auth as auth
 
+ALLOWED_FILE_TYPES = ['.jpg', '.zip', '.mp4']
 
-def upload_handler(file, dst):
-    """handles uploading of all file types.
+# helpers
+def local_rename_file_with_salt(root, ext):
+    salt = secrets.token_urlsafe(4)
+    root = '{}_{}'.format(root, salt)
 
-    :param file: ???
-    :param dst: ???
+    return (root, ext)
 
-    :return Type: ???
-    """
-    # data structures
-    items = []
-    result = []
-    allowed = ['.jpg', '.zip', '.mp4', '.png']
-    # process filenames and add random characters to avoid duplication, and
-    filename, ext = os.path.splitext(file.filename)
 
-    # check if `file` is allowed, else...
-    if ext not in allowed:
+def upload_handler(dst, filelist):
+    if isinstance(filelist, list):
+        pass
+    else:
+        filelist = [filelist]
+
+    result = {}
+    for file in filelist:
+        try:
+            dst, root, ext = local_save_file(dst, file)
+        except:
+            return False
+
+        if ext == '.jpg' or ext == '.mp4':
+            dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
+            local_file_to_s3(dst, filename)
+            local_clean_up(dst, filename)
+            result['filename'] = filename
+
+            local_file_to_s3(dst, thumbnail)
+            local_clean_up(dst, thumbnail)
+            result['thumbnail'] = thumbnail
+
+        if ext == '.zip':
+            filename = f'{root}{ext}'
+            local_file_to_s3(dst, filename)
+            local_clean_up(dst, filename)
+            result['attachment'] = filename
+
+    return result
+
+
+def local_save_file(dst, fileobj):
+    root, ext = os.path.splitext(fileobj.filename)
+    if ext not in ALLOWED_FILE_TYPES:
         # TODO: IMP error
         return False
 
-    # save locally for 'physical' processing.
-    salt = secrets.token_urlsafe(4)
-    filename = '{}_{}'.format(filename, salt)
-    file.save(os.path.join(dst, '{}{}'.format(filename, ext)))
+    root, ext = local_rename_file_with_salt(root, ext)
+    fileobj.save(os.path.join(dst, '{}{}'.format(root, ext)))
+
+    return (dst, root, ext)
 
 
-    items.append('{}{}'.format(filename, ext))
-    # result.append('{}{}'.format(filename, ext))
+def local_make_thumbnail(dst, root, ext):
+    if ext == '.jpg':
+        thumbnail = image.thumb(dst, f'{root}{ext}')
 
-    # get s3 resource
+    elif ext == '.mp4':
+        saved_frame = image.save_frame(dst, f'{root}{ext}')
+        thumbnail = image.thumb(dst, saved_frame)
+    
+    else:
+        return False
+
+    return (dst, f'{root}{ext}', thumbnail)
+
+
+def local_file_to_s3(dst, filename):
     s3 = auth.boto3_res_s3()
+    auth.boto3_s3_upload(s3, dst, filename)
 
-    # process each file based on extention. Any file extentions not allowed
-    # are ignored.
-    for item in items:
-        filename, ext = os.path.splitext(item)
-
-        if ext == '.jpg' or ext == '.png':
-            # Make thumbnail and upload items to s3
-            thumbnail = image.thumb(dst, '{}{}'.format(filename, ext))
-            auth.boto3_s3_upload(s3, dst, item)
-            auth.boto3_s3_upload(s3, dst, thumbnail)
-
-            result.append('{}{}'.format(filename, ext))
-            result.append(thumbnail)
-            # clean up local
-            os.remove(os.path.join(dst, item))
-            os.remove(os.path.join(dst, thumbnail))
+    return (dst, filename)
 
 
-            return result
+def local_clean_up(dst, filename):
+    os.remove(os.path.join(dst, filename))
+
+    return filename
 
 
-        elif ext == '.zip':
-            # upload zip file
-            auth.boto3_s3_upload(s3, dst, item)
-
-            result.append('{}{}'.format(filename, ext))
-            # clean up
-            os.remove(os.path.join(dst, item))
-
-
-            return result
-
-
-        elif ext == '.mp4':
-            # get frame from  video file and upload all
-            saved_frame = image.save_frame(dst, '{}{}'.format(filename, ext))
-            thumbnail_from_saved_frame = image.thumb(dst, saved_frame)
-
-            auth.boto3_s3_upload(s3, dst, item)
-            auth.boto3_s3_upload(s3, dst, thumbnail_from_saved_frame)
-
-            result.append(item)
-            result.append(thumbnail_from_saved_frame)
-            # Clean up
-            os.remove(os.path.join(dst, item))
-            os.remove(os.path.join(dst, saved_frame))
-            os.remove(os.path.join(dst, thumbnail_from_saved_frame))
-
-            return result
-
-        else:
-            # TODO: error
-            pass
-
-
-    # `TODO: error
-    return result
-
-def create_payload(account_session, upload_data, item_name, uploaded_file):
+def create_payload(account_session, upload_data, item_name, **files):
     """"""
     payload = {}
     payload['name'] = item_name
     payload['author'] = account_session['username']
     payload['tags'] = upload_data['tags']
     payload['item_type'] = upload_data['itemradio']
-    payload['item_loc'] = uploaded_file[0]
-    payload['item_thumb'] = uploaded_file[1]
+    payload['item_loc'] = files['filename']
+    payload['item_thumb'] = files['thumbnail']
+    if 'attachment' in files and files['attachment']:
+        payload['attached'] = files['attachment']
 
     # AWS REKOGNITION
-    for tag in image.generate_tags(uploaded_file[0]):
+    for tag in image.generate_tags(files['filename']):
         if payload['tags'] == '':
             payload['tags'] = tag.lower()
         else:

@@ -59,11 +59,11 @@ def login():
 
         else:
             auth.SessionHandler(session).close()
+            message = 'Somethings wrong there. Try again.'
+            return render_template('login.html', message=message)
 
     else:
         return render_template('login.html')
-
-    return home()
 
 
 @app.route("/logout")
@@ -87,7 +87,12 @@ def signup():
         elif payload['password'] not in dev_user:
             return render_template('signup.html')
 
-        return home()
+        resp = requests.post('{}accounts'.format(settings.api_root), params=payload).json()
+        if 'status' in resp and resp['status'] == 'success':
+            return home()
+
+        else:
+            return render_template('signup.html', message=resp['error'])
 
     elif request.method == 'GET':
         return render_template('signup.html')
@@ -126,14 +131,9 @@ def uploading():
             # process remaining item data
             if 'itemradio' in upload_data and upload_data['itemradio'] == 'image':
                 for items in processed_files:
-                    for item in processed_files[items]:
-                        if item.filename.endswith('.jpg'):
-                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload = file.create_payload(account_session, upload_data, items, uploaded_file)
-
-                        else:
-                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload['attached'] = uploaded_file
+                    uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
+                    if uploaded_file != False:
+                        payload = file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
@@ -146,14 +146,9 @@ def uploading():
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'footage':
                 for items in processed_files:
-                    for item in processed_files[items]:
-                        if item.filename.endswith('.mp4'):
-                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload = file.create_payload(account_session, upload_data, items, uploaded_file)
-
-                        else:
-                            # Use to validate wether item is a valid format
-                            pass
+                    uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
+                    if uploaded_file != False:
+                        payload = file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
@@ -166,18 +161,14 @@ def uploading():
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'geometry':
                 for items in processed_files:
-                    for item in processed_files[items]:
-                        if item.filename.endswith('.jpg'):
-                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload = file.create_payload(account_session, upload_data, items, uploaded_file)
-
-                        else:
-                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload['attached'] = uploaded_file
+                    uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
+                    if uploaded_file != False:
+                        payload = file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
                     res = r.json()['data']
+
                     # collect uploaded item ids from respoce object.
                     # append Item ids for Collection
                     for x in res:
@@ -186,18 +177,14 @@ def uploading():
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'people':
                 for items in processed_files:
-                    for item in processed_files[items]:
-                        if item.filename.endswith('.jpg'):
-                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload = file.create_payload(account_session, upload_data, items, uploaded_file)
-
-                        else:
-                            uploaded_file = file.upload_handler(item, app.config['UPLOAD_FOLDER'])
-                            payload['attached'] = uploaded_file
+                    uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
+                    if uploaded_file != False:
+                        payload = file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
                     r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
                     res = r.json()['data']
+
                     # collect uploaded item ids from respoce object.
                     # TODO: Make this a helper
                     # append Item ids for Collection
@@ -311,22 +298,22 @@ def patch_item():
                 pass
 
             else:
-                uploaded_file = file.upload_handler(cover_image, app.config['UPLOAD_FOLDER'])
-                data = {}
-                data['item_loc'] = uploaded_file[0]
-                data['item_thumb'] = uploaded_file[1]
-                data['id'] = form['id']
+                uploaded_file = file.upload_handler(app.config['UPLOAD_FOLDER'], cover_image)
+                payload = {}
+                payload['item_loc'] = uploaded_file['filename']
+                payload['item_thumb'] = uploaded_file['thumbnail']
+                payload['id'] = form['id']
 
-                data['del_item_loc'] = form['del_item_loc']
-                data['del_item_thumb'] = form['del_item_thumb']
+                payload['del_item_loc'] = form['del_item_loc']
+                payload['del_item_thumb'] = form['del_item_thumb']
 
                 # delete old collection cover
-                if 'del_item_loc' and 'del_item_thumb' in data:
-                    to_delete_from_s3 = [data['del_item_loc'], data['del_item_thumb'], 'None']
+                if 'del_item_loc' and 'del_item_thumb' in payload:
+                    to_delete_from_s3 = [payload['del_item_loc'], payload['del_item_thumb'], 'None']
                     auth.delete_from_s3(to_delete_from_s3)
 
     account_session = auth.SessionHandler(session).get()
-    requests.put('{}items/{}'.format(settings.api_root, data['id']), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+    requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
 
 
     return redirect(f"item/{data['id']}")

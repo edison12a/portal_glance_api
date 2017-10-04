@@ -306,6 +306,7 @@ class Tags(Resource):
     def get(self, id):
         pass
 
+
     @auth.login_required
     def put(self, id):
         pass
@@ -344,7 +345,6 @@ class Query(Resource):
 
         session.close()
         return response
-
 
 
 # routes

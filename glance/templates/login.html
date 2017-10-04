@@ -12,6 +12,13 @@
   <div style="width:400px;margin:auto;">
     <div id="section_header">Login</div>
 
+    {% if message %}
+    <div class="alert alert-danger" role="alert">
+      {{message}}
+    </div>
+    {% else %}
+    {% endif %}
+
     <form action="/login" method="POST">
       <input type="username" class="form-control" name="username" placeholder="Username">
       <input type="password" class="form-control" name="password" placeholder="Password">
