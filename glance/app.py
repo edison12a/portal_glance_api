@@ -58,6 +58,7 @@ def login():
         else:
             auth.SessionHandler(session).close()
             message = 'Somethings wrong there. Try again.'
+
             return render_template('login.html', message=message)
 
     else:
@@ -85,14 +86,15 @@ def signup():
         elif payload['password'] not in dev_user:
             return render_template('signup.html')
 
-        resp = requests.post('{}accounts'.format(settings.api_root), params=payload).json()
-        if 'status' in resp and resp['status'] == 'success':
+        res = glance.modules.api.post_account(payload)
+        if res:
             return home()
 
         else:
-            return render_template('signup.html', message=resp['error'])
+            return render_template('signup.html', message=res['error'])
 
     elif request.method == 'GET':
+
         return render_template('signup.html')
 
 
@@ -120,6 +122,7 @@ def uploading():
             upload_data = {}
             upload_data['items_for_collection'] = []
 
+            # process form data
             for form_input in request.form:
                 upload_data[form_input] = request.form[form_input]
 
@@ -127,55 +130,12 @@ def uploading():
             processed_files = glance.modules.file.process_raw_files(request.files.getlist('file'))
 
             # process remaining item data
-            if 'itemradio' in upload_data and upload_data['itemradio'] == 'image':
+            if 'itemradio' in upload_data:
                 for items in processed_files:
                     uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items], account_session, upload_data['itemradio'])
                     if uploaded_file:
-                        print('--------------------------------------')
-                        print(uploaded_file)
+                        # add new id to list
                         for x in uploaded_file:
-                            item_id = x['id']
-                            upload_data['items_for_collection'].append(item_id)
-
-            elif 'itemradio' in upload_data and upload_data['itemradio'] == 'footage':
-                for items in processed_files:
-                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
-                    if uploaded_file != False:
-                        payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
-
-                    # post payload to api
-                    res = glance.modules.api.post_item(account_session, payload)
-                    if res:
-                        # append Item ids for Collection
-                        for x in res:
-                            item_id = x['id']
-                            upload_data['items_for_collection'].append(item_id)
-
-            elif 'itemradio' in upload_data and upload_data['itemradio'] == 'geometry':
-                for items in processed_files:
-                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
-                    if uploaded_file != False:
-                        payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
-
-                    # post payload to api
-                    res = glance.modules.api.post_item(account_session, payload)
-                    if res:
-                        # append Item ids for Collection
-                        for x in res:
-                            item_id = x['id']
-                            upload_data['items_for_collection'].append(item_id)
-
-            elif 'itemradio' in upload_data and upload_data['itemradio'] == 'people':
-                for items in processed_files:
-                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
-                    if uploaded_file != False:
-                        payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
-
-                    # post payload to api
-                    res = glance.modules.api.post_item(account_session, payload)
-                    if res:
-                        # append Item ids for Collection
-                        for x in res:
                             item_id = x['id']
                             upload_data['items_for_collection'].append(item_id)
 

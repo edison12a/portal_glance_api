@@ -18,41 +18,56 @@ import glance.modules.api
 ALLOWED_FILE_TYPES = ['.jpg', '.zip', '.mp4']
 
 def upload_handler(dst, filelist, account_session, item_type):
+    # TODO: if uploading an .mp4 the frame that gets ripped doesn't get deleted from local server.
     if isinstance(filelist, list):
         pass
     else:
         filelist = [filelist]
 
-    for file in filelist:
+    # edge case: change collection cover.
+    if item_type == None:
         try:
-            dst, root, ext = local_save_file(dst, file)
+            dst, root, ext = local_save_file(dst, filelist[0])
         except:
             return False
 
-        if item_type == None:
-            # edge case: change collection cover.
-            dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
-            local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
-            local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(dst, thumbnail))
+        dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
+        local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
+        local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(dst, thumbnail))
 
-            return (filename, thumbnail)
+        return (filename, thumbnail)
 
+    # init database entry
+    payload = {'item_type': item_type}
+    res = glance.modules.api.post_item(account_session, payload)
+
+    # process each item
+    for file in filelist:
+        try:
+            dst, root, ext = local_save_file(dst, file)
+
+        except:
+            return False
 
         if ext == '.jpg' or ext == '.mp4':
             dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
 
-            payload = {'name': root, 'item_loc': filename, 'item_thumb': thumbnail, 'item_type': item_type}
-            res = glance.modules.api.post_item(account_session, payload)
+            payload = {'id': res[0]['id'], 'name': root, 'item_loc': filename, 'item_thumb': thumbnail}
 
             # below celery task needs to imp rek with db update
-            local_file_to_s3.apply_async((dst, filename), link=[aws_rek_image.si(res[0]['id'], filename, account_session), local_clean_up.si(dst, filename)])
+            local_file_to_s3.apply_async((dst, filename), link=[aws_rek_image.si(payload['id'], filename, account_session), local_clean_up.si(dst, filename)])
             local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(dst, thumbnail))
 
         if ext == '.zip':
             filename = f'{root}{ext}'
+            print(filename)
             local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
 
-        return res
+            payload['attached'] = filename
+
+        res = glance.modules.api.put_item(account_session, payload)
+
+    return res
 
 
 def local_save_file(dst, fileobj):

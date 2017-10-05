@@ -24,9 +24,18 @@ def post_item(account_session, payload):
 
 
 def put_item(account_session, payload):
-    res = requests.put('{}items/{}'.format(glance.config.settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+    res = requests.put('{}items/{}'.format(glance.config.settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
     if 'status' in res and res['status'] == 'success':
         return res['data']
 
     else:
         return False
+
+
+def post_account(payload):
+    res = requests.post('{}accounts'.format(glance.config.settings.api_root), params=payload).json()
+    if 'status' in res and res['status'] == 'success':
+        return res['data']
+    
+    else:
+        return res['data']
