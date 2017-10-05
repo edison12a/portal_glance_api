@@ -132,7 +132,7 @@ def uploading():
             # process remaining item data
             if 'itemradio' in upload_data:
                 for items in processed_files:
-                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items], account_session, upload_data['itemradio'])
+                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items], account_session, upload_data)
                     if uploaded_file:
                         # add new id to list
                         for x in uploaded_file:
@@ -213,30 +213,7 @@ def patch_item():
     payload = {}
 
     if request.method == 'POST':
-        form = request.form
-        for k in form:
-            if k == 'id':
-                payload['id'] = form[k]
-
-            elif k == 'append_collection' and form[k] != '':
-                payload['items'] = form[k]
-
-            elif k == 'append_to_collection' and form[k] != '':
-                payload['append_to_collection'] = form[k]
-
-            elif k == 'append_tags' and form[k] != '':
-                payload['tags'] = form[k]
-
-            elif k == 'people_tags' and form[k] != '':
-                tags = ' '.join(form.getlist('people_tags'))
-                payload['people_tags'] = tags
-
-            elif k == 'collection_rename' and form[k] != '':
-                payload[k] = form[k]
-                if 'tags' in payload and payload['tags'] != '':
-                    payload['tags'] += f"{payload['tags']} {payload[k]}"
-                else:
-                    payload['tags'] = payload[k]
+        payload = glance.modules.api.payload_from_form(request.form)
 
         if 'change_cover' in request.files:
             cover_image = request.files['change_cover']
@@ -252,10 +229,6 @@ def patch_item():
 
                 payload['item_loc'] = uploaded_file[0]
                 payload['item_thumb'] = uploaded_file[1]
-                payload['id'] = form['id']
-
-                payload['del_item_loc'] = form['del_item_loc']
-                payload['del_item_thumb'] = form['del_item_thumb']
 
                 # delete old collection cover
                 if 'del_item_loc' and 'del_item_thumb' in payload:

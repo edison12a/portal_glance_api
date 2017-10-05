@@ -17,7 +17,7 @@ import glance.modules.api
 
 ALLOWED_FILE_TYPES = ['.jpg', '.zip', '.mp4']
 
-def upload_handler(dst, filelist, account_session, item_type):
+def upload_handler(dst, filelist, account_session, extra=None):
     # TODO: if uploading an .mp4 the frame that gets ripped doesn't get deleted from local server.
     if isinstance(filelist, list):
         pass
@@ -25,7 +25,7 @@ def upload_handler(dst, filelist, account_session, item_type):
         filelist = [filelist]
 
     # edge case: change collection cover.
-    if item_type == None:
+    if extra == None:
         try:
             dst, root, ext = local_save_file(dst, filelist[0])
         except:
@@ -38,7 +38,7 @@ def upload_handler(dst, filelist, account_session, item_type):
         return (filename, thumbnail)
 
     # init database entry
-    payload = {'item_type': item_type}
+    payload = {'item_type': extra['itemradio']}
     res = glance.modules.api.post_item(account_session, payload)
 
     # process each item
@@ -52,7 +52,13 @@ def upload_handler(dst, filelist, account_session, item_type):
         if ext == '.jpg' or ext == '.mp4':
             dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
 
-            payload = {'id': res[0]['id'], 'name': root, 'item_loc': filename, 'item_thumb': thumbnail}
+            payload = {
+                'id': res[0]['id'], 
+                'name': root, 
+                'item_loc': filename, 
+                'item_thumb': thumbnail, 
+                'tags': glance.modules.api.tag_string(extra['tags'])
+            }
 
             # below celery task needs to imp rek with db update
             local_file_to_s3.apply_async((dst, filename), link=[aws_rek_image.si(payload['id'], filename, account_session), local_clean_up.si(dst, filename)])
@@ -60,7 +66,6 @@ def upload_handler(dst, filelist, account_session, item_type):
 
         if ext == '.zip':
             filename = f'{root}{ext}'
-            print(filename)
             local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
 
             payload['attached'] = filename

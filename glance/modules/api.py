@@ -4,16 +4,52 @@ from requests.auth import HTTPBasicAuth
 import glance.config
 
 
-'''API SHORTHAND'''
-# TODO: Lazy?
-API = glance.config.settings.api_root
-API_ACCOUNTS = '{}items'.format(API)
-API_ITEM = '{}items'.format(API)
-API_PATCH = '{}items/patch'.format(API)
-API_COLLECTION = '{}collection'.format(API)
-API_USER = '{}accounts'.format(API)
-API_QUERY = '{}query'.format(API)
+# helpers
+def tag_string(tag_list):
+    if isinstance(tag_list, str):
+        return tag_list.lower()
 
+    elif isinstance(tag_list, list):
+        return ' '.join(tag_list).lower()
+
+
+def payload_from_form(requestform):
+    payload = {}
+    
+    for k in requestform:
+        if k == 'id':
+            payload['id'] = requestform[k]
+
+        elif k == 'append_collection' and requestform[k] != '':
+            payload['items'] = requestform[k]
+
+        elif k == 'append_to_collection' and requestform[k] != '':
+            payload['append_to_collection'] = requestform[k]
+
+        elif k == 'append_tags' and requestform[k] != '':
+            payload['tags'] = requestform[k]
+
+        elif k == 'people_tags' and requestform[k] != '':
+            tags = ' '.join(requestform.getlist('people_tags'))
+            payload['people_tags'] = tags
+
+        elif k == 'collection_rename' and requestform[k] != '':
+            payload[k] = requestform[k]
+            if 'tags' in payload and payload['tags'] != '':
+                payload['tags'] += f"{payload['tags']} {payload[k]}"
+            else:
+                payload['tags'] = payload[k]
+
+        elif k == 'del_item_loc' and requestform[k] != '':
+            payload['del_item_loc'] = requestform['del_item_loc']
+
+        elif k == 'del_item_thumb' and requestform[k] != '':
+            payload['del_item_thumb'] = requestform['del_item_thumb']
+
+    return payload
+
+
+# api access
 def post_item(account_session, payload):
     res = requests.post('{}items'.format(glance.config.settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
     if 'status' in res and res['status'] == 'success':
