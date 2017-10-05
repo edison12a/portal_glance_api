@@ -19,6 +19,7 @@ from celery import Celery
 import glance.modules.auth as auth
 import glance.modules.file
 import glance.modules.image as image
+import glance.modules.api
 
 from glance.config import settings
 
@@ -29,7 +30,6 @@ app.config['UPLOAD_FOLDER'] = settings.tmp_upload
 app.secret_key = settings.secret_key
 
 app.config['CELERY_BROKER_URL'] = 'pyamqp://guest@localhost//'
-# app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
 
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
@@ -129,18 +129,13 @@ def uploading():
             # process remaining item data
             if 'itemradio' in upload_data and upload_data['itemradio'] == 'image':
                 for items in processed_files:
-                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items])
-                    if uploaded_file != False:
-                        payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
-
-                    # post payload to api
-                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-                    res = r.json()['data']
-
-                    # append Item ids for Collection
-                    for x in res:
-                        item_id = x['id']
-                        upload_data['items_for_collection'].append(item_id)
+                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items], account_session, upload_data['itemradio'])
+                    if uploaded_file:
+                        print('--------------------------------------')
+                        print(uploaded_file)
+                        for x in uploaded_file:
+                            item_id = x['id']
+                            upload_data['items_for_collection'].append(item_id)
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'footage':
                 for items in processed_files:
@@ -149,13 +144,12 @@ def uploading():
                         payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
-                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-                    res = r.json()['data']
-
-                    # append Item ids for Collection
-                    for x in res:
-                        item_id = x['id']
-                        upload_data['items_for_collection'].append(item_id)
+                    res = glance.modules.api.post_item(account_session, payload)
+                    if res:
+                        # append Item ids for Collection
+                        for x in res:
+                            item_id = x['id']
+                            upload_data['items_for_collection'].append(item_id)
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'geometry':
                 for items in processed_files:
@@ -164,14 +158,12 @@ def uploading():
                         payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
-                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-                    res = r.json()['data']
-
-                    # collect uploaded item ids from respoce object.
-                    # append Item ids for Collection
-                    for x in res:
-                        item_id = x['id']
-                        upload_data['items_for_collection'].append(item_id)
+                    res = glance.modules.api.post_item(account_session, payload)
+                    if res:
+                        # append Item ids for Collection
+                        for x in res:
+                            item_id = x['id']
+                            upload_data['items_for_collection'].append(item_id)
 
             elif 'itemradio' in upload_data and upload_data['itemradio'] == 'people':
                 for items in processed_files:
@@ -180,15 +172,12 @@ def uploading():
                         payload = glance.modules.file.create_payload(account_session, upload_data, items, **uploaded_file)
 
                     # post payload to api
-                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-                    res = r.json()['data']
-
-                    # collect uploaded item ids from respoce object.
-                    # TODO: Make this a helper
-                    # append Item ids for Collection
-                    for x in res:
-                        item_id = x['id']
-                        upload_data['items_for_collection'].append(item_id)
+                    res = glance.modules.api.post_item(account_session, payload)
+                    if res:
+                        # append Item ids for Collection
+                        for x in res:
+                            item_id = x['id']
+                            upload_data['items_for_collection'].append(item_id)
 
             # Runs if collection has been requested aswell as the uploading of files.
             if 'collection' in upload_data and 'itemradio' in upload_data:
@@ -213,9 +202,7 @@ def uploading():
                         'author': session['username']
                     }
 
-                    r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-
-                    res = r.json()['data']
+                    res = glance.modules.api.post_item(account_session, payload)
 
                     # return home()
                     return render_template('collection.html', item=res, data=data)
@@ -234,8 +221,8 @@ def uploading():
                 if payload['tags'] == '':
                     del payload['tags']
 
-                r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-                res = r.json()['data']
+                # post payload to api
+                res = glance.modules.api.post_item(account_session, payload)
 
                 return render_template('collection.html', item=res, data=data)
 
@@ -262,33 +249,34 @@ def uploading():
 
 @app.route('/patch', methods=['POST'])
 def patch_item():
+    account_session = auth.SessionHandler(session).get()
+    payload = {}
 
-    data = {}
     if request.method == 'POST':
         form = request.form
         for k in form:
             if k == 'id':
-                data['id'] = form[k]
+                payload['id'] = form[k]
 
             elif k == 'append_collection' and form[k] != '':
-                data['items'] = form[k]
+                payload['items'] = form[k]
 
             elif k == 'append_to_collection' and form[k] != '':
-                data['append_to_collection'] = form[k]
+                payload['append_to_collection'] = form[k]
 
             elif k == 'append_tags' and form[k] != '':
-                data['tags'] = form[k]
+                payload['tags'] = form[k]
 
             elif k == 'people_tags' and form[k] != '':
                 tags = ' '.join(form.getlist('people_tags'))
-                data['people_tags'] = tags
+                payload['people_tags'] = tags
 
             elif k == 'collection_rename' and form[k] != '':
-                data[k] = form[k]
-                if 'tags' in data and data['tags'] != '':
-                    data['tags'] += f"{data['tags']} {data[k]}"
+                payload[k] = form[k]
+                if 'tags' in payload and payload['tags'] != '':
+                    payload['tags'] += f"{payload['tags']} {payload[k]}"
                 else:
-                    data['tags'] = data[k]
+                    payload['tags'] = payload[k]
 
         if 'change_cover' in request.files:
             cover_image = request.files['change_cover']
@@ -296,10 +284,14 @@ def patch_item():
                 pass
 
             else:
-                uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], cover_image)
-                payload = {}
-                payload['item_loc'] = uploaded_file['filename']
-                payload['item_thumb'] = uploaded_file['thumbnail']
+                uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], cover_image, account_session, None)
+                if payload:
+                    pass
+                else:
+                    payload = {}
+
+                payload['item_loc'] = uploaded_file[0]
+                payload['item_thumb'] = uploaded_file[1]
                 payload['id'] = form['id']
 
                 payload['del_item_loc'] = form['del_item_loc']
@@ -310,11 +302,9 @@ def patch_item():
                     to_delete_from_s3 = [payload['del_item_loc'], payload['del_item_thumb'], 'None']
                     auth.delete_from_s3(to_delete_from_s3)
 
-    account_session = auth.SessionHandler(session).get()
-    requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+    glance.modules.api.put_item(account_session, payload)
 
-
-    return redirect(f"item/{data['id']}")
+    return redirect(f"item/{payload['id']}")
 
 
 @app.route('/manage_selection', methods=['GET', 'POST'])

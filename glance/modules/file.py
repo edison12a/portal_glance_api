@@ -13,36 +13,46 @@ import string
 import glance.modules.image as image
 import glance.modules.auth as auth
 import glance.app
+import glance.modules.api
 
 ALLOWED_FILE_TYPES = ['.jpg', '.zip', '.mp4']
 
-def upload_handler(dst, filelist):
+def upload_handler(dst, filelist, account_session, item_type):
     if isinstance(filelist, list):
         pass
     else:
         filelist = [filelist]
 
-    result = {}
     for file in filelist:
         try:
             dst, root, ext = local_save_file(dst, file)
         except:
             return False
 
-        if ext == '.jpg' or ext == '.mp4':
+        if item_type == None:
+            # edge case: change collection cover.
             dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
             local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
-            result['filename'] = filename
-
             local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(dst, thumbnail))
-            result['thumbnail'] = thumbnail
+
+            return (filename, thumbnail)
+
+
+        if ext == '.jpg' or ext == '.mp4':
+            dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
+
+            payload = {'name': root, 'item_loc': filename, 'item_thumb': thumbnail, 'item_type': item_type}
+            res = glance.modules.api.post_item(account_session, payload)
+
+            # below celery task needs to imp rek with db update
+            local_file_to_s3.apply_async((dst, filename), link=[aws_rek_image.si(res[0]['id'], filename, account_session), local_clean_up.si(dst, filename)])
+            local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(dst, thumbnail))
 
         if ext == '.zip':
             filename = f'{root}{ext}'
             local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
-            result['attachment'] = filename
 
-    return result
+        return res
 
 
 def local_save_file(dst, fileobj):
@@ -89,6 +99,19 @@ def local_clean_up(dst, filename):
     os.remove(os.path.join(dst, filename))
 
     return filename
+
+
+@glance.app.celery.task
+def aws_rek_image(id, filename, account_session):
+    tags = []
+    for tag in image.generate_tags(filename):
+        tags.append(tag.lower())
+
+    if len(tags) > 0:
+        payload = {'id': id, 'tags': ' '.join(tags)}
+        glance.modules.api.put_item(account_session, payload)
+
+    return True
 
 
 # TODO: IMP celery for create_payload, and aws rekignition
