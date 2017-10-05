@@ -1,48 +1,30 @@
 """
-glance web app
+glance webapp
 """
 
 __author__ = ""
 __version__ = "0.1"
 __license__ = "./LICENSE"
 
-import os
-import subprocess
-import string
-import re
-
-import requests
-from flask import Flask, render_template, request, session, jsonify, url_for, redirect
-from requests.auth import HTTPBasicAuth
+from flask import Flask, render_template, request, session, jsonify, redirect
 from celery import Celery
 
 import glance.modules.auth as auth
 import glance.modules.file
-import glance.modules.image as image
+import glance.modules.image
 import glance.modules.api
-
-from glance.config import settings
+import glance.config
 
 
 '''Flask Config'''
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = settings.tmp_upload
-app.secret_key = settings.secret_key
+app.config['UPLOAD_FOLDER'] = glance.config.settings.tmp_upload
+app.secret_key = glance.config.settings.secret_key
 
 app.config['CELERY_BROKER_URL'] = 'pyamqp://guest@localhost//'
 
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
-
-'''API SHORTHAND'''
-# TODO: Lazy?
-API = settings.api_root
-API_ACCOUNTS = '{}items'.format(settings.api_root)
-API_ITEM = '{}items'.format(settings.api_root)
-API_PATCH = '{}items/patch'.format(settings.api_root)
-API_COLLECTION = '{}collection'.format(settings.api_root)
-API_USER = '{}accounts'.format(settings.api_root)
-API_QUERY = '{}query'.format(settings.api_root)
 
 '''Routes'''
 # auth
@@ -52,7 +34,6 @@ def login():
         form = request.form
 
         if auth.SessionHandler(session).open(username=form['username'], password=form['password']):
-
             return home()
 
         else:
@@ -398,7 +379,7 @@ def home():
 
     account_session = auth.SessionHandler(session)
     if 'username' not in account_session.get():
-        return redirect(url_for('login'))
+        return login()
 
     res = glance.modules.api.get_items(account_session.get())
 
@@ -482,7 +463,7 @@ def item(id):
 
             elif res[0]['item_type'] == 'people':
                 tags_from_api = res[0]['tags']
-                people_tags = image.get_people_tags(tags_from_api)
+                people_tags = glance.modules.image.get_people_tags(tags_from_api)
 
                 return render_template('people.html', item=res[0], people_tags=people_tags, data=data)
 

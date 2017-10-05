@@ -101,6 +101,7 @@ def local_make_thumbnail(dst, root, ext):
     elif ext == '.mp4':
         saved_frame = image.save_frame(dst, f'{root}{ext}')
         thumbnail = image.thumb(dst, saved_frame)
+        local_clean_up(dst, saved_frame)
     
     else:
         return False
