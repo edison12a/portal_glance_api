@@ -192,8 +192,10 @@ def uploading():
                 items = {'status': 'success', 'data': []}
 
                 for item_id in upload_data['items_for_collection']:
-                    r = requests.get('{}items/{}'.format(settings.api_root, item_id), auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()['data'][0]
-                    items['data'].append(r)
+                    payload = {'id': item_id}
+                    res = glance.modules.api.get_item(account_session, payload)[0]
+                    
+                    items['data'].append(res)
 
                 return render_template('search.html', data=data, items=items)
 
@@ -222,18 +224,13 @@ def patch_item():
 
             else:
                 uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], cover_image, account_session, None)
-                if payload:
-                    pass
-                else:
-                    payload = {}
-
+                
                 payload['item_loc'] = uploaded_file[0]
                 payload['item_thumb'] = uploaded_file[1]
 
                 # delete old collection cover
                 if 'del_item_loc' and 'del_item_thumb' in payload:
-                    to_delete_from_s3 = [payload['del_item_loc'], payload['del_item_thumb'], 'None']
-                    auth.delete_from_s3(to_delete_from_s3)
+                    auth.delete_from_s3([payload['del_item_loc'], payload['del_item_thumb'], 'None'])
 
     glance.modules.api.put_item(account_session, payload)
 
@@ -257,7 +254,9 @@ def manage_selection():
 
         payload['items'] = ' '.join(ids)
 
-        r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password']))
+        glance.modules.api.put_item(account_session.get(), payload)
+
+        return redirect(f"item/{payload['id']}")
 
 
     if 'tags' in request.form and request.form['tags'] != '':
@@ -277,9 +276,12 @@ def manage_selection():
 
         for x in ids:
             payload['id'] = x
-            payload['tags'] = request.form['tags']
+            payload['tags'] = glance.modules.api.tag_string(request.form['tags'])
 
-            r = requests.put('{}items/{}'.format(settings.api_root, payload['id']), params=payload, auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password']))
+            glance.modules.api.put_item(account_session.get(), payload)
+
+        return manage()
+
 
     # TODO: IMP clearing of all selections
     if 'clear_selection' in request.form and request.form['clear_selection'] == 'True':
@@ -314,12 +316,9 @@ def manage_selection():
             'author': account_session.get()['username']
         }
 
-
-        # r = requests.post('{}'.format(API_ITEM), params=payload)
-        r = requests.post('{}items'.format(settings.api_root), params=payload, auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password']))
-
-        if 'status' in r.json() and r.json()['status'] == 'success':
-            return item(r.json()['data'][0]['id'])
+        res = glance.modules.api.post_item(account_session.get(), payload)
+        if res:
+            return redirect(f"item/{res[0]['id']}")
 
 
     if 'delete_selection' in request.form and request.form['delete_selection'] == 'True':
@@ -331,25 +330,25 @@ def manage_selection():
                 items_for_deletion.append(k)
 
         for item in items_for_deletion:
-            g = requests.get('{}items/{}'.format(settings.api_root, item), auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password'])).json()
+            payload = {'id': item}
+            resp = glance.modules.api.get_item(account_session.get(), payload)[0]
+            
+            data = []
+            if 'item_loc' in resp:
+                data.append(resp['item_loc'])
+            if 'item_thumb' in resp:
+                data.append(resp['item_thumb'])
+            if 'attached' in resp:
+                data.append(resp['attached'])
 
-            if 'status' in g and g['status'] == 'success':
-                resp = g['data'][0]
-                data = []
-                if 'item_loc' in resp:
-                    data.append(resp['item_loc'])
-                if 'item_thumb' in resp:
-                    data.append(resp['item_thumb'])
-                if 'attached' in resp:
-                    data.append(resp['attached'])
+            # delete from s3 and database
+            # TODO: IMP something safer.
+            # upon deletion remove item from favs
+            if item in account_session.get()['fav']:
+                account_session.fav(item)
 
-                # delete from s3 and database
-                # TODO: IMP something safer.
-                if item in account_session.get()['fav']:
-                    account_session.fav(item)
-
-                auth.delete_from_s3(data)
-                requests.delete('{}items/{}'.format(settings.api_root, item), auth=HTTPBasicAuth(account_session.get()['username'], account_session.get()['password']))
+            auth.delete_from_s3(data)
+            glance.modules.api.delete_item(account_session.get(), payload)
 
 
         return manage()
@@ -360,10 +359,11 @@ def manage_selection():
 
 @app.route('/item/delete/<int:id>')
 def delete(id):
-    account_session = auth.SessionHandler(session).get()
-    g = requests.get('{}items/{}'.format(settings.api_root, id), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+    account_session = auth.SessionHandler(session)
+    payload = {'id': id}
 
-    resp = g.json()['data'][0]
+    resp = glance.modules.api.get_item(account_session.get(), payload)[0]
+
     data = []
     if 'item_loc' in resp:
         data.append(resp['item_loc'])
@@ -375,8 +375,7 @@ def delete(id):
     # delete from s3 and database
     # TODO: IMP something safer.
     auth.delete_from_s3(data)
-    requests.delete('{}items/{}'.format(settings.api_root, id), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-
+    glance.modules.api.delete_item(account_session.get(), payload)
 
     return home()
 
@@ -397,78 +396,55 @@ def home():
     payload['filter'] = 'all'
     auth.SessionHandler(session).filter(payload['filter'])
 
-    account_session = auth.SessionHandler(session).get()
-    if 'username' not in account_session:
+    account_session = auth.SessionHandler(session)
+    if 'username' not in account_session.get():
         return redirect(url_for('login'))
 
-    r = requests.get('{}items'.format(settings.api_root), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-    res = r.json()
+    res = glance.modules.api.get_items(account_session.get())
 
-    if 'status' in res and res['status'] == 'failed':
+    if res:
+        tags = []
+
+        for x in res:
+            for j in x['tags']:
+                if j not in tags:
+                    tags.append(j['name'])
+
+        collections = [x for x in res if x['item_type'] == 'collection'][0:10]
+        images = [x for x in res if x['item_type'] == 'image'][0:10]
+        footage = [x for x in res if x['item_type'] == 'footage'][0:10]
+        people = [x for x in res if x['item_type'] == 'people'][0:10]
+        geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
+
+        return render_template(
+            'home.html', collections=collections, images=images, footage=footage,
+            people=people, geometry=geometry, data=data, tags=tags[:160]
+            )
+
+    else:
         return render_template('home.html', data=data)
-
-    res = res['data']
-    # tags
-    tags = []
-
-    for x in res:
-        for j in x['tags']:
-            if j not in tags:
-                tags.append(j['name'])
-
-    collections = [x for x in res if x['item_type'] == 'collection'][0:10]
-
-    images = [x for x in res if x['item_type'] == 'image'][0:10]
-
-    footage = [x for x in res if x['item_type'] == 'footage'][0:10]
-
-    people = [x for x in res if x['item_type'] == 'people'][0:10]
-
-    geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
-
-
-    return render_template(
-        'home.html', collections=collections, images=images, footage=footage,
-        people=people, geometry=geometry, data=data, tags=tags[:160]
-        )
 
 
 @app.route('/manage')
 def manage():
-    # TODO: emi persistant data users search term, imp into session?
-    data = {'query': "**"}
-    # TODO: API needs to be able to serve, `item by author`.
-    # data to send... collections made by user
-    # TODO: data=data somethings up here.
     account_session = auth.SessionHandler(session).get()
+    data = {'query': "**"}
+
     if 'username' in account_session:
-        r = requests.get('{}items'.format(settings.api_root), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-        res = r.json()
-        if 'status' in res and res['status'] == 'success':
-            res = r.json()['data']
+        res = glance.modules.api.get_items(account_session)
+        if res:
             collections = [x for x in res if x['item_type'] == 'collection' and x['author'] == account_session['username']]
             data = []
 
             return render_template('manage.html', collection=collections, items=data, data=data)
 
+        else:
+            collections = []
+            data = []
 
-        collections = []
-        data = []
-        return render_template('manage.html', collection=collections, items=data, data=data)
+            return render_template('manage.html', collection=collections, items=data, data=data)
 
     return home()
-
-
-@app.route('/coll_list')
-def coll_list():
-    data = []
-
-    account_session = auth.SessionHandler(session).get()
-    r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
-    collection = r.json()
-
-
-    return render_template('coll_list.html', data=data, collection=collection)
 
 
 @app.route('/upload')
@@ -487,27 +463,28 @@ def item(id):
     data = {'query': "**"}
 
     if id:
-        account_session = auth.SessionHandler(session).get()
-        r = requests.get('{}items/{}'.format(settings.api_root, id), auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+        account_session = auth.SessionHandler(session)
+        payload = {'id': id}
+        res = glance.modules.api.get_item(account_session.get(), payload)
 
-        if r.json()['data'][0]['item_type'] == 'image':
-            return render_template('image.html', item=r.json()['data'][0], data=data)
+        if res:
+            if res[0]['item_type'] == 'image':
+                return render_template('image.html', item=res[0], data=data)
 
-        elif r.json()['data'][0]['item_type'] == 'collection':
-            return render_template('collection.html', item=r.json()['data'], data=data)
+            elif res[0]['item_type'] == 'collection':
+                return render_template('collection.html', item=res, data=data)
 
-        elif r.json()['data'][0]['item_type'] == 'footage':
-            return render_template('footage.html', item=r.json()['data'][0], data=data)
+            elif res[0]['item_type'] == 'footage':
+                return render_template('footage.html', item=res[0], data=data)
 
-        elif r.json()['data'][0]['item_type'] == 'geometry':
-            return render_template('geometry.html', item=r.json()['data'][0], data=data)
+            elif res[0]['item_type'] == 'geometry':
+                return render_template('geometry.html', item=res[0], data=data)
 
-        elif r.json()['data'][0]['item_type'] == 'people':
-            tags_from_api = r.json()['data'][0]['tags']
-            people_tags = image.get_people_tags(tags_from_api)
+            elif res[0]['item_type'] == 'people':
+                tags_from_api = res[0]['tags']
+                people_tags = image.get_people_tags(tags_from_api)
 
-            return render_template('people.html', item=r.json()['data'][0], people_tags=people_tags, data=data)
-
+                return render_template('people.html', item=res[0], people_tags=people_tags, data=data)
 
         else:
             return home()
@@ -517,7 +494,7 @@ def item(id):
 
 @app.route('/search')
 def search():
-    # collection init data
+    account_session = auth.SessionHandler(session)
     data = {
         'filter': session['filter'],
         'filter_people': [],
@@ -527,11 +504,11 @@ def search():
     # if sent with 'filter'
     if 'filter' in request.args:
         # update data user session
-        auth.SessionHandler(session).filter(request.args['filter'])
+        account_session.filter(request.args['filter'])
         data['filter'] = request.args['filter']
     elif 'filter_people' in request.args:
         # update user session
-        auth.SessionHandler(session).filter_people(request.args['filter_people'])
+        account_session.filter_people(request.args['filter_people'])
     else:
         data['filter'] = session['filter']
 
@@ -546,15 +523,15 @@ def search():
         else:
             session['filter_people'] = {}
 
-
     data['filter_people'] = ' '.join(data['filter_people'])
 
-    account_session = auth.SessionHandler(session).get()
-    r = requests.get('{}query'.format(settings.api_root), params=data, auth=HTTPBasicAuth(account_session['username'], account_session['password']))
+    res = glance.modules.api.query(account_session.get(), data)
 
-    print('0000000000000000000000000000000000000')
-    print(r.json())
-    return render_template('search.html', data=data, items=r.json())
+    if res:
+        return render_template('search.html', data=data, items=res)
+    
+    else:
+        return render_template('search.html', data=data, items=res)
 
 
 if __name__ == "__main__":

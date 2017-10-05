@@ -74,7 +74,7 @@ class Entry(Resource):
     @auth.login_required
     def get(self):
         entry = {
-            'name': 'gallery api',
+            'name': 'glance api',
             'version': 'v2',
             'resources': ''
         }

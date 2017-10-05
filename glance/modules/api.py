@@ -3,6 +3,7 @@ from requests.auth import HTTPBasicAuth
 
 import glance.config
 
+# TODO: Imp error handlering
 
 # helpers
 def tag_string(tag_list):
@@ -15,7 +16,7 @@ def tag_string(tag_list):
 
 def payload_from_form(requestform):
     payload = {}
-    
+
     for k in requestform:
         if k == 'id':
             payload['id'] = requestform[k]
@@ -75,3 +76,39 @@ def post_account(payload):
     
     else:
         return res['data']
+
+
+def get_item(account_session, payload):
+    res = requests.get('{}items/{}'.format(glance.config.settings.api_root, payload['id']), auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
+    if 'status' in res and res['status'] == 'success':
+        return res['data']
+
+    else:
+        return res['data']
+
+
+def get_items(account_session, payload=None):
+    res = requests.get('{}items'.format(glance.config.settings.api_root), auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
+    if 'status' in res and res['status'] == 'success':
+        return res['data']
+
+    else:
+        return res
+
+
+def delete_item(account_session, payload):
+    res = requests.delete('{}items/{}'.format(glance.config.settings.api_root, payload['id']), auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
+    if 'status' in res and res['status'] == 'success':
+        return res
+
+    else:
+        return res
+
+
+def query(account_session, payload):
+    res = requests.get('{}query'.format(glance.config.settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
+    if 'status' in res and res['status'] == 'success':
+        return res
+
+    else:
+        return res
