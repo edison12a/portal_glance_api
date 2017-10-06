@@ -72,10 +72,10 @@ def put_item(account_session, payload):
 def post_account(payload):
     res = requests.post('{}accounts'.format(glance.config.settings.api_root), params=payload).json()
     if 'status' in res and res['status'] == 'success':
-        return res['data']
+        return res
     
     else:
-        return res['data']
+        return res
 
 
 def get_item(account_session, payload):

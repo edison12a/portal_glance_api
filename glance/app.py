@@ -68,7 +68,7 @@ def signup():
             return render_template('signup.html')
 
         res = glance.modules.api.post_account(payload)
-        if res:
+        if res['status'] == 'success':
             return home()
 
         else:
