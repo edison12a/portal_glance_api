@@ -75,3 +75,71 @@ Next open `pg_hba.conf` and add the below lines to the top of the file.
 
     host all all 192.168.0.0/24 md5
     host all all 0.0.0.0/0 md5
+
+
+Celery Set up
+---------------
+
+Init-script: celeryd
+
+1) 
+
+Create /etc/init.d/celeryd with the content from https://github.com/celery/celery/blob/master/extra/generic-init.d/celeryd
+
+"""
+sudo nano /etc/init.d/celeryd
+
+Copy-paste code from celery repo to the file
+
+Save celeryd (CTR+X, y, Enter from nano)
+
+Run following commands from the terminal:
+
+sudo chmod 755 /etc/init.d/celeryd
+sudo chown root:root /etc/init.d/celeryd
+"""
+
+2)
+
+configuration
+
+Create /etc/default/celeryd
+
+Example:
+
+"""
+CELERY_BIN="project/venv/bin/celery"
+
+# App instance to use
+CELERY_APP="project_django_project"
+
+# Where to chdir at start.
+CELERYD_CHDIR="/home/username/project/"
+
+# Extra command-line arguments to the worker
+CELERYD_OPTS="--time-limit=300 --concurrency=8"
+
+# %n will be replaced with the first part of the nodename.
+CELERYD_LOG_FILE="/var/log/celery/%n%I.log"
+CELERYD_PID_FILE="/var/run/celery/%n.pid"
+
+# Workers should run as an unprivileged user.
+#   You need to create this user manually (or you can choose
+#   a user/group combination that already exists (e.g., nobody).
+CELERYD_USER="username"
+CELERYD_GROUP="username"
+
+# If enabled pid and log directories will be created if missing,
+# and owned by the userid/group configured.
+CELERY_CREATE_DIRS=1
+
+export SECRET_KEY="foobar"
+"""
+
+Activate workers
+
+"""
+sudo /etc/init.d/celeryd start
+sudo /etc/init.d/celeryd status
+sudo /etc/init.d/celeryd stop
+"""
