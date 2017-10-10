@@ -382,20 +382,21 @@ def home():
         return login()
 
     res = glance.modules.api.get_items(account_session.get())
+    print(res)
 
     if 'status' in res and res['status'] == 'success':
         tags = []
 
-        for x in res:
+        for x in res['data']:
             for j in x['tags']:
                 if j not in tags:
                     tags.append(j['name'])
 
-        collections = [x for x in res if x['item_type'] == 'collection'][0:10]
-        images = [x for x in res if x['item_type'] == 'image'][0:10]
-        footage = [x for x in res if x['item_type'] == 'footage'][0:10]
-        people = [x for x in res if x['item_type'] == 'people'][0:10]
-        geometry = [x for x in res if x['item_type'] == 'geometry'][0:10]
+        collections = [x for x in res['data'] if x['item_type'] == 'collection'][0:10]
+        images = [x for x in res['data'] if x['item_type'] == 'image'][0:10]
+        footage = [x for x in res['data'] if x['item_type'] == 'footage'][0:10]
+        people = [x for x in res['data'] if x['item_type'] == 'people'][0:10]
+        geometry = [x for x in res['data'] if x['item_type'] == 'geometry'][0:10]
 
         return render_template(
             'home.html', collections=collections, images=images, footage=footage,

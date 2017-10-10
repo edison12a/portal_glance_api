@@ -90,7 +90,7 @@ def get_item(account_session, payload):
 def get_items(account_session, payload=None):
     res = requests.get('{}items'.format(glance.config.settings.api_root), auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
     if 'status' in res and res['status'] == 'success':
-        return res['data']
+        return res
 
     else:
         return res
