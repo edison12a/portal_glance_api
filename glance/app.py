@@ -382,7 +382,8 @@ def home():
         return login()
 
     res = glance.modules.api.get_items(account_session.get())
-    print(res)
+
+    total_items = glance.modules.api.total_items(account_session.get())
 
     if 'status' in res and res['status'] == 'success':
         tags = []
@@ -400,7 +401,7 @@ def home():
 
         return render_template(
             'home.html', collections=collections, images=images, footage=footage,
-            people=people, geometry=geometry, data=data, tags=tags[:160]
+            people=people, geometry=geometry, data=data, tags=tags[:160], total_items=total_items
             )
 
     else:

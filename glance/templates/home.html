@@ -1,6 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
 
+<div id="nav_item_panel_subitem">
+  <small>
+  <div style="display:inline-block;width:16%;text-align:center;">
+  Collections: {{total_items.collections}}
+</div>
+<div style="display:inline-block;width:16%;text-align:center;">
+    Images: {{total_items.images}}
+  </div>
+  <div style="display:inline-block;width:16%;text-align:center;">
+      Footage: {{total_items.footage}}
+    </div>
+    <div style="display:inline-block;width:16%;text-align:center;">
+        Geometry: {{total_items.geometry}}
+      </div>
+      <div style="display:inline-block;width:16%;text-align:center;">
+          People: {{total_items.people}}
+        </div>
+        <div style="display:inline-block;width:16%;text-align:center;">
+            Tags: {{total_items.tags}}
+          </div>
+        </small>
+</div>
+
+
+
 <!-- tag list !-->
 <div id="nav_item_panel_subitem">
   {% for tag in tags %}

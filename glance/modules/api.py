@@ -50,6 +50,15 @@ def payload_from_form(requestform):
     return payload
 
 
+def total_items(account_session, payload=None):
+    res = requests.get('{}'.format(glance.config.settings.api_root), auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
+    if 'status' in res and res['status'] == 'success':
+        return res
+
+    else:
+        return res
+
+
 # api access
 def post_item(account_session, payload):
     res = requests.post('{}items'.format(glance.config.settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()

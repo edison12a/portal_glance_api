@@ -5,7 +5,7 @@ from flask import Flask, jsonify
 from flask_restful import reqparse, abort, Api, Resource, fields, marshal_with
 from flask_httpauth import HTTPBasicAuth
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 
 from config import settings
 from modules import convert
@@ -73,10 +73,17 @@ def verify(username, password):
 class Entry(Resource):
     @auth.login_required
     def get(self):
+        session = Session()
         entry = {
             'name': 'glance api',
             'version': 'v2',
-            'resources': ''
+            'resources': '',
+            'collections': session.query(func.count(models.Collection.id)).scalar(),
+            'images': session.query(func.count(models.Image.id)).scalar(),
+            'footage': session.query(func.count(models.Footage.id)).scalar(),
+            'geometry': session.query(func.count(models.Geometry.id)).scalar(),
+            'people': session.query(func.count(models.People.id)).scalar(),
+            'tags': session.query(func.count(models.Tag.id)).scalar()
         }
 
         return entry, 200
