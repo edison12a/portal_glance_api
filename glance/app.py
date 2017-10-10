@@ -383,7 +383,7 @@ def home():
 
     res = glance.modules.api.get_items(account_session.get())
 
-    if res:
+    if 'status' in res and res['status'] == 'success':
         tags = []
 
         for x in res:
