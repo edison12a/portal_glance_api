@@ -47,7 +47,7 @@
 {% endfor %}
 
 <!-- latest images !-->
-{% for item in images %}
+{% for item in images|reverse %}
 {% if loop.index0 % 5 == 0 %}
 <div class="item_results">
 {% endif %}
