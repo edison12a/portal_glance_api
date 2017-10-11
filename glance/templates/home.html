@@ -34,7 +34,7 @@
 </div>
 
 <!-- latest collections !-->
-{% for item in collections %}
+{% for item in collections|reverse %}
 {% if loop.index0 % 5 == 0 %}
 <div class="item_results">
 {% endif %}
@@ -60,7 +60,7 @@
 {% endfor %}
 
 <!-- latest footage -->
-{% for item in footage %}
+{% for item in footage|reverse %}
 {% if loop.index0 % 5 == 0 %}
 <div class="item_results">
 {% endif %}
@@ -73,7 +73,7 @@
 {% endfor %}
 
 <!-- latest geometry !-->
-{% for item in geometry %}
+{% for item in geometry|reverse %}
 {% if loop.index0 % 5 == 0 %}
 <div class="item_results">
 {% endif %}
@@ -86,7 +86,7 @@
 {% endfor %}
 
 <!-- latest people !-->
-{% for item in people %}
+{% for item in people|reverse %}
 {% if loop.index0 % 5 == 0 %}
 <div class="item_results">
 {% endif %}

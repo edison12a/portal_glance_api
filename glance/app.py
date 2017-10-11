@@ -416,7 +416,7 @@ def manage():
     if 'username' in account_session:
         res = glance.modules.api.get_items(account_session)
         if res:
-            collections = [x for x in res if x['item_type'] == 'collection' and x['author'] == account_session['username']]
+            collections = [x for x in res['data'] if x['item_type'] == 'collection' and x['author'] == account_session['username']]
             data = []
 
             return render_template('manage.html', collection=collections, items=data, data=data)
