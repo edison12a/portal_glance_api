@@ -9,10 +9,10 @@ from glance_api.modules import models
 from glance_api import api
 
 
-print(os.getcwd())
 @pytest.fixture(scope='session')
 def connection(request):
     # TODO: Figure how to delete sqlite_test_database.db on tests finish
+    # current its just gitingored
     db_name = 'sqlite_test_database.db'
     engine = sqlalchemy.create_engine(f'sqlite:///tests/{db_name}')
     models.Base.metadata.create_all(engine)
@@ -24,27 +24,23 @@ def connection(request):
 
     return connection
 
+
 @pytest.fixture
 def db_session(request, connection):
     # from transaction import abort
     trans = connection.begin()
     request.addfinalizer(trans.rollback)
-    request.addfinalizer(models.Base.metadata.drop_all)
 
     from glance_api.api import session
     return session
 
 
-def test_db_is_rolled_back(db_session):
-    print(os.getcwd())
-    assert 0 == db_session.query(models.Account).count()
+def test_db_Account_Table(db_session):
+    test_user = models.Account(username='test_username', password='test_password')
+    db_session.add(test_user)
 
-def test__reset_db():
-    pass
+    assert 1 == db_session.query(models.Account).count()
 
-
-def test_make_dict():
-    pass
 
 """
 def test_post_collection(test_session):
