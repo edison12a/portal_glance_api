@@ -4,7 +4,7 @@ import uuid
 from flask import Flask, jsonify
 from flask_restful import reqparse, abort, Api, Resource, fields, marshal_with
 from flask_httpauth import HTTPBasicAuth
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine, func
 
 from config import settings
@@ -25,12 +25,11 @@ api = Api(app, '/glance/v2')
 auth = HTTPBasicAuth()
 
 # Init sessionmaker
-Session = sessionmaker(bind=engine)
+session = scoped_session(sessionmaker(bind=engine))
 
 
 '''development tools'''
 # functions
-# session = Session()
 # functions.__reset_db(session, engine)
 # functions.__drop_table(session, engine)
 # functions.__create_table(session, engine)
@@ -62,7 +61,6 @@ def resp(status=None, data=None, link=None, error=None, message=None):
 def verify(username, password):
     account_details = {'username': username, 'password': password}
 
-    session = Session()
     validate_account = functions.get_account(session, **account_details)
     session.close()
 
@@ -73,7 +71,6 @@ def verify(username, password):
 class Entry(Resource):
     @auth.login_required
     def get(self):
-        session = Session()
         entry = {
             'name': 'glance api',
             'version': 'v2',
@@ -92,7 +89,6 @@ class Entry(Resource):
 class Accounts(Resource):
     @auth.login_required
     def get(self, id):
-        session = Session()
         raw_account = session.query(models.Account).filter_by(id=id).first()
         session.close()
 
@@ -134,7 +130,6 @@ class Accounts(Resource):
 
     @auth.login_required
     def delete(self, id):
-        session = Session()
         raw_account = session.query(models.Account).filter_by(id=id).first()
 
         if auth.username() == raw_account.username:
@@ -154,7 +149,6 @@ class Accounts(Resource):
 class AccountsL(Resource):
     @auth.login_required
     def get(self):
-        session = Session()
         raw_account = session.query(models.Account).all()
 
         response = resp(data=convert.jsonify(raw_account), status='success')
@@ -173,7 +167,6 @@ class AccountsL(Resource):
 
         #process user input
         if args['username'] != None and args['password'] != None:
-            session = Session()
             existing_account = session.query(models.Account).filter_by(username=args['username']).first()
             if existing_account:
                 response = resp(error='Account name already exists', status='failed')
@@ -202,8 +195,6 @@ class AccountsL(Resource):
 class Items(Resource):
     @auth.login_required
     def get(self, id):
-
-        session = Session()
         raw_item = functions.Item(session).get(id)
         if raw_item:
             response = resp(status='success', data=convert.jsonify((raw_item,)))
@@ -233,8 +224,6 @@ class Items(Resource):
         parser.add_argument('people_tags', type=str, help='help text')
         args = parser.parse_args()
 
-        session = Session()
-
         put_item = functions.Item(session).patch(args)
 
         response = resp(status='success', data=convert.jsonify((put_item,)))
@@ -245,7 +234,6 @@ class Items(Resource):
 
     @auth.login_required
     def delete(self, id):
-        session = Session()
         raw_account = session.query(models.Account).filter_by(username=auth.username()).first()
         raw_item = session.query(models.Item).filter_by(id=id).first()
 
@@ -266,7 +254,6 @@ class Items(Resource):
 class ItemsL(Resource):
     @auth.login_required
     def get(self):
-        session = Session()
         raw_items = functions.Item(session).get()
         if raw_items:
 
@@ -295,7 +282,6 @@ class ItemsL(Resource):
         parser.add_argument('items', type=str, help='help text')
         args = parser.parse_args()
 
-        session = Session()
         args['author'] = auth.username()
         new_item = functions.Item(session).post(args)
         if new_item:
@@ -345,7 +331,6 @@ class Query(Resource):
         parser.add_argument('query', type=str, help='help text')
         args = parser.parse_args()
 
-        session = Session()
         test = functions.get_query(session, args)
 
         response = resp(status='success', data=convert.jsonify(test))
