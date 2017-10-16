@@ -1,51 +1,43 @@
+import os
+
 import pytest
 import requests
-
 import sqlalchemy
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 from glance_api.modules import functions
 from glance_api.modules import models
+from glance_api import api
 
 
+print(os.getcwd())
 @pytest.fixture(scope='session')
-def test_session(request):
-    # TODO: set up rollback on database, so it doesnt get deleted on every
-    # test.
-    # TODO: IMP deletion of db after tests.
-    engine = create_engine('sqlite:///tests/sqlite_test_database.db')
+def connection(request):
+    # TODO: Figure how to delete sqlite_test_database.db on tests finish
+    db_name = 'sqlite_test_database.db'
+    engine = sqlalchemy.create_engine(f'sqlite:///tests/{db_name}')
+    models.Base.metadata.create_all(engine)
+    connection = engine.connect()
+    api.session.registry.clear()
+    api.session.configure(bind=connection)
+    models.Base.metadata.bind = engine
+    request.addfinalizer(models.Base.metadata.drop_all)
 
-    try:
-        meta = sqlalchemy.MetaData(engine)
-        meta.reflect()
-        meta.drop_all()
-    except:
-        pass
-    try:
-        models.Base.metadata.create_all(engine)
-    except:
-        pass
+    return connection
 
-    # Init sessionmaker
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    return session
-
-"""
-# TODO: this fixture might have to do with producing a clean session? without
-# deleting database?
 @pytest.fixture
 def db_session(request, connection):
-    from transaction import abort
+    # from transaction import abort
     trans = connection.begin()
     request.addfinalizer(trans.rollback)
-    request.addfinalizer(abort)
+    request.addfinalizer(models.Base.metadata.drop_all)
 
-    from foo.models import DBSession
-    return DBSession
-"""
+    from glance_api.api import session
+    return session
+
+
+def test_db_is_rolled_back(db_session):
+    print(os.getcwd())
+    assert 0 == db_session.query(models.Account).count()
 
 def test__reset_db():
     pass

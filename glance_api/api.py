@@ -7,10 +7,10 @@ from flask_httpauth import HTTPBasicAuth
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine, func
 
-from config import settings
-from modules import convert
-from modules import models
-from modules import functions
+import glance_api.config.settings as settings
+import glance_api.modules.convert as convert
+import glance_api.modules.models as models
+import glance_api.modules.functions as functions
 
 # Config
 # init app and db
