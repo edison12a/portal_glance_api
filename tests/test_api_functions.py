@@ -36,10 +36,56 @@ def db_session(request, connection):
 
 
 def test_db_Account_Table(db_session):
-    test_user = models.Account(username='test_username', password='test_password')
+    # test data
+    test_data = {'username': 'test_username', 'password': 'test_password'}
+    # new user
+    test_user = models.Account(username=test_data['username'], password=test_data['password'])
     db_session.add(test_user)
 
     assert 1 == db_session.query(models.Account).count()
+
+    # delete user
+    test_user = db_session.query(models.Account).filter_by(username='test_username').first()
+    db_session.delete(test_user)
+
+    assert 0 == db_session.query(models.Account).count()
+
+
+def test_db_Tag(db_session):
+    #test data
+    test_data = {'name': 'test_tag_name'}
+    # new tag
+    test_tag = models.Tag(name=test_data['name'])
+    db_session.add(test_tag)
+
+    assert 1 == db_session.query(models.Tag).count()
+
+    # delete tag
+    test_tag = db_session.query(models.Tag).filter_by(name=test_data['name']).first()
+    db_session.delete(test_tag)
+
+    assert 0 == db_session.query(models.Tag).count()
+
+
+def test_db_Item(db_session):
+    #test data
+    test_data = ['image', 'footage', 'geometry', 'people', 'collection']
+
+    # new item
+    for item_type in test_data:
+        test_item = models.Item(type=item_type)
+        db_session.add(test_item)
+
+    assert 5 == db_session.query(models.Item).count()
+
+    # delete item
+    for item_type in test_data:
+        test_item = db_session.query(models.Item).filter_by(type=item_type).first()
+        db_session.delete(test_item)
+
+    assert 0 == db_session.query(models.Item).count()
+
+
 
 
 """

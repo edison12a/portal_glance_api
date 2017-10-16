@@ -27,21 +27,6 @@ collect_ass = Table('collection_association_table', Base.metadata,
     Column('item_id', Integer, ForeignKey('item.id'))
 )
 
-'''
-class User(Base):
-    """User Table"""
-    __tablename__ = "user"
-
-    id = Column(Integer, primary_key=True)
-    username = Column(String)
-    password = Column(String)
-
-
-    def __init__(self, username, password):
-
-        self.username = username
-        self.password = password
-'''
 
 class Account(Base):
     """Account Table"""
