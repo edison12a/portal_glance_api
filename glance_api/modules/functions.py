@@ -54,67 +54,6 @@ def __create_table(session, engine):
     session.close()
     glance_api.modules.models.Account.__table__.create(engine)
 
-
-
-# helper functions
-def to_dict(item_list):
-    """Converts database object to dict.
-
-    :param item_list: Tuple, `glance_api.modules.models.Item`
-
-    :return: dict repr of database object.
-    :return type: Tuple. 'glance_api.modules.models.Item'
-    """
-
-    result = []
-    # check if `item_list` is iterable
-    if isinstance(item_list, list) or isinstance(item_list, tuple):
-        pass
-    else:
-        item_list = (item_list,)
-
-    # remove duplicate results
-    item_list = list(set(item_list))
-
-    # for each database object, build dict, 'item', from data.
-    for item_object in item_list:
-        item = {}
-        for column in item_object.__table__.columns:
-            item[column.name] = str(getattr(item_object, column.name))
-
-        # init tags
-        item['tags'] = []
-        assets_tags = item_object.tags
-
-        for tag in assets_tags:
-            item['tags'].append(str(tag.name))
-
-        # init collections
-        if item_object.item_type == 'collection':
-
-            item['items'] = {}
-            for x in item_object.items:
-                item['items'][x.id] = {
-                    'id': x.id,
-                    'item_thumb': x.item_thumb,
-                    'item_type': x.item_type
-                }
-
-        else:
-            item['collections'] = {}
-            for x in item_object.collections:
-                item['collections'][x.id] = {
-                    'id': x.id,
-                    'item_thumb': x.item_thumb,
-                    'name': x.name
-                }
-
-        result.append(item)
-
-    # return database objects as dicts.
-    return result
-
-
 def order_by_initdate(lst):
     result = []
     for x in lst:
