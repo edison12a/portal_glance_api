@@ -8,7 +8,6 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine, func
 
 import glance_api.config.settings as settings
-import glance_api.modules.convert as convert
 import glance_api.modules.models as models
 import glance_api.modules.functions as functions
 import glance_api.modules.dev_functions as dev_functions
@@ -93,7 +92,7 @@ class Accounts(Resource):
         raw_account = session.query(models.Account).filter_by(id=id).first()
         session.close()
 
-        response = resp(status='success', data=convert.jsonify((raw_account,)))
+        response = resp(status='success', data=functions.jsonify((raw_account,)))
         return response, 200
 
 
@@ -152,7 +151,7 @@ class AccountsL(Resource):
     def get(self):
         raw_account = session.query(models.Account).all()
 
-        response = resp(data=convert.jsonify(raw_account), status='success')
+        response = resp(data=functions.jsonify(raw_account), status='success')
 
         session.close()
         return response, 200
@@ -180,7 +179,7 @@ class AccountsL(Resource):
             session.commit()
 
             response = resp(
-                data=convert.jsonify((new_account,)),
+                data=functions.jsonify((new_account,)),
                 link='/accounts/{}'.format(new_account.id),
                 status='success'
             )
@@ -198,7 +197,7 @@ class Items(Resource):
     def get(self, id):
         raw_item = functions.Item(session).get(id)
         if raw_item:
-            response = resp(status='success', data=convert.jsonify((raw_item,)))
+            response = resp(status='success', data=functions.jsonify((raw_item,)))
 
             session.close()
             return response
@@ -227,7 +226,7 @@ class Items(Resource):
 
         put_item = functions.Item(session).patch(args)
 
-        response = resp(status='success', data=convert.jsonify((put_item,)))
+        response = resp(status='success', data=functions.jsonify((put_item,)))
 
         session.close()
         return response
@@ -258,7 +257,7 @@ class ItemsL(Resource):
         raw_items = functions.Item(session).get()
         if raw_items:
 
-            response = resp(status='success', data=convert.jsonify(raw_items))
+            response = resp(status='success', data=functions.jsonify(raw_items))
 
             session.close()
             return response
@@ -286,7 +285,7 @@ class ItemsL(Resource):
         args['author'] = auth.username()
         new_item = functions.Item(session).post(args)
         if new_item:
-            response = resp(status='success', message='New item created', data=convert.jsonify((new_item,)))
+            response = resp(status='success', message='New item created', data=functions.jsonify((new_item,)))
 
             session.close()
             return response
@@ -334,7 +333,7 @@ class Query(Resource):
 
         test = functions.get_query(session, args)
 
-        response = resp(status='success', data=convert.jsonify(test))
+        response = resp(status='success', data=functions.jsonify(test))
 
         session.close()
         return response

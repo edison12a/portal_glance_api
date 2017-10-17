@@ -4,34 +4,58 @@ This module contains Classes and helpers for the API
 
 import datetime
 
+from sqlalchemy.inspection import inspect
+import sqlalchemy.orm
+
 import glance_api.modules.models
-import glance_api.modules.query
 
 
-# auth
-# TODO: Refactor to User() class
-def get_user(session, **kwarg):
-    """Checks database to see if users credentials are correct.
+def jsonify(query):
+    result = []
 
-    :param session: 'sqlalchemy.orm.session.Session'.
-    :param kwarg:
-    :param username: str.
-    :param password: str.
+    for row in query:
+        to_append = {}
 
-    :return type: bool
-    """
-    # TODO: consider renaming, `check_user` or something.
-    # TODO: if test == NONETYPE, return False
+        # get object columns and data
+        for column in row.__table__.columns:
+            column_header = str(column).split('.')[1]
+            to_append[column_header] = str(getattr(row, column_header))
 
-    test = session.query(glance_api.modules.models.User).filter_by(username=kwarg['username']).first()
+        # get objects relationship columns and data
+        inspect_row = inspect(row).__dict__['class_'].__dict__.keys()
 
-    if test is not None and test.password == kwarg['password']:
-        result = True
-    else:
-        result = False
+        for column_name in inspect_row:
+            if not column_name.startswith('_'):
+                if column_name not in row.__table__.columns:
+                    if column_name != 'type' and '_sa_adapter' in getattr(row, column_name).__dict__.keys():
+                        # 'sqlalchemy.orm.collections.InstrumentedList'
+                        item_collect = []
+
+                        for relationship_row in getattr(row, column_name):
+                            item = {}
+                            for data in relationship_row.__table__.columns:
+                                item[str(data).split('.')[1]] = str(getattr(relationship_row, str(data).split('.')[1]))
+
+                            item_collect.append(item)
+
+                        to_append[column_name] = item_collect
+
+                    else:
+                        # 'sqlalchemy.orm.dynamic.AppenderBaseQuery'
+                        item_collect = []
+
+                        for relationship_row in getattr(row, column_name):
+                            if not isinstance(relationship_row, str):
+                                for data in relationship_row.__table__.columns:
+                                    item[str(data).split('.')[1]] = getattr(relationship_row, str(data).split('.')[1])
+
+                                item_collect.append(item)
+
+                        to_append[column_name] = item_collect
+
+        result.append(to_append)
 
     return result
-
 
 def get_account(session, **kwarg):
     """Checks database to see if users credentials are correct.
@@ -54,70 +78,6 @@ def get_account(session, **kwarg):
         result = False
 
     return result
-
-
-def post_user(session, **kwarg):
-    """Creates a new user
-
-    :param session: 'sqlalchemy.orm.session.Session'.
-    :param kwarg:
-    :param username: str.
-    :param password: str.
-
-    :return: user object
-    :return type: database object.
-    """
-
-    data = {}
-
-    # process user input
-    for k, v in kwarg.items():
-        data[k] = v
-
-    # Database entry
-    user = glance_api.modules.models.User(
-        username=data['username'], password=data['password']
-    )
-
-    session.add(user)
-    session.commit()
-
-    return user
-
-
-# query
-# TODO: refactor to Query() class
-def get_tag(session, data):
-    """Retrive Tag objects from database.
-
-    :param session: 'sqlalchemy.orm.session.Session'.
-    :param data: sqlalchemy objects.
-
-    :return: List
-    """
-    if data == None:
-        result = [str(x.name) for x in session.query(glance_api.modules.models.Tag).all()]
-        return result
-    else:
-        # TODO: IF data == 'id' return that ids tags.
-        return False
-
-    return False
-
-
-def get_collection_by_author(session, author):
-    """Get authors collections.
-
-    Keyword arguments:
-    session -- Sqlalchemy session object.
-    author -- STRING. Author name.
-
-    Return:
-    List of database objects.
-    """
-    # TODO: new docstrings
-    collection_by_author = session.query(glance_api.modules.models.Collection).filter_by(author=author).all()
-    return collection_by_author
 
 
 def get_query(session, userquery):
@@ -178,7 +138,7 @@ def get_query(session, userquery):
             for tag in raw_tags:
                 tags.append(tag)
     # further filter items with [filter]
-    print(tags)
+
     for tag in tags:
         for item in tag.items:
             # TODO: for some reason a shitload of dupilicate items are appearing here.
@@ -203,8 +163,6 @@ def get_query(session, userquery):
         else:
             return set(items)
 
-    print('llllllllllllllllllllllllllllllllllllllllllllllll')
-    print(len(items))
 
     return set(items)
 
