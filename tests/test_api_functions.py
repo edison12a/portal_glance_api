@@ -1,3 +1,7 @@
+"""
+This module contains all tests for glance_api.modules.functions.py
+"""
+
 import os
 
 import pytest
@@ -33,8 +37,6 @@ def db_session(request, connection):
 
     from glance_api.api import session
     return session
-
-
 
 
 """

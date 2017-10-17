@@ -11,6 +11,7 @@ import glance_api.config.settings as settings
 import glance_api.modules.convert as convert
 import glance_api.modules.models as models
 import glance_api.modules.functions as functions
+import glance_api.modules.dev_functions as dev_functions
 
 # Config
 # init app and db
@@ -30,9 +31,9 @@ session = scoped_session(sessionmaker(bind=engine))
 
 '''development tools'''
 # functions
-# functions.__reset_db(session, engine)
-# functions.__drop_table(session, engine)
-# functions.__create_table(session, engine)
+# dev_functions.__reset_db(session, engine)
+# dev_functions.__drop_table(session, engine)
+# dev_functions.__create_table(session, engine)
 
 
 # helpers

@@ -1,3 +1,7 @@
+"""
+This module contains tests for glance_api.modules.models.py
+"""
+
 import os
 
 import pytest
