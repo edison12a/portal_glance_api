@@ -57,6 +57,7 @@ def jsonify(query):
 
     return result
 
+
 def get_account(session, **kwarg):
     """Checks database to see if users credentials are correct.
 
@@ -80,25 +81,10 @@ def get_account(session, **kwarg):
     return result
 
 
-def get_query(session, userquery):
-    """Get database objects based user term.
-
-    Keyword arguments:
-    session -- Sqlalchemy session object.
-    userquery -- str.
-
-    Return: List
-    """
-    # TODO: if an item doesnt have any tags, it isnt returned at all.
-    # maybe find a better system to query with, instead of using tags?
+# user query start
+def construct_query_dict(userquery):
     data = dict(userquery)
-
-    # init structures
-    result = []
-    items = []
-    tags = []
     query = {}
-    items_matching_filter = []
 
     # init query object
     if 'filter' not in data:
@@ -123,11 +109,16 @@ def get_query(session, userquery):
         'query': data['query']
     }
 
+    return query
+
+
+def get_tags_from_query(session, query):
+    tags = []
     # filter items with [query]
     if query['query'] == '**' or query['query'] == '':
         tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
-    else:
 
+    else:
         for tag in query['query'].split(' '):
             raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()]
 
@@ -137,8 +128,13 @@ def get_query(session, userquery):
 
             for tag in raw_tags:
                 tags.append(tag)
-    # further filter items with [filter]
 
+    return tags
+
+
+def filter_tags(query, tags):
+    items = []
+    # further filter items with [filter]
     for tag in tags:
         for item in tag.items:
             # TODO: for some reason a shitload of dupilicate items are appearing here.
@@ -148,23 +144,35 @@ def get_query(session, userquery):
                 if item.type == query['filter']:
                     items.append(item)
 
+    return items
+
+
+def filter_tags_if_people(query, items):
+    result = []
+
+    items = set(items)
+    for item in items:
+        for tag in item.tags:
+            if tag.name in query['filter_people'].split(' '):
+                if tag.name == '':
+                    pass
+                else:
+                    result.append(item)
+    return result
+
+
+def get_query(session, userquery):
+    query = construct_query_dict(userquery)
+    tags = get_tags_from_query(session, query)
+    items = filter_tags(query, tags)
+
     # if [filter] == people further filter with [people_tags]
     if query['filter'] == 'people':
         if query['filter_people'] != '':
-            items = set(items)
-            for item in items:
-                for tag in item.tags:
-                    if tag.name in query['filter_people'].split(' '):
-                        if tag.name == '':
-                            pass
-                        else:
-                            result.append(item)
-            return set(result)
-        else:
-            return set(items)
-
+            return set(filter_tags_if_people(query, items))
 
     return set(items)
+# user query end
 
 
 class Item():
@@ -173,24 +181,29 @@ class Item():
     def __init__(self, session):
         self.session = session
 
-    def get(self, id=None, filter=None, query=None):
+    def get(self, id=None, query=None, filter=None):
+        print('USING GLANCE_API.MODULES.FUNCTIONS.ITEM')
         """get item.
 
         id: primary key of database item, `None` returns all
         filter: item_type of database item, limit results to item_type
         """
         # TODO: imp control flow
-        if id == None:
+        if id:
+            item = self.session.query(glance_api.modules.models.Item).get(id)
+            return item
+
+        elif query:
+            items = self.session.query(glance_api.modules.models.Item).all()
+            return items
+
+        else:
             if filter == None or filter == 'all':
                 items = self.session.query(glance_api.modules.models.Item).all()
                 return items
             else:
                 items = self.session.query(glance_api.modules.models.Item).filter(glance_api.modules.models.Item.type==filter).all()
                 return items
-
-        else:
-            item = self.session.query(glance_api.modules.models.Item).get(id)
-            return item
 
     def delete(self, id):
         """ deletes item from database.

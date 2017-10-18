@@ -254,7 +254,15 @@ class Items(Resource):
 class ItemsL(Resource):
     @auth.login_required
     def get(self):
-        raw_items = functions.Item(session).get()
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('filter', type=str, help='help text')
+        parser.add_argument('filter_people', type=str, help='help text')
+        parser.add_argument('query', type=str, help='help text')
+        args = parser.parse_args()
+
+        raw_items = functions.Item(session).get(args)
         if raw_items:
 
             response = resp(status='success', data=functions.jsonify(raw_items))
