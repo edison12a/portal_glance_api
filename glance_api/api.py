@@ -262,9 +262,8 @@ class ItemsL(Resource):
         parser.add_argument('query', type=str, help='help text')
         args = parser.parse_args()
 
-        raw_items = functions.Item(session).get(args)
+        raw_items = functions.Item(session).get(query=args['query'], filter=args['filter'])
         if raw_items:
-
             response = resp(status='success', data=functions.jsonify(raw_items))
 
             session.close()

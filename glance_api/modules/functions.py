@@ -188,12 +188,16 @@ class Item():
         id: primary key of database item, `None` returns all
         filter: item_type of database item, limit results to item_type
         """
-        # TODO: imp control flow
+        print(id)
+        print(query)
+        print(filter)
+
         if id:
             item = self.session.query(glance_api.modules.models.Item).get(id)
             return item
 
         elif query:
+            print('enter query')
             items = self.session.query(glance_api.modules.models.Item).all()
             return items
 
