@@ -12,28 +12,25 @@ import glance_api.modules.models as models
 import glance_api.modules.functions as functions
 import glance_api.modules.dev_functions as dev_functions
 
+
 # Config
 # init app and db
 app = Flask(__name__)
-# conn = sqlite3.connect('example.db')
 
 # config
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.POSTGRES_DATABASE
 engine = create_engine(settings.POSTGRES_DATABASE, echo=False)
 api = Api(app, '/glance/v2')
-# db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
 # Init sessionmaker
 session = scoped_session(sessionmaker(bind=engine))
-
 
 '''development tools'''
 # functions
 # dev_functions.__reset_db(session, engine)
 # dev_functions.__drop_table(session, engine)
 # dev_functions.__create_table(session, engine)
-
 
 # helpers
 def resp(status=None, data=None, link=None, error=None, message=None):
@@ -55,13 +52,16 @@ def resp(status=None, data=None, link=None, error=None, message=None):
 
     return response
 
+
 # auth
 # Basic HTTP auth
 @auth.verify_password
 def verify(username, password):
+    """Function im using to build responses"""
+    # TODO: Make better
     account_details = {'username': username, 'password': password}
 
-    validate_account = functions.get_account(session, **account_details)
+    validate_account = functions.validate_account(session, **account_details)
     session.close()
 
     return validate_account
@@ -261,8 +261,13 @@ class ItemsL(Resource):
         parser.add_argument('filter_people', type=str, help='help text')
         parser.add_argument('query', type=str, help='help text')
         args = parser.parse_args()
+        print('--------------------')
+        print(args)
 
-        raw_items = functions.Item(session).get(query=args['query'], filter=args['filter'])
+        raw_items = functions.Item(session).get(
+            query=args['query'], filter=args['filter'], 
+            filter_people=args['filter_people']
+        )
         if raw_items:
             response = resp(status='success', data=functions.jsonify(raw_items))
 
@@ -270,7 +275,7 @@ class ItemsL(Resource):
             return response
 
         else:
-            response = resp(status='failed', error='nothing in database')
+            response = resp(status='Success', message='nothing in database')
 
             session.close()
             return response
@@ -327,25 +332,6 @@ class TagsL(Resource):
         pass
 
 
-class Query(Resource):
-    @auth.login_required
-    def get(self):
-        parser = reqparse.RequestParser()
-
-        # accepted ARGs from api
-        parser.add_argument('filter', type=str, help='help text')
-        parser.add_argument('filter_people', type=str, help='help text')
-        parser.add_argument('query', type=str, help='help text')
-        args = parser.parse_args()
-
-        test = functions.get_query(session, args)
-
-        response = resp(status='success', data=functions.jsonify(test))
-
-        session.close()
-        return response
-
-
 # routes
 api.add_resource(Entry, '/')
 api.add_resource(Accounts, '/accounts/<id>')
@@ -354,7 +340,6 @@ api.add_resource(Items, '/items/<id>')
 api.add_resource(ItemsL, '/items')
 api.add_resource(Tags, '/tags/<id>')
 api.add_resource(TagsL, '/tags')
-api.add_resource(Query, '/query')
 
 
 if __name__ == '__main__':

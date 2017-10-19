@@ -58,7 +58,7 @@ def jsonify(query):
     return result
 
 
-def get_account(session, **kwarg):
+def validate_account(session, **kwarg):
     """Checks database to see if users credentials are correct.
 
     :param session: 'sqlalchemy.orm.session.Session'.
@@ -74,140 +74,104 @@ def get_account(session, **kwarg):
     test = session.query(glance_api.modules.models.Account).filter_by(username=kwarg['username']).first()
 
     if test is not None and test.password == kwarg['password']:
-        result = True
+        return True
     else:
-        result = False
-
-    return result
-
-
-# user query start
-def construct_query_dict(userquery):
-    data = dict(userquery)
-    query = {}
-
-    # init query object
-    if 'filter' not in data:
-        query['filter'] = 'all'
-    else:
-        query['filter'] = data['filter']
-
-
-    if 'filter_people' not in data or data['filter_people'] == None:
-        query['filter_people'] = None
-    else:
-        query['filter_people'] = data['filter_people']
-
-    filter_people = []
-    if 'filter_people' in data:
-        filter_people = data['filter_people']
-
-    # construct query
-    query = {
-        'filter': data['filter'],
-        'filter_people': filter_people,
-        'query': data['query']
-    }
-
-    return query
-
-
-def get_tags_from_query(session, query):
-    tags = []
-    # filter items with [query]
-    if query['query'] == '**' or query['query'] == '':
-        tags = [x for x in session.query(glance_api.modules.models.Tag).all()]
-
-    else:
-        for tag in query['query'].split(' '):
-            raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()]
-
-        # TODO: Start to implement pagination, and sorted search results.
-        for x in query['query'].split(' '):
-            raw_tags = [x for x in session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
-
-            for tag in raw_tags:
-                tags.append(tag)
-
-    return tags
-
-
-def filter_tags(query, tags):
-    items = []
-    # further filter items with [filter]
-    for tag in tags:
-        for item in tag.items:
-            # TODO: for some reason a shitload of dupilicate items are appearing here.
-            if query['filter'] == 'all':
-                items.append(item)
-            else:
-                if item.type == query['filter']:
-                    items.append(item)
-
-    return items
-
-
-def filter_tags_if_people(query, items):
-    result = []
-
-    items = set(items)
-    for item in items:
-        for tag in item.tags:
-            if tag.name in query['filter_people'].split(' '):
-                if tag.name == '':
-                    pass
-                else:
-                    result.append(item)
-    return result
-
-
-def get_query(session, userquery):
-    query = construct_query_dict(userquery)
-    tags = get_tags_from_query(session, query)
-    items = filter_tags(query, tags)
-
-    # if [filter] == people further filter with [people_tags]
-    if query['filter'] == 'people':
-        if query['filter_people'] != '':
-            return set(filter_tags_if_people(query, items))
-
-    return set(items)
-# user query end
+        return False
 
 
 class Item():
     """Constructs a generic :class:`Item`"""
-    # TODO: IMP function `get_query` into here somewhere.
     def __init__(self, session):
         self.session = session
 
-    def get(self, id=None, query=None, filter=None):
-        print('USING GLANCE_API.MODULES.FUNCTIONS.ITEM')
-        """get item.
+
+    def _get_tags_from_query(self, session, query):
+        tags = []
+        # filter items with [query]
+        if query['query'] == '**' or query['query'] == '':
+            tags = [x for x in self.session.query(glance_api.modules.models.Tag).all()]
+
+        else:
+            for tag in query['query'].split(' '):
+                raw_tags = [x for x in self.session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()]
+
+            # TODO: Start to implement pagination, and sorted search results.
+            for x in query['query'].split(' '):
+                raw_tags = [x for x in self.session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
+
+                for tag in raw_tags:
+                    tags.append(tag)
+
+        return tags
+
+
+    def _get_filter_tags(self, query, tags):
+        items = []
+        # further filter items with [filter]
+        for tag in tags:
+            for item in tag.items:
+                # TODO: for some reason a shitload of dupilicate items are appearing here.
+                if query['filter'] == 'all' or query['filter'] == None:
+                    items.append(item)
+                else:
+                    if item.type == query['filter']:
+                        items.append(item)
+
+        return items
+
+
+    def _get_filter_tags_if_people(self, query, items):
+        result = []
+
+        items = set(items)
+        for item in items:
+            for tag in item.tags:
+                if tag.name in query['filter_people'].split(' '):
+                    if tag.name == '':
+                        pass
+                    else:
+                        result.append(item)
+        return result
+
+
+    def get(self, id=None, query=None, filter=None, filter_people=None):
+        """get item(s).
 
         id: primary key of database item, `None` returns all
         filter: item_type of database item, limit results to item_type
         """
-        print(id)
-        print(query)
-        print(filter)
-
         if id:
             item = self.session.query(glance_api.modules.models.Item).get(id)
             return item
 
         elif query:
-            print('enter query')
-            items = self.session.query(glance_api.modules.models.Item).all()
+            user_query = {
+                'filter': filter,
+                'filter_people': filter_people,
+                'query': query
+            }
+
+            tags = self._get_tags_from_query(self.session, user_query)
+            items = self._get_filter_tags(user_query, tags)
+
+            if user_query['filter'] == 'people':
+                if user_query['filter_people'] != '':
+                    return set(self._get_filter_tags_if_people(user_query, items))
+
             return items
 
         else:
             if filter == None or filter == 'all':
                 items = self.session.query(glance_api.modules.models.Item).all()
+
                 return items
+
+
             else:
                 items = self.session.query(glance_api.modules.models.Item).filter(glance_api.modules.models.Item.type==filter).all()
+                
                 return items
+
 
     def delete(self, id):
         """ deletes item from database.
@@ -230,8 +194,8 @@ class Item():
                     self.session.delete(x)
                     self.session.commit()
 
-
             self.session.delete(item)
+
         except:
             pass
 
@@ -239,8 +203,7 @@ class Item():
 
         return True
 
-    # item type posts
-    # TODO: collections, tags
+
     def post(self, kwarg):
         """post item to database.
 
@@ -248,7 +211,6 @@ class Item():
         return: new `Item` object
         """
         # TODO: make item_types global?
-        # TODO: tags
         item_types = {
             'image': glance_api.modules.models.Image,
             'footage': glance_api.modules.models.Footage,
@@ -291,9 +253,7 @@ class Item():
         self.session.add(item)
         self.session.commit()
 
-
         # prepare tags for item
-
         # after entry is commited then hit the database with any new tags?
         # is this the best way?
         if 'tags' in payload and payload['tags'] != None:
@@ -317,7 +277,6 @@ class Item():
                     item.tags.append(newtag)
 
         self.session.add(item)
-        # commit changes to database
         self.session.commit()
 
         return item
@@ -326,7 +285,6 @@ class Item():
     def patch(self, kwarg):
         """updates asset fields using user data"""
         # TODO: This is a pretty heftly function... needs refactoring
-
         # init query dict
         query = {}
         query['tags'] = []
@@ -357,6 +315,8 @@ class Item():
         asset = self.session.query(glance_api.modules.models.Item).get(id)
         # Process user data and update asset object fields.
         # TODO: is there a better way to handle these sort of 'flags'?
+        # TODO: duplicate tags allowed here, stop that. check if new tags exists.
+        # if it does, add to item. ELSE make a new tag.
         for k, v in query.items():
             if k == 'name' and v != None:
                 asset.name = v
@@ -406,8 +366,6 @@ class Item():
 
             elif k == 'people_tags' and v != None:
                 current_people_tags = [x for x in asset.tags if x.name.startswith('_')]
-                print(current_people_tags)
-                print(v)
 
                 for x in current_people_tags:
                     if x.name not in v:
@@ -418,9 +376,6 @@ class Item():
                     self.session.add(new_tag)
 
                     asset.tags.append(new_tag)
-
-
-
 
             elif k == 'items' and v != None:
                 # process asset tags
