@@ -13,6 +13,8 @@ from glance_api.modules import models
 from glance_api import api
 
 
+# TODO: Finish testing Item 
+
 @pytest.fixture(scope='session')
 def connection(request):
     # TODO: Figure how to delete sqlite_test_database.db on tests finish
@@ -31,12 +33,43 @@ def connection(request):
 
 @pytest.fixture
 def db_session(request, connection):
-    # from transaction import abort
     trans = connection.begin()
     request.addfinalizer(trans.rollback)
 
     from glance_api.api import session
     return session
+
+
+def test_Item():
+    pass
+
+
+def test_Item_get_tags_from_query():
+    pass
+
+
+def test_Item_get_filter_tags():
+    pass
+
+
+def test_Item_get_filter_tags_if_people():
+    pass
+
+
+def test_Item_get():
+    pass
+
+
+def test_Item_delete():
+    pass
+
+
+def test_Item_post():
+    pass
+
+
+def test_Item_patch():
+    pass
 
 
 """
