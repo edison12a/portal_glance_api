@@ -40,16 +40,115 @@ def db_session(request, connection):
     return session
 
 
-def test_Item():
-    pass
+def test_Item_with_no_session():
+    with pytest.raises(TypeError):
+        functions.Item()
 
 
-def test_Item_get_tags_from_query():
-    pass
+def test_Item_get_tags_from_query_returns_list(db_session):
+    test_data = {'filter': 'image', 'filter_people': None, 'query': 'animal'}
+
+    test_method = functions.Item(db_session)._get_tags_from_query(test_data)
+
+    assert type(test_method) == list
 
 
-def test_Item_get_filter_tags():
-    pass
+def test_Item_get_tags_from_query_no_tags(db_session):
+    test_data = {'filter': 'image', 'filter_people': None, 'query': 'TEST_TAGS'}
+
+    test_method = functions.Item(db_session)._get_tags_from_query(test_data)
+
+    assert len(test_method) == 0
+
+
+def test_Item_get_tags_from_query_tags(db_session):
+    test_query = {'filter': 'image', 'filter_people': None, 'query': ''}
+    test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
+
+    for tag in test_tags:
+        new_tag = models.Tag(name=tag)
+        db_session.add(new_tag)
+
+    test_method = functions.Item(db_session)._get_tags_from_query(test_query)
+
+    assert len(test_method) == 3
+
+
+def test_Item_get_filter_tags_returns_list(db_session):
+    test_query = {'filter': 'image', 'filter_people': None, 'query': ''}
+    test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
+
+    for tag in test_tags:
+        new_tag = models.Tag(name=tag)
+        db_session.add(new_tag)
+
+    tags = db_session.query(models.Tag).all()
+    test_method = functions.Item(db_session)._get_filter_tags(test_query, tags)
+
+
+    assert type(test_method) == list
+
+
+def test_Item_get_filter_tags_image_has_tags(db_session):
+    test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
+    test_query = {'filter': 'image', 'filter_people': None, 'query': ' '.join(test_tags)}
+    
+    new_image = models.Image(name='test')
+    for tag in test_tags:
+        new_tag = models.Tag(name=tag)
+        db_session.add(new_tag)
+
+    get_tag = db_session.query(models.Tag).filter_by(name=test_tags[0]).first()
+    new_image.tags.append(get_tag)
+    db_session.add(new_image)
+
+    test_new_tag = db_session.query(models.Tag).all()
+
+    test_method = functions.Item(db_session)._get_filter_tags(test_query, test_new_tag)
+
+    assert len(test_method) == 1
+
+
+def test_Item_get_filter_tags_image_has_no_tags(db_session):
+    test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
+    test_query = {'filter': 'image', 'filter_people': None, 'query': ' '.join(test_tags)}
+    
+    new_image = models.Image(name='test')
+    db_session.add(new_image)
+
+    for tag in test_tags:
+        new_tag = models.Tag(name=tag)
+        db_session.add(new_tag)
+
+    test_new_tag = db_session.query(models.Tag).all()
+    test_method = functions.Item(db_session)._get_filter_tags(test_query, test_new_tag)
+
+    assert len(test_method) == 0
+
+
+def test_Item_get_filter_tags_no_filter(db_session):
+    test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
+    test_query = {'filter': None, 'filter_people': None, 'query': ' '.join(test_tags)}
+    
+    new_image = models.Image(name='test')
+    new_footage = models.Footage(name='test')
+    db_session.add(new_image)
+    db_session.add(new_footage)
+
+    for tag in test_tags:
+        new_tag = models.Tag(name=tag)
+        db_session.add(new_tag)
+
+    get_tag_one = db_session.query(models.Tag).filter_by(name=test_tags[0]).first()
+    get_tag_two = db_session.query(models.Tag).filter_by(name=test_tags[0]).first()
+
+    new_image.tags.append(get_tag_one)
+    new_footage.tags.append(get_tag_two)
+
+    test_new_tag = db_session.query(models.Tag).all()
+    test_method = functions.Item(db_session)._get_filter_tags(test_query, test_new_tag)
+
+    assert len(test_method) == 2
 
 
 def test_Item_get_filter_tags_if_people():

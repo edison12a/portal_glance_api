@@ -80,12 +80,12 @@ def validate_account(session, **kwarg):
 
 
 class Item():
-    """Constructs a generic :class:`Item`"""
     def __init__(self, session):
         self.session = session
 
 
-    def _get_tags_from_query(self, session, query):
+    def _get_tags_from_query(self, query):
+        """Returns list of api.model.Tag objects"""
         tags = []
         # filter items with [query]
         if query['query'] == '**' or query['query'] == '':
@@ -105,7 +105,14 @@ class Item():
         return tags
 
 
+    def _get_tags_filter_people(self, query, tags):
+        # TODO: re-write this to filter tags instead of items.
+        # refactor other one.
+        return tags
+
+
     def _get_filter_tags(self, query, tags):
+        """Returns list of api.models.Item objects"""
         items = []
         # further filter items with [filter]
         for tag in tags:
@@ -144,14 +151,19 @@ class Item():
             item = self.session.query(glance_api.modules.models.Item).get(id)
             return item
 
-        elif query:
+        elif query or query == '':
             user_query = {
                 'filter': filter,
                 'filter_people': filter_people,
                 'query': query
             }
 
-            tags = self._get_tags_from_query(self.session, user_query)
+            tags = self._get_tags_from_query(user_query)
+            print('---------------------------')
+            print(tags)
+            test = self._get_tags_filter_people(user_query, tags)
+            print('00000000000000000000000000')
+            print(test)
             items = self._get_filter_tags(user_query, tags)
 
             if user_query['filter'] == 'people':

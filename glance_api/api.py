@@ -83,6 +83,11 @@ class Entry(Resource):
             'tags': session.query(func.count(models.Tag.id)).scalar()
         }
 
+        test_data = {'filter': 'image', 'filter_people': None, 'query': 'animal'}
+        test_method = functions.Item(session)._get_tags_from_query(test_data)
+        test = functions.Item(session)._get_filter_tags(test_data, test_method)
+        print(test)
+
         return entry, 200
 
 
@@ -261,8 +266,6 @@ class ItemsL(Resource):
         parser.add_argument('filter_people', type=str, help='help text')
         parser.add_argument('query', type=str, help='help text')
         args = parser.parse_args()
-        print('--------------------')
-        print(args)
 
         raw_items = functions.Item(session).get(
             query=args['query'], filter=args['filter'], 
