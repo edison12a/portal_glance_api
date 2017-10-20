@@ -84,19 +84,24 @@ class Item():
         self.session = session
 
 
-    def _get_tags_from_query(self, query):
-        """Returns list of api.model.Tag objects"""
+    def _get_tags_from_queries(self, query):
+        """Uses query['query'] and query['filter_people']
+        Returns list of api.model.Tag objects"""
         tags = []
         # filter items with [query]
-        if query['query'] == '**' or query['query'] == '':
-            tags = [x for x in self.session.query(glance_api.modules.models.Tag).all()]
+        if query['query'] == '**' or query['query'] == '' or query['query'] == None:
+                tags = [x for x in self.session.query(glance_api.modules.models.Tag).all()]
 
         else:
-            for tag in query['query'].split(' '):
-                raw_tags = [x for x in self.session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()]
+            if query['filter_people']:
+                query_list = query['query'].split(' ')
+                filter_people_list = query['filter_people'].split(' ')
+                queries = query_list + filter_people_list
+            else:
+                queries = query['query'].split(' ')
 
             # TODO: Start to implement pagination, and sorted search results.
-            for x in query['query'].split(' '):
+            for x in queries:
                 raw_tags = [x for x in self.session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
 
                 for tag in raw_tags:
@@ -105,14 +110,9 @@ class Item():
         return tags
 
 
-    def _get_tags_filter_people(self, query, tags):
-        # TODO: re-write this to filter tags instead of items.
-        # refactor other one.
-        return tags
-
-
     def _get_filter_tags(self, query, tags):
-        """Returns list of api.models.Item objects"""
+        """Filters tags using query['filter']
+        Returns list of api.models.Item objects"""
         items = []
         # further filter items with [filter]
         for tag in tags:
@@ -124,21 +124,7 @@ class Item():
                     if item.type == query['filter']:
                         items.append(item)
 
-        return items
-
-
-    def _get_filter_tags_if_people(self, query, items):
-        result = []
-
-        items = set(items)
-        for item in items:
-            for tag in item.tags:
-                if tag.name in query['filter_people'].split(' '):
-                    if tag.name == '':
-                        pass
-                    else:
-                        result.append(item)
-        return result
+        return list(set(items))
 
 
     def get(self, id=None, query=None, filter=None, filter_people=None):
@@ -158,17 +144,9 @@ class Item():
                 'query': query
             }
 
-            tags = self._get_tags_from_query(user_query)
-            print('---------------------------')
-            print(tags)
-            test = self._get_tags_filter_people(user_query, tags)
-            print('00000000000000000000000000')
-            print(test)
+            tags = self._get_tags_from_queries(user_query)
             items = self._get_filter_tags(user_query, tags)
 
-            if user_query['filter'] == 'people':
-                if user_query['filter_people'] != '':
-                    return set(self._get_filter_tags_if_people(user_query, items))
 
             return items
 

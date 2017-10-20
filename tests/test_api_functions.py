@@ -45,23 +45,23 @@ def test_Item_with_no_session():
         functions.Item()
 
 
-def test_Item_get_tags_from_query_returns_list(db_session):
+def test_Item_get_tags_from_queries_returns_list(db_session):
     test_data = {'filter': 'image', 'filter_people': None, 'query': 'animal'}
 
-    test_method = functions.Item(db_session)._get_tags_from_query(test_data)
+    test_method = functions.Item(db_session)._get_tags_from_queries(test_data)
 
     assert type(test_method) == list
 
 
-def test_Item_get_tags_from_query_no_tags(db_session):
+def test_Item_get_tags_from_queries_no_tags(db_session):
     test_data = {'filter': 'image', 'filter_people': None, 'query': 'TEST_TAGS'}
 
-    test_method = functions.Item(db_session)._get_tags_from_query(test_data)
+    test_method = functions.Item(db_session)._get_tags_from_queries(test_data)
 
     assert len(test_method) == 0
 
 
-def test_Item_get_tags_from_query_tags(db_session):
+def test_Item_get_tags_from_queries_tags(db_session):
     test_query = {'filter': 'image', 'filter_people': None, 'query': ''}
     test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
 
@@ -69,7 +69,7 @@ def test_Item_get_tags_from_query_tags(db_session):
         new_tag = models.Tag(name=tag)
         db_session.add(new_tag)
 
-    test_method = functions.Item(db_session)._get_tags_from_query(test_query)
+    test_method = functions.Item(db_session)._get_tags_from_queries(test_query)
 
     assert len(test_method) == 3
 
@@ -149,10 +149,6 @@ def test_Item_get_filter_tags_no_filter(db_session):
     test_method = functions.Item(db_session)._get_filter_tags(test_query, test_new_tag)
 
     assert len(test_method) == 2
-
-
-def test_Item_get_filter_tags_if_people():
-    pass
 
 
 def test_Item_get():
