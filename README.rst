@@ -5,64 +5,52 @@ Glance
 
 Glance is a management system for digital items. Using images to represent various forms of data. Video files, images, documents, source code etc.
 
-Features
----------
+.. image:: ./glance/static/img/docs_ss.jpg
+  :scale: 50 %
 
-Portfolio style display of digital items.
-
-User collections and tagging for storage and retrieval.
-
-:AWS Services:
-  AWS s3 backed storage.
-  AWS ReKognition.
-
-Installation
+Quick Start
 ------------
 
-A postgresql database needs to be set up prior.
+3rd Party Requirements
+**********************
 
-Active AWS s3 account.
+Postgresql
 
-Clone repo.
+Celery
+
+AWS account
+
+Setup
+*****
 
 Use miniconda for env, environment.yml
-# TODO: research/automate building requirements.txt from environment.yml??
-# or just use pyenv?
 
-.. code-block:: cmd
+.. code-block::
 
     $ cd dev-glance-api
     $ conda env create
     $ source activate glance-api-env
 
-setup.py develop
-# TODO: research: if i use install none of the modules can find each other...
-# why?
-
-setup.py tests
+    (env)$ setup.py install
 
 Api config
 ..........
 
-glance_api/config/config.ini
+User glance_api/config/EXAMPLE_config.ini as a template to build glance_api/config/config.ini
 
 Run glance_api/api.py to get api running.
 
-.. code-block:: cmd
+.. code-block::
 
-    (glance-api-env)$ cd glance_api
-    (glance-api-env)$ python api.py
-
-http://localhost/glance/api
+    (env)$ cd glance_api
+    (env)$ python api.py
 
 App config
 ..........
 
-glance/config/config.ini
+Use glance/config/EXAMPLE_config.ini as a template to build glance/config/config.ini
 
-Run glance/app.py to get the app running.
-
-.. code-block:: cmd
+.. code-block::
 
     (glance-api-env)$ cd glance
     (glance-api-env)$ python app.py
@@ -70,7 +58,7 @@ Run glance/app.py to get the app running.
 http://localhost:5000
 
 Extended Documentation & Tests
--------------
+------------------------------
 
 `User Guide`_
 

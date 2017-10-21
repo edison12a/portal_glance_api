@@ -8,8 +8,9 @@ Api
 Tech Stack
 ----------
 
-
+* AWS
 * Postgres
+* Celery
 * Flask
 * Nginx
 

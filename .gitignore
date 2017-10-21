@@ -8,9 +8,6 @@ glance.egg-info/
 build/
 dist/
 
-# Sphinx docs
-docs/_build/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
