@@ -57,14 +57,10 @@ Use glance/config/EXAMPLE_config.ini as a template to build glance/config/config
 
 http://localhost:5000
 
-Extended Documentation & Tests
+Documentation
 ------------------------------
 
-`User Guide`_
-
-`API docs`_
-
-`APP docs`_
+`Sphinx docs <./docs/_build/html/index.html>`_
 
 
 Tests
