@@ -1,0 +1,330 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>glance.modules.auth &#8212; Glance 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for glance.modules.auth</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains functions for Authentication &amp; Authorization</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">from</span> <span class="nn">requests.auth</span> <span class="k">import</span> <span class="n">HTTPBasicAuth</span>
+
+<span class="kn">import</span> <span class="nn">glance.config.settings</span> <span class="k">as</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">glance.modules.struct</span> <span class="k">as</span> <span class="nn">struct</span>
+
+
+<span class="c1"># basic unencrypted user auth using the api and flasks `session`.</span>
+<div class="viewcode-block" id="logged_in"><a class="viewcode-back" href="../../../app/source.html#glance.modules.auth.logged_in">[docs]</a><span class="k">def</span> <span class="nf">logged_in</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if user is currently logged in.</span>
+
+<span class="sd">    :param session: -- Sqlalchemy session object.</span>
+
+<span class="sd">    :return type: Bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;logged_in&#39;</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;logged_in&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;filter&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="check_login_details"><a class="viewcode-back" href="../../../app/source.html#glance.modules.auth.check_login_details">[docs]</a><span class="k">def</span> <span class="nf">check_login_details</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if user details are correct.</span>
+
+<span class="sd">    :param data: -- lst. User data.</span>
+
+<span class="sd">    :return type: Bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># r = requests.get(&#39;{}user&#39;.format(settings.api_root), params=data)</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/accounts&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">api_root</span><span class="p">),</span>
+            <span class="n">auth</span><span class="o">=</span><span class="n">HTTPBasicAuth</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">])</span>
+            <span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span>
+
+    <span class="k">if</span> <span class="s1">&#39;user details&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;user details&#39;</span><span class="p">]:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="c1"># user session data</span>
+<div class="viewcode-block" id="SessionHandler"><a class="viewcode-back" href="../../../app/source.html#glance.modules.auth.SessionHandler">[docs]</a><span class="k">class</span> <span class="nc">SessionHandler</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Handles all interaction with flask.session object.</span>
+
+<span class="sd">    :methods:</span>
+<span class="sd">      * open(data)</span>
+<span class="sd">      * filter(data)</span>
+<span class="sd">      * fav(id, item_type)</span>
+<span class="sd">      * close()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">allowed_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;filter&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;logged_in&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;fav&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;filter_people&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
+    <span class="n">allowed_filters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="s1">&#39;footage&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">,</span> <span class="s1">&#39;collection&#39;</span><span class="p">,</span> <span class="s1">&#39;people&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+
+
+    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">accounts&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">api_root</span><span class="p">),</span> <span class="n">auth</span><span class="o">=</span><span class="n">HTTPBasicAuth</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;logged_in&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">username</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">password</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;fav&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;filter_people&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">structure_people_tags</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">elif</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+
+    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowed_filters</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
+
+    <span class="k">def</span> <span class="nf">filter_people</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;filter_people&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;filter_people&#39;</span><span class="p">][</span><span class="n">x</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;filter_people&#39;</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="n">data</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;filter_people&#39;</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="n">data</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;filter_people&#39;</span><span class="p">][</span><span class="n">x</span><span class="p">][</span><span class="n">data</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
+
+    <span class="k">def</span> <span class="nf">fav</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">item_thumb</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;fav&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;fav&#39;</span><span class="p">][</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">item_thumb</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;fav&#39;</span><span class="p">][</span><span class="nb">id</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
+
+
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;logged_in&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;filter&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;fav&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;filter_people&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;SessionHandler&gt;&#39;</span></div>
+
+
+<span class="c1"># aws access</span>
+<div class="viewcode-block" id="boto3_res_s3"><a class="viewcode-back" href="../../../app/source.html#glance.modules.auth.boto3_res_s3">[docs]</a><span class="k">def</span> <span class="nf">boto3_res_s3</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Create Amazon s3 Resource..</span>
+
+<span class="sd">    :return type: boto3 resource</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">boto3_session</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span>
+        <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">config_type</span><span class="p">[</span><span class="s1">&#39;AWS_ACCESS_KEY_ID&#39;</span><span class="p">],</span>
+        <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">config_type</span><span class="p">[</span><span class="s1">&#39;AWS_SECRET_ACCESS_KEY&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3_session</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">s3</span></div>
+
+
+<div class="viewcode-block" id="boto3_res_rek"><a class="viewcode-back" href="../../../app/source.html#glance.modules.auth.boto3_res_rek">[docs]</a><span class="k">def</span> <span class="nf">boto3_res_rek</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Create Amazon rekognition Client.</span>
+
+<span class="sd">    :return type: boto3 client</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">boto3_session</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span>
+        <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">config_type</span><span class="p">[</span><span class="s1">&#39;AWS_ACCESS_KEY_ID&#39;</span><span class="p">],</span>
+        <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">config_type</span><span class="p">[</span><span class="s1">&#39;AWS_SECRET_ACCESS_KEY&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="c1"># init client</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">boto3_session</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;rekognition&#39;</span><span class="p">,</span> <span class="n">region_name</span><span class="o">=</span><span class="s1">&#39;us-east-1&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">client</span></div>
+
+
+<div class="viewcode-block" id="boto3_rek_tag"><a class="viewcode-back" href="../../../app/source.html#glance.modules.auth.boto3_rek_tag">[docs]</a><span class="k">def</span> <span class="nf">boto3_rek_tag</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run Rekognition on Image.</span>
+
+<span class="sd">    :param client: -- Rekognition Object</span>
+<span class="sd">    :param data: -- ???</span>
+<span class="sd">    :param confidence: -- Controls label ammount.</span>
+
+<span class="sd">    :return type: JSON.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">detect_labels</span><span class="p">(</span>
+        <span class="n">Image</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;S3Object&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;Bucket&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">config_type</span><span class="p">[</span><span class="s1">&#39;AWS_BUCKET&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;Name&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="n">MaxLabels</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">MinConfidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="boto3_s3_upload"><a class="viewcode-back" href="../../../app/source.html#glance.modules.auth.boto3_s3_upload">[docs]</a><span class="k">def</span> <span class="nf">boto3_s3_upload</span><span class="p">(</span><span class="n">s3</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Upload Item to s3.</span>
+
+<span class="sd">    :param s3: -- Sqlalchemy session object.</span>
+<span class="sd">    :param dst: -- str. Location to storage ???</span>
+<span class="sd">    :param file: -- ???. File object.</span>
+
+<span class="sd">    Return Type: Bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">s3</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">config_type</span><span class="p">[</span><span class="s1">&#39;AWS_BUCKET&#39;</span><span class="p">],</span> <span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">Body</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">file</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">file</span></div>
+
+
+<div class="viewcode-block" id="delete_from_s3"><a class="viewcode-back" href="../../../app/source.html#glance.modules.auth.delete_from_s3">[docs]</a><span class="k">def</span> <span class="nf">delete_from_s3</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;delete physical assets from s3</span>
+
+<span class="sd">    :param data: -- ???</span>
+
+<span class="sd">    :return type: ???</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># refactor below</span>
+    <span class="c1"># get s3 resource</span>
+    <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3_res_s3</span><span class="p">()</span>
+
+    <span class="n">bucket</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">config_type</span><span class="p">[</span><span class="s1">&#39;AWS_BUCKET&#39;</span><span class="p">])</span>
+
+    <span class="n">objects_to_delete</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="o">==</span> <span class="s1">&#39;site/default_cover.jpg&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">objects_to_delete</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;Key&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="p">})</span>
+
+
+    <span class="n">bucket</span><span class="o">.</span><span class="n">delete_objects</span><span class="p">(</span>
+        <span class="n">Delete</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;Objects&#39;</span><span class="p">:</span> <span class="n">objects_to_delete</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, vhdev.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

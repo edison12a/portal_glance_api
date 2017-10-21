@@ -1,0 +1,237 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Developer Documentation &#8212; Glance 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="App" href="../app/app.html" />
+    <link rel="prev" title="Api" href="api.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="developer-documentation">
+<h1>Developer Documentation<a class="headerlink" href="#developer-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-glance_api.modules.functions">
+<span id="glance-api-modules-functions"></span><h2>glance_api.modules.functions<a class="headerlink" href="#module-glance_api.modules.functions" title="Permalink to this headline">¶</a></h2>
+<p>This module contains Classes and helpers for the API</p>
+<dl class="class">
+<dt id="glance_api.modules.functions.Item">
+<em class="property">class </em><code class="descclassname">glance_api.modules.functions.</code><code class="descname">Item</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/functions.html#Item"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.functions.Item" title="Permalink to this definition">¶</a></dt>
+<dd><p>manages database access</p>
+<dl class="method">
+<dt id="glance_api.modules.functions.Item.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/functions.html#Item.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.functions.Item.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>deletes item from database.</p>
+<p>id: primary key of database item,</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="glance_api.modules.functions.Item.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>id=None</em>, <em>query=None</em>, <em>filter=None</em>, <em>filter_people=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/functions.html#Item.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.functions.Item.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get item(s).</p>
+<p>id: primary key of database item, <cite>None</cite> returns all
+filter: item_type of database item, limit results to item_type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="glance_api.modules.functions.Item.patch">
+<code class="descname">patch</code><span class="sig-paren">(</span><em>kwarg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/functions.html#Item.patch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.functions.Item.patch" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates asset fields using user data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="glance_api.modules.functions.Item.post">
+<code class="descname">post</code><span class="sig-paren">(</span><em>kwarg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/functions.html#Item.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.functions.Item.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>post item to database.</p>
+<p>kwarg: dict. user data to process.
+return: new <cite>Item</cite> object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="glance_api.modules.functions.jsonify">
+<code class="descclassname">glance_api.modules.functions.</code><code class="descname">jsonify</code><span class="sig-paren">(</span><em>query</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/functions.html#jsonify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.functions.jsonify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts raw database objects to json/dict.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance_api.modules.functions.validate_account">
+<code class="descclassname">glance_api.modules.functions.</code><code class="descname">validate_account</code><span class="sig-paren">(</span><em>session</em>, <em>**kwarg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/functions.html#validate_account"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.functions.validate_account" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks database to see if users credentials are correct.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>session</strong> – ‘sqlalchemy.orm.session.Session’.</li>
+<li><strong>kwarg</strong> – </li>
+<li><strong>username</strong> – str.</li>
+<li><strong>password</strong> – str.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-glance_api.modules.models">
+<span id="glance-api-modules-models"></span><h2>glance_api.modules.models<a class="headerlink" href="#module-glance_api.modules.models" title="Permalink to this headline">¶</a></h2>
+<p>This module describes the database using sqlalchemy. declaritive.</p>
+<dl class="class">
+<dt id="glance_api.modules.models.Account">
+<em class="property">class </em><code class="descclassname">glance_api.modules.models.</code><code class="descname">Account</code><span class="sig-paren">(</span><em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/models.html#Account"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.models.Account" title="Permalink to this definition">¶</a></dt>
+<dd><p>Account Table</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="glance_api.modules.models.Collection">
+<em class="property">class </em><code class="descclassname">glance_api.modules.models.</code><code class="descname">Collection</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/models.html#Collection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.models.Collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection Table
+Inherits from Item.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="glance_api.modules.models.Footage">
+<em class="property">class </em><code class="descclassname">glance_api.modules.models.</code><code class="descname">Footage</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/models.html#Footage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.models.Footage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Footage Table
+Inherits from Item.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="glance_api.modules.models.Geometry">
+<em class="property">class </em><code class="descclassname">glance_api.modules.models.</code><code class="descname">Geometry</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/models.html#Geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.models.Geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Geoemtry Table
+Inherits from Item.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="glance_api.modules.models.Image">
+<em class="property">class </em><code class="descclassname">glance_api.modules.models.</code><code class="descname">Image</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/models.html#Image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.models.Image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Image Table
+Inherits from Item.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="glance_api.modules.models.Item">
+<em class="property">class </em><code class="descclassname">glance_api.modules.models.</code><code class="descname">Item</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/models.html#Item"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.models.Item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Item Table
+Master table. Item types inherit from Item.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="glance_api.modules.models.People">
+<em class="property">class </em><code class="descclassname">glance_api.modules.models.</code><code class="descname">People</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/models.html#People"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.models.People" title="Permalink to this definition">¶</a></dt>
+<dd><p>People Table
+Inherits from Item.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="glance_api.modules.models.Tag">
+<em class="property">class </em><code class="descclassname">glance_api.modules.models.</code><code class="descname">Tag</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance_api/modules/models.html#Tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance_api.modules.models.Tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tag Table</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Developer Documentation</a><ul>
+<li><a class="reference internal" href="#module-glance_api.modules.functions">glance_api.modules.functions</a></li>
+<li><a class="reference internal" href="#module-glance_api.modules.models">glance_api.modules.models</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="api.html" title="previous chapter">Api</a></li>
+      <li>Next: <a href="../app/app.html" title="next chapter">App</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/source.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, vhdev.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/api/source.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

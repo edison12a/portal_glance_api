@@ -1,0 +1,335 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Developer Documentation &#8212; Glance 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="App" href="app.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="developer-documentation">
+<h1>Developer Documentation<a class="headerlink" href="#developer-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-glance.modules.auth">
+<span id="glance-modules-auth"></span><h2>glance.modules.auth<a class="headerlink" href="#module-glance.modules.auth" title="Permalink to this headline">¶</a></h2>
+<p>This module contains functions for Authentication &amp; Authorization</p>
+<dl class="class">
+<dt id="glance.modules.auth.SessionHandler">
+<em class="property">class </em><code class="descclassname">glance.modules.auth.</code><code class="descname">SessionHandler</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/auth.html#SessionHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.auth.SessionHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles all interaction with flask.session object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Methods:</th><td class="field-body"><ul class="first last simple">
+<li>open(data)</li>
+<li>filter(data)</li>
+<li>fav(id, item_type)</li>
+<li>close()</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance.modules.auth.boto3_rek_tag">
+<code class="descclassname">glance.modules.auth.</code><code class="descname">boto3_rek_tag</code><span class="sig-paren">(</span><em>client</em>, <em>data</em>, <em>confidence=60</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/auth.html#boto3_rek_tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.auth.boto3_rek_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run Rekognition on Image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>client</strong> – – Rekognition Object</li>
+<li><strong>data</strong> – – ???</li>
+<li><strong>confidence</strong> – – Controls label ammount.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">JSON.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance.modules.auth.boto3_res_rek">
+<code class="descclassname">glance.modules.auth.</code><code class="descname">boto3_res_rek</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/auth.html#boto3_res_rek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.auth.boto3_res_rek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create Amazon rekognition Client.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boto3 client</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance.modules.auth.boto3_res_s3">
+<code class="descclassname">glance.modules.auth.</code><code class="descname">boto3_res_s3</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/auth.html#boto3_res_s3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.auth.boto3_res_s3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create Amazon s3 Resource..</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boto3 resource</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance.modules.auth.boto3_s3_upload">
+<code class="descclassname">glance.modules.auth.</code><code class="descname">boto3_s3_upload</code><span class="sig-paren">(</span><em>s3</em>, <em>dst</em>, <em>file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/auth.html#boto3_s3_upload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.auth.boto3_s3_upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload Item to s3.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>s3</strong> – – Sqlalchemy session object.</li>
+<li><strong>dst</strong> – – str. Location to storage ???</li>
+<li><strong>file</strong> – – ???. File object.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Return Type: Bool</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance.modules.auth.check_login_details">
+<code class="descclassname">glance.modules.auth.</code><code class="descname">check_login_details</code><span class="sig-paren">(</span><em>**data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/auth.html#check_login_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.auth.check_login_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if user details are correct.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – – lst. User data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance.modules.auth.delete_from_s3">
+<code class="descclassname">glance.modules.auth.</code><code class="descname">delete_from_s3</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/auth.html#delete_from_s3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.auth.delete_from_s3" title="Permalink to this definition">¶</a></dt>
+<dd><p>delete physical assets from s3</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – – ???</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">???</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance.modules.auth.logged_in">
+<code class="descclassname">glance.modules.auth.</code><code class="descname">logged_in</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/auth.html#logged_in"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.auth.logged_in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if user is currently logged in.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> – – Sqlalchemy session object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-glance.modules.file">
+<span id="glance-modules-file"></span><h2>glance.modules.file<a class="headerlink" href="#module-glance.modules.file" title="Permalink to this headline">¶</a></h2>
+<p>This module contains functions for Files</p>
+<dl class="function">
+<dt id="glance.modules.file.process_raw_files">
+<code class="descclassname">glance.modules.file.</code><code class="descname">process_raw_files</code><span class="sig-paren">(</span><em>files</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/file.html#process_raw_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.file.process_raw_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>pairs images to attachments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>files</strong> – <p>???</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return Type:</th><td class="field-body">???</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-glance.modules.image">
+<span id="glance-modules-image"></span><h2>glance.modules.image<a class="headerlink" href="#module-glance.modules.image" title="Permalink to this headline">¶</a></h2>
+<p>This module contains functions for Image Processing</p>
+<dl class="function">
+<dt id="glance.modules.image.generate_tags">
+<code class="descclassname">glance.modules.image.</code><code class="descname">generate_tags</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/image.html#generate_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.image.generate_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using AWS Rekognition, generate tags (labels).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> – – string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">– list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance.modules.image.save_frame">
+<code class="descclassname">glance.modules.image.</code><code class="descname">save_frame</code><span class="sig-paren">(</span><em>dst</em>, <em>file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/image.html#save_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.image.save_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract frame from mp4.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dst</strong> – – ???</li>
+<li><strong>file</strong> – – ???</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">???</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="glance.modules.image.thumb">
+<code class="descclassname">glance.modules.image.</code><code class="descname">thumb</code><span class="sig-paren">(</span><em>dir</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/glance/modules/image.html#thumb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#glance.modules.image.thumb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate thumbnail from file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dir</strong> – – ???</li>
+<li><strong>filename</strong> – – ???</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">???</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Developer Documentation</a><ul>
+<li><a class="reference internal" href="#module-glance.modules.auth">glance.modules.auth</a></li>
+<li><a class="reference internal" href="#module-glance.modules.file">glance.modules.file</a></li>
+<li><a class="reference internal" href="#module-glance.modules.image">glance.modules.image</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="app.html" title="previous chapter">App</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/app/source.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, vhdev.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/app/source.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

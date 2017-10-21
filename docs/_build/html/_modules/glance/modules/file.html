@@ -1,0 +1,284 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>glance.modules.file &#8212; Glance 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for glance.modules.file</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains functions for Files</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">secrets</span>
+<span class="kn">import</span> <span class="nn">string</span>
+
+<span class="kn">import</span> <span class="nn">glance.modules.image</span> <span class="k">as</span> <span class="nn">image</span>
+<span class="kn">import</span> <span class="nn">glance.modules.auth</span> <span class="k">as</span> <span class="nn">auth</span>
+<span class="kn">import</span> <span class="nn">glance.app</span>
+<span class="kn">import</span> <span class="nn">glance.modules.api</span>
+
+<span class="n">ALLOWED_FILE_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;.zip&#39;</span><span class="p">,</span> <span class="s1">&#39;.mp4&#39;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">upload_handler</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">filelist</span><span class="p">,</span> <span class="n">account_session</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># TODO: if uploading an .mp4 the frame that gets ripped doesn&#39;t get deleted from local server.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filelist</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filelist</span> <span class="o">=</span> <span class="p">[</span><span class="n">filelist</span><span class="p">]</span>
+
+    <span class="c1"># edge case: change collection cover.</span>
+    <span class="k">if</span> <span class="n">extra</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dst</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">local_save_file</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">filelist</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">thumbnail</span> <span class="o">=</span> <span class="n">local_make_thumbnail</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">local_file_to_s3</span><span class="o">.</span><span class="n">apply_async</span><span class="p">((</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">link</span><span class="o">=</span><span class="n">local_clean_up</span><span class="o">.</span><span class="n">si</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+        <span class="n">local_file_to_s3</span><span class="o">.</span><span class="n">apply_async</span><span class="p">((</span><span class="n">dst</span><span class="p">,</span> <span class="n">thumbnail</span><span class="p">),</span> <span class="n">link</span><span class="o">=</span><span class="n">local_clean_up</span><span class="o">.</span><span class="n">si</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">thumbnail</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">thumbnail</span><span class="p">)</span>
+
+    <span class="c1"># init database entry</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;item_type&#39;</span><span class="p">:</span> <span class="n">extra</span><span class="p">[</span><span class="s1">&#39;itemradio&#39;</span><span class="p">]}</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">glance</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">post_item</span><span class="p">(</span><span class="n">account_session</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+
+    <span class="c1"># process each item</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">filelist</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dst</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">local_save_file</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.jpg&#39;</span> <span class="ow">or</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.mp4&#39;</span><span class="p">:</span>
+            <span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">thumbnail</span> <span class="o">=</span> <span class="n">local_make_thumbnail</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> 
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">root</span><span class="p">,</span> 
+                <span class="s1">&#39;item_loc&#39;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span> 
+                <span class="s1">&#39;item_thumb&#39;</span><span class="p">:</span> <span class="n">thumbnail</span><span class="p">,</span> 
+                <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="n">glance</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">tag_string</span><span class="p">(</span><span class="n">extra</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">])</span>
+            <span class="p">}</span>
+
+            <span class="c1"># below celery task needs to imp rek with db update</span>
+            <span class="n">local_file_to_s3</span><span class="o">.</span><span class="n">apply_async</span><span class="p">((</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">link</span><span class="o">=</span><span class="p">[</span><span class="n">aws_rek_image</span><span class="o">.</span><span class="n">si</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">],</span> <span class="n">filename</span><span class="p">,</span> <span class="n">account_session</span><span class="p">),</span> <span class="n">local_clean_up</span><span class="o">.</span><span class="n">si</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">)])</span>
+            <span class="n">local_file_to_s3</span><span class="o">.</span><span class="n">apply_async</span><span class="p">((</span><span class="n">dst</span><span class="p">,</span> <span class="n">thumbnail</span><span class="p">),</span> <span class="n">link</span><span class="o">=</span><span class="n">local_clean_up</span><span class="o">.</span><span class="n">si</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">thumbnail</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.zip&#39;</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{root}{ext}</span><span class="s1">&#39;</span>
+            <span class="n">local_file_to_s3</span><span class="o">.</span><span class="n">apply_async</span><span class="p">((</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">link</span><span class="o">=</span><span class="n">local_clean_up</span><span class="o">.</span><span class="n">si</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+
+            <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;attached&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">glance</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">put_item</span><span class="p">(</span><span class="n">account_session</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span>
+
+
+<span class="k">def</span> <span class="nf">local_save_file</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">):</span>
+    <span class="n">root</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fileobj</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ext</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALLOWED_FILE_TYPES</span><span class="p">:</span>
+        <span class="c1"># TODO: IMP error</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">root</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">local_rename_file_with_salt</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="n">fileobj</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">ext</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">local_rename_file_with_salt</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">ext</span><span class="p">):</span>
+    <span class="n">salt</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">token_urlsafe</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">salt</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">local_make_thumbnail</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">ext</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.jpg&#39;</span><span class="p">:</span>
+        <span class="n">thumbnail</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">thumb</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{root}{ext}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.mp4&#39;</span><span class="p">:</span>
+        <span class="n">saved_frame</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">save_frame</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{root}{ext}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">thumbnail</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">thumb</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">saved_frame</span><span class="p">)</span>
+        <span class="n">local_clean_up</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">saved_frame</span><span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{root}{ext}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">thumbnail</span><span class="p">)</span>
+
+<span class="nd">@glance</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">celery</span><span class="o">.</span><span class="n">task</span>
+<span class="k">def</span> <span class="nf">local_file_to_s3</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="n">s3</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">boto3_res_s3</span><span class="p">()</span>
+    <span class="n">auth</span><span class="o">.</span><span class="n">boto3_s3_upload</span><span class="p">(</span><span class="n">s3</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+<span class="nd">@glance</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">celery</span><span class="o">.</span><span class="n">task</span>
+<span class="k">def</span> <span class="nf">local_clean_up</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">filename</span>
+
+
+<span class="nd">@glance</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">celery</span><span class="o">.</span><span class="n">task</span>
+<span class="k">def</span> <span class="nf">aws_rek_image</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">account_session</span><span class="p">):</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">generate_tags</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="nb">id</span><span class="p">,</span> <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tags</span><span class="p">)}</span>
+        <span class="n">glance</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">put_item</span><span class="p">(</span><span class="n">account_session</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="c1"># TODO: IMP celery for create_payload, and aws rekignition</span>
+<span class="k">def</span> <span class="nf">create_payload</span><span class="p">(</span><span class="n">account_session</span><span class="p">,</span> <span class="n">upload_data</span><span class="p">,</span> <span class="n">item_name</span><span class="p">,</span> <span class="o">**</span><span class="n">files</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">item_name</span>
+    <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">account_session</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span>
+    <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">upload_data</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span>
+    <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;item_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">upload_data</span><span class="p">[</span><span class="s1">&#39;itemradio&#39;</span><span class="p">]</span>
+    <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;item_loc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+    <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;item_thumb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s1">&#39;thumbnail&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;attachment&#39;</span> <span class="ow">in</span> <span class="n">files</span> <span class="ow">and</span> <span class="n">files</span><span class="p">[</span><span class="s1">&#39;attachment&#39;</span><span class="p">]:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;attached&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s1">&#39;attachment&#39;</span><span class="p">]</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # AWS REKOGNITION</span>
+<span class="sd">    for tag in image.generate_tags(files[&#39;filename&#39;]):</span>
+<span class="sd">        if payload[&#39;tags&#39;] == &#39;&#39;:</span>
+<span class="sd">            payload[&#39;tags&#39;] = tag.lower()</span>
+<span class="sd">        else:</span>
+<span class="sd">            payload[&#39;tags&#39;] += &#39; &#39; + tag.lower()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Process image name</span>
+    <span class="n">payload_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;_&#39;</span> <span class="ow">or</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+            <span class="n">payload_name</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">payload_name</span> <span class="o">+=</span> <span class="n">x</span>
+
+    <span class="c1"># apend payload_name to tag string for posting.</span>
+    <span class="k">if</span> <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">payload_name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">payload</span>
+
+
+<div class="viewcode-block" id="process_raw_files"><a class="viewcode-back" href="../../../app/source.html#glance.modules.file.process_raw_files">[docs]</a><span class="k">def</span> <span class="nf">process_raw_files</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;pairs images to attachments.</span>
+
+<span class="sd">    :param files: ???</span>
+
+<span class="sd">    :return Type: ???</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">collector</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">filename</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">collector</span><span class="p">:</span>
+            <span class="n">collector</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">collector</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">collector</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">collector</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, vhdev.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
