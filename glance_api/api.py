@@ -83,10 +83,9 @@ class Entry(Resource):
             'tags': session.query(func.count(models.Tag.id)).scalar()
         }
 
-        test_data = {'filter': 'image', 'filter_people': None, 'query': 'animal'}
-        test_method = functions.Item(session)._get_tags_from_query(test_data)
-        test = functions.Item(session)._get_filter_tags(test_data, test_method)
-        print(test)
+        test_data = {'id': 1, 'filter': None, 'filter_people': None, 'query': None}
+        test_method = functions.Item(session).get(id=test_data['id'])
+        print(bool(test_method))
 
         return entry, 200
 

@@ -13,12 +13,12 @@ from glance_api.modules import models
 from glance_api import api
 
 
-# TODO: Finish testing Item 
+# TODO: Finish testing Item
+# TODO: Currently using sqlite3 database for tests, need to use postgres instead
+# TODO: Figure out how to make test database in postgres programmically.
 
 @pytest.fixture(scope='session')
 def connection(request):
-    # TODO: Figure how to delete sqlite_test_database.db on tests finish
-    # current its just gitingored
     db_name = 'sqlite_test_database.db'
     engine = sqlalchemy.create_engine(f'sqlite:///tests/{db_name}')
     models.Base.metadata.create_all(engine)
@@ -45,23 +45,23 @@ def test_Item_with_no_session():
         functions.Item()
 
 
-def test_Item_get_tags_from_queries_returns_list(db_session):
+def test_Item_tags_from_queries_returns_type_list(db_session):
     test_data = {'filter': 'image', 'filter_people': None, 'query': 'animal'}
 
-    test_method = functions.Item(db_session)._get_tags_from_queries(test_data)
+    test_method = functions.Item(db_session)._tags_from_queries(test_data)
 
     assert type(test_method) == list
 
 
-def test_Item_get_tags_from_queries_no_tags(db_session):
+def test_Item_tags_from_queries_no_tags(db_session):
     test_data = {'filter': 'image', 'filter_people': None, 'query': 'TEST_TAGS'}
 
-    test_method = functions.Item(db_session)._get_tags_from_queries(test_data)
+    test_method = functions.Item(db_session)._tags_from_queries(test_data)
 
     assert len(test_method) == 0
 
 
-def test_Item_get_tags_from_queries_tags(db_session):
+def test_Item_tags_from_queries_tags(db_session):
     test_query = {'filter': 'image', 'filter_people': None, 'query': ''}
     test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
 
@@ -69,12 +69,51 @@ def test_Item_get_tags_from_queries_tags(db_session):
         new_tag = models.Tag(name=tag)
         db_session.add(new_tag)
 
-    test_method = functions.Item(db_session)._get_tags_from_queries(test_query)
+    test_method = functions.Item(db_session)._tags_from_queries(test_query)
 
     assert len(test_method) == 3
 
 
-def test_Item_get_filter_tags_returns_list(db_session):
+def test_Item_tags_from_queries_query(db_session):
+    test_query = {'filter': '', 'filter_people': None, 'query': 'querytag notfoundtag'}
+    test_tags = ['_one', '_group', 'querytag', 'notfoundtag']
+
+    for tag in test_tags:
+        new_tag = models.Tag(name=tag)
+        db_session.add(new_tag)
+
+    test_method = functions.Item(db_session)._tags_from_queries(test_query)
+
+    assert len(test_method) == 2
+
+
+def test_Item_tags_from_queries_filter_people(db_session):
+    test_query = {'filter': 'people', 'filter_people': '_one _group', 'query': 'none'}
+    test_tags = ['_one', '_group', 'querytag', 'notfoundtag']
+
+    for tag in test_tags:
+        new_tag = models.Tag(name=tag)
+        db_session.add(new_tag)
+
+    test_method = functions.Item(db_session)._tags_from_queries(test_query)
+
+    assert len(test_method) == 2
+
+
+def test_Item_tags_from_queries_filter_people_and_query(db_session):
+    test_query = {'filter': 'people', 'filter_people': '_one _group', 'query': 'querytag'}
+    test_tags = ['_one', '_group', 'querytag', 'notfoundtag']
+
+    for tag in test_tags:
+        new_tag = models.Tag(name=tag)
+        db_session.add(new_tag)
+
+    test_method = functions.Item(db_session)._tags_from_queries(test_query)
+
+    assert len(test_method) == 3
+
+
+def test_Item_filter_tags_returns_list(db_session):
     test_query = {'filter': 'image', 'filter_people': None, 'query': ''}
     test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
 
@@ -83,13 +122,13 @@ def test_Item_get_filter_tags_returns_list(db_session):
         db_session.add(new_tag)
 
     tags = db_session.query(models.Tag).all()
-    test_method = functions.Item(db_session)._get_filter_tags(test_query, tags)
+    test_method = functions.Item(db_session)._filter_tags(test_query, tags)
 
 
     assert type(test_method) == list
 
 
-def test_Item_get_filter_tags_image_has_tags(db_session):
+def test_Item_filter_tags_image_has_tags(db_session):
     test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
     test_query = {'filter': 'image', 'filter_people': None, 'query': ' '.join(test_tags)}
     
@@ -104,12 +143,12 @@ def test_Item_get_filter_tags_image_has_tags(db_session):
 
     test_new_tag = db_session.query(models.Tag).all()
 
-    test_method = functions.Item(db_session)._get_filter_tags(test_query, test_new_tag)
+    test_method = functions.Item(db_session)._filter_tags(test_query, test_new_tag)
 
     assert len(test_method) == 1
 
 
-def test_Item_get_filter_tags_image_has_no_tags(db_session):
+def test_Item_filter_tags_image_has_no_tags(db_session):
     test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
     test_query = {'filter': 'image', 'filter_people': None, 'query': ' '.join(test_tags)}
     
@@ -121,12 +160,12 @@ def test_Item_get_filter_tags_image_has_no_tags(db_session):
         db_session.add(new_tag)
 
     test_new_tag = db_session.query(models.Tag).all()
-    test_method = functions.Item(db_session)._get_filter_tags(test_query, test_new_tag)
+    test_method = functions.Item(db_session)._filter_tags(test_query, test_new_tag)
 
     assert len(test_method) == 0
 
 
-def test_Item_get_filter_tags_no_filter(db_session):
+def test_Item_filter_tags_no_filter(db_session):
     test_tags = ['TEST_TAG_ONE', 'TEST_TAG_TWO', 'TEST_TAG_THREE']
     test_query = {'filter': None, 'filter_people': None, 'query': ' '.join(test_tags)}
     
@@ -146,13 +185,31 @@ def test_Item_get_filter_tags_no_filter(db_session):
     new_footage.tags.append(get_tag_two)
 
     test_new_tag = db_session.query(models.Tag).all()
-    test_method = functions.Item(db_session)._get_filter_tags(test_query, test_new_tag)
+    test_method = functions.Item(db_session)._filter_tags(test_query, test_new_tag)
 
     assert len(test_method) == 2
 
 
-def test_Item_get():
-    pass
+def test_Item_get_id_does_not_exists(db_session):
+    test_data = {'id': 999, 'query': None, 'filter_people': None}
+
+    test_method = functions.Item(db_session).get(id=test_data['id'])
+
+    assert test_method == None
+
+
+# TODO: Figure out how to make a test database in postgres programically
+# for the following tests.
+"""
+def test_Item_get_id_does_exists(db_session):
+    test_data = {'id': 1, 'query': None, 'filter_people': None}
+
+    new_item = models.Item(type='image')
+    db_session.add(new_item)
+
+    test_method = functions.Item(db_session).get(id=test_data['id'])
+
+    assert test_method == True
 
 
 def test_Item_delete():
@@ -165,143 +222,5 @@ def test_Item_post():
 
 def test_Item_patch():
     pass
-
-
-"""
-def test_post_collection(test_session):
-    # test data
-    test_data = {'name': 'test_collection_name'}
-    test_function = functions.post_collection(test_session, **test_data)
-
-    # asserts
-    testing_data = test_session.query(models.Collection).get(test_function.id)
-    assert testing_data.name == test_function.name
-
-
-def test_post_asset(test_session):
-    # test data
-    test_data = {'name':'test_asset_name', 'image': 'test_asset_image'}
-    test_function = functions.post_asset(test_session, **test_data)
-
-    # asserts
-    testing_data = test_session.query(models.Asset).get(int(test_function.id))
-    assert testing_data.name == test_function.name
-
-
-def test_get_collections(test_session):
-    # test function
-    test_data = models.Collection(name='test_collection_name')
-    test_session.add(test_data)
-    test_session.commit()
-    test_function = functions.get_collections(test_session)
-
-    # asserts
-    testing_data = test_session.query(models.Collection).all()
-    assert len(test_function) == len(testing_data)
-
-
-def test_get_assets(test_session):
-    # test data
-    test_data = models.Asset(name='test_asset_name')
-    test_session.add(test_data)
-    test_session.commit()
-    # test function
-    test_function = functions.get_assets(test_session)
-
-    # asserts
-    testing_data = test_session.query(models.Asset).all()
-    assert len(test_function) == len(testing_data)
-
-
-def test_get_asset_by_id(test_session):
-    # test data
-    test_data = models.Asset(name='test_asset_name')
-    test_session.add(test_data)
-    test_session.commit()
-    # test function
-    test_function = functions.get_asset_by_id(test_session, test_data.id)
-    # asserts
-    assert test_data.name == test_function.name
-
-
-def test_get_collection_by_id(test_session):
-    # test data
-    test_data = models.Collection(name='test_collection_name')
-    test_session.add(test_data)
-    test_session.commit()
-    # test function
-    test_function = functions.get_collection_by_id(test_session, test_data.id)
-    # asserts
-    assert test_data.name == test_function.name
-
-
-def test_get_query(test_session):
-    # TODO: Only testing assets at the moment.
-    # test data
-    # objects
-    test_data_asset = models.Asset(name='test_asset_name')
-    # tags
-    test_tag_asset = models.Tag(name='testtagasset')
-
-    test_session.add(test_data_asset)
-    test_session.add(test_tag_asset)
-    test_tag_data = {'query': [test_tag_asset.name]}
-    # append tags to objects
-    test_data_asset.tags.append(test_tag_asset)
-
-    test_session.add(test_data_asset)
-    test_session.commit()
-
-    # test function
-    test_function = functions.get_query(test_session, {'query': 'testtagasset'})
-    # asserts
-    assert len(test_function) == 1
-
-
-def test_get_query_flag(test_session):
-    # test data
-    test_data = models.Asset(name='test_asset_name', flag=1)
-    test_session.add(test_data)
-    test_session.commit()
-    # testing data
-    testing_data = test_session.query(models.Asset).filter(int(flag)>0).all()
-    # asserts
-    assert len(testing_data) == 1
-
-
-def test_patch_asset():
-    pass
-
-
-def test_patch_collection():
-    pass
-
-
-def test_del_asset(test_session):
-    # test data
-    test_data = models.Asset(name='test_asset_name')
-    test_session.add(test_data)
-    test_session.commit()
-    # asserts
-    # First test that the asset has been entered into the database.
-    assert test_session.query(models.Asset).get(test_data.id).id == test_data.id
-    # test function
-    test_function = functions.del_asset(test_session, test_data.id)
-    # final test to see if asset has been removed from database.
-    assert test_session.query(models.Asset).get(test_data.id) == None
-
-
-def test_del_collection(test_session):
-    # test data
-    test_data = models.Collection(name='test_collection_name')
-    test_session.add(test_data)
-    test_session.commit()
-    # asserts
-    # First test that the asset has been entered into the database.
-    assert test_session.query(models.Collection).get(test_data.id).id == test_data.id
-    # test function
-    test_function = functions.del_collection(test_session, test_data.id)
-    # final test to see if asset has been removed from database.
-    assert test_session.query(models.Collection).get(test_data.id) == None
 
 """

@@ -10,7 +10,9 @@ import sqlalchemy.orm
 import glance_api.modules.models
 
 
+# Helpers
 def jsonify(query):
+    """Converts raw database objects to json/dict."""
     result = []
 
     for row in query:
@@ -80,11 +82,12 @@ def validate_account(session, **kwarg):
 
 
 class Item():
+    """manages database access"""
     def __init__(self, session):
         self.session = session
 
 
-    def _get_tags_from_queries(self, query):
+    def _tags_from_queries(self, query):
         """Uses query['query'] and query['filter_people']
         Returns list of api.model.Tag objects"""
         tags = []
@@ -93,7 +96,7 @@ class Item():
                 tags = [x for x in self.session.query(glance_api.modules.models.Tag).all()]
 
         else:
-            if query['filter_people']:
+            if query['filter_people'] and query['filter'] == 'people':
                 query_list = query['query'].split(' ')
                 filter_people_list = query['filter_people'].split(' ')
                 queries = query_list + filter_people_list
@@ -110,7 +113,7 @@ class Item():
         return tags
 
 
-    def _get_filter_tags(self, query, tags):
+    def _filter_tags(self, query, tags):
         """Filters tags using query['filter']
         Returns list of api.models.Item objects"""
         items = []
@@ -144,8 +147,8 @@ class Item():
                 'query': query
             }
 
-            tags = self._get_tags_from_queries(user_query)
-            items = self._get_filter_tags(user_query, tags)
+            tags = self._tags_from_queries(user_query)
+            items = self._filter_tags(user_query, tags)
 
 
             return items
