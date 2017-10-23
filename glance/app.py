@@ -481,7 +481,7 @@ def search():
     data = {
         'filter': session['filter'],
         'filter_people': [],
-        'query': request.args['search']
+        'query': request.args['query']
     }
 
     # if sent with 'filter'

@@ -115,7 +115,7 @@ def delete_item(account_session, payload):
 
 
 def query(account_session, payload):
-    res = requests.get('{}query'.format(glance.config.settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
+    res = requests.get('{}items'.format(glance.config.settings.api_root), params=payload, auth=HTTPBasicAuth(account_session['username'], account_session['password'])).json()
     if 'status' in res and res['status'] == 'success':
         return res
 
