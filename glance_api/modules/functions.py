@@ -91,30 +91,50 @@ class Item():
         """Uses query['query'] and query['filter_people']
         Returns list of api.model.Tag objects"""
         tags = []
-        # filter items with [query]
-        if query['query'] == '**' or query['query'] == '' or query['query'] == None:
-                tags = [x for x in self.session.query(glance_api.modules.models.Tag).all()]
+
+        if query['query'] == '**' or query['query'] == '' or query['query'] is None:
+            # all_tags = [x for x in self.session.query(glance_api.modules.models.Tag).limit(100)]
+            all_tags = [x for x in self.session.query(glance_api.modules.models.Tag).all()]
+
+            if query['filter']:
+                if query['filter'] == 'people' and query['filter_people']:
+                    people_tags = query['filter_people'].split(' ')
+
+                    for tag in all_tags:
+                        if tag.items[0].item_type == query['filter']:
+                            for raw_tag in tag.items[0].tags:
+                                if raw_tag.name in people_tags:
+                                    tags.append(tag)
+
+                else:
+                    for tag in all_tags:
+                        if tag.items[0].item_type == query['filter']:
+                            tags.append(tag)
+            else:
+                tags = all_tags
 
         else:
             if query['filter_people'] and query['filter'] == 'people':
                 query_list = query['query'].split(' ')
                 filter_people_list = query['filter_people'].split(' ')
                 queries = query_list + filter_people_list
+
             else:
                 queries = query['query'].split(' ')
 
             # TODO: Start to implement pagination, and sorted search results.
             for x in queries:
-                raw_tags = [x for x in self.session.query(glance_api.modules.models.Tag).filter_by(name=x).limit(100)]
+                raw_tags = [x for x in self.session.query(glance_api.modules.models.Tag).filter_by(name=x)]
 
                 for tag in raw_tags:
                     tags.append(tag)
+
 
         return tags
 
 
     def _filter_tags(self, query, tags):
-        """Filters tags using query['filter']
+        """Filters tags using query['query'], query['filter'] and query['filter_people']
         Returns list of api.models.Item objects"""
         items = []
         # further filter items with [filter]
@@ -123,6 +143,19 @@ class Item():
                 # TODO: for some reason a shitload of dupilicate items are appearing here.
                 if query['filter'] == 'all' or query['filter'] == None:
                     items.append(item)
+
+                elif query['filter'] == 'people':
+                    if query['filter_people']:
+                        if item.type == query['filter']:
+                            filter_people = query['filter_people'].split(' ')
+                            user_tags = query['query'].split(' ')
+
+                            # TODO: ONLY APPEND IF ITEM HAS TAGS IN BOTH USER_TAGS AND PEOPLE_TAGS
+
+                    else:
+                        if item.type == query['filter']:
+                            items.append(item)
+
                 else:
                     if item.type == query['filter']:
                         items.append(item)

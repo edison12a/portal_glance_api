@@ -99,6 +99,7 @@ class Accounts(Resource):
 
     @auth.login_required
     def put(self, id):
+        # todo: Remove old gallery code
         parser = reqparse.RequestParser()
         parser.add_argument('galleries', type=str, help='help text')
         args = parser.parse_args()
