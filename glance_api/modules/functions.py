@@ -147,10 +147,14 @@ class Item():
                 elif query['filter'] == 'people':
                     if query['filter_people']:
                         if item.type == query['filter']:
-                            filter_people = query['filter_people'].split(' ')
-                            user_tags = query['query'].split(' ')
+                            item_tag_collector = []
+                            all_user_tags = (query['filter_people'].split(' ')) + (query['query'].split(' '))
+                            
+                            for item_tag in item.tags:
+                                item_tag_collector.append(item_tag.name)
 
-                            # TODO: ONLY APPEND IF ITEM HAS TAGS IN BOTH USER_TAGS AND PEOPLE_TAGS
+                            if set(all_user_tags).issubset(item_tag_collector):
+                                items.append(item)
 
                     else:
                         if item.type == query['filter']:
