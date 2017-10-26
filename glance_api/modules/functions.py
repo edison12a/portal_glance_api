@@ -177,7 +177,8 @@ class Item():
             item = self.session.query(glance_api.modules.models.Item).get(id)
             return item
 
-        elif query or query == '':
+        elif query:
+
             user_query = {
                 'filter': filter,
                 'filter_people': filter_people,
@@ -187,17 +188,17 @@ class Item():
             tags = self._tags_from_queries(user_query)
             items = self._filter_tags(user_query, tags)
 
-
             return items
 
         else:
-            if filter == None or filter == 'all':
+            if filter is None or filter == 'all':
                 items = self.session.query(glance_api.modules.models.Item).all()
 
                 return items
 
 
             else:
+                print('returning all')
                 items = self.session.query(glance_api.modules.models.Item).filter(glance_api.modules.models.Item.type==filter).all()
                 
                 return items
