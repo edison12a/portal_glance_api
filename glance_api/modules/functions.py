@@ -195,23 +195,22 @@ class Item():
         elif filter_people:
             _collected = []
             _tags = []
-            selected_tags = filter_people.split(' ')
-            print(selected_tags)
+            selected_tags = set(filter_people.split(' '))
 
-            # collect all tags that match user selection
             for tag in selected_tags:
                 test = self.session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()
                 for tag in test:
+
                     for raw_tag in tag.items[0].tags:
                         if raw_tag.name.startswith('_') and raw_tag.name in selected_tags:
                             _tags.append(raw_tag)
 
-            # retrive items from tags
-            for tag in _tags:
-                _collected.append(tag.items[0])
+                            bla = set([x.name for x in raw_tag.items[0].tags])
 
+                            if selected_tags.issubset(bla):
+                                _collected.append(tag.items[0])
 
-            return _collected
+            return set(_collected)
 
 
         else:
