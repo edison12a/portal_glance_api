@@ -39,7 +39,7 @@ dependencies:
   - markupsafe==0.23
   - olefile==0.44
   - pillow==4.1.1
-  - psycopg2==2.6.2
+  - psycopg2
   - py==1.4.32
   - pygments==2.2.0
   - pytest==3.0.5

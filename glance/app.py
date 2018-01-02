@@ -384,6 +384,8 @@ def home():
     res = glance.modules.api.get_items(account_session.get())
 
     total_items = glance.modules.api.total_items(account_session.get())
+    print('*****************88888')
+    print(total_items)
 
     if 'status' in res and res['status'] == 'success':
         tags = []
@@ -405,7 +407,7 @@ def home():
             )
 
     else:
-        return render_template('home.html', data=data)
+        return render_template('home.html', data=data, total_items=total_items)
 
 
 @app.route('/manage')

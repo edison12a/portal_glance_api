@@ -44,7 +44,7 @@ def check_login_details(**data):
     # r = requests.get('{}user'.format(settings.api_root), params=data)
 
     r = requests.get(
-            '{}/accounts'.format(settings.api_root),
+            '{}accounts'.format(settings.api_root),
             auth=HTTPBasicAuth(data['username'], data['password'])
             )
     response = r.status_code
@@ -87,6 +87,7 @@ class SessionHandler():
             self.session['filter'] = 'all'
             self.session['fav'] = {}
             self.session['filter_people'] = struct.structure_people_tags()
+
             return True
 
         elif r.status_code != 200:
