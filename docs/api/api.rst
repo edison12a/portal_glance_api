@@ -77,6 +77,16 @@ Next open `pg_hba.conf` and add the below lines to the top of the file.
     host all all 0.0.0.0/0 md5
 
 
+RabbitMQ server
+---------------
+
+The broker being used is RabbitMQ.
+
+Install it with: sudo apt-get install rabbitmq-server
+
+Once installed, it will automatically be run in the background ready to recieve messages.
+
+
 Celery Set up
 ---------------
 
@@ -108,13 +118,13 @@ Create /etc/default/celeryd
 Example:
 
 """
-CELERY_BIN="project/venv/bin/celery"
+CELERY_BIN="/path/to/virtual/env/bin/celery"
 
 # App instance to use
-CELERY_APP="project_django_project"
+CELERY_APP="app.context"
 
 # Where to chdir at start.
-CELERYD_CHDIR="/home/username/project/"
+CELERYD_CHDIR="/path/to/actual/project/code/"
 
 # Extra command-line arguments to the worker
 CELERYD_OPTS="--time-limit=300 --concurrency=8"

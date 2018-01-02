@@ -84,6 +84,7 @@ def validate_account(session, **kwarg):
 class Item():
     """manages database access"""
     def __init__(self, session):
+        print('ENTER ITEM')
         self.session = session
 
 
@@ -93,6 +94,7 @@ class Item():
         tags = []
 
         if query['query'] == '**' or query['query'] == '' or query['query'] is None:
+            
             # all_tags = [x for x in self.session.query(glance_api.modules.models.Tag).limit(100)]
             all_tags = [x for x in self.session.query(glance_api.modules.models.Tag).all()]
 
@@ -190,6 +192,28 @@ class Item():
 
             return items
 
+        elif filter_people:
+            _collected = []
+            _tags = []
+            selected_tags = filter_people.split(' ')
+            print(selected_tags)
+
+            # collect all tags that match user selection
+            for tag in selected_tags:
+                test = self.session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()
+                for tag in test:
+                    for raw_tag in tag.items[0].tags:
+                        if raw_tag.name.startswith('_') and raw_tag.name in selected_tags:
+                            _tags.append(raw_tag)
+
+            # retrive items from tags
+            for tag in _tags:
+                _collected.append(tag.items[0])
+
+
+            return _collected
+
+
         else:
             if filter is None or filter == 'all':
                 items = self.session.query(glance_api.modules.models.Item).all()
@@ -199,7 +223,7 @@ class Item():
 
             else:
                 print('returning all')
-                items = self.session.query(glance_api.modules.models.Item).filter(glance_api.modules.models.Item.type==filter).all()
+                items = self.session.query(glance_api.modules.models.Item).filter(glance_api.modules.models.Item.type==filter).limit(50)
                 
                 return items
 

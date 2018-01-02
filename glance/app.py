@@ -384,8 +384,6 @@ def home():
     res = glance.modules.api.get_items(account_session.get())
 
     total_items = glance.modules.api.total_items(account_session.get())
-    print('*****************88888')
-    print(total_items)
 
     if 'status' in res and res['status'] == 'success':
         tags = []
@@ -417,11 +415,20 @@ def manage():
 
     if 'username' in account_session:
         res = glance.modules.api.get_items(account_session)
-        if res:
-            collections = [x for x in res['data'] if x['item_type'] == 'collection' and x['author'] == account_session['username']]
-            data = []
 
-            return render_template('manage.html', collection=collections, items=data, data=data)
+        if 'status' in res and res['status'] == 'success':
+            if 'message' in res and res['message'] == 'nothing in database':
+                # this is crappy. Only used if database is empty. fix it.
+                collections = []
+                data = []
+
+                return render_template('manage.html', collection=collections, items=data, data=data)
+
+            else:
+                collections = [x for x in res['data'] if x['item_type'] == 'collection' and x['author'] == account_session['username']]
+                data = []
+
+                return render_template('manage.html', collection=collections, items=data, data=data)
 
         else:
             collections = []
@@ -491,9 +498,11 @@ def search():
         # update data user session
         account_session.filter(request.args['filter'])
         data['filter'] = request.args['filter']
+
     elif 'filter_people' in request.args:
         # update user session
         account_session.filter_people(request.args['filter_people'])
+
     else:
         data['filter'] = session['filter']
 
