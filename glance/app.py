@@ -60,12 +60,9 @@ def signup():
         for form_input in request.form:
             payload[form_input] = request.form[form_input]
 
-        # TODO: below is for testing only. remove for prod
-        dev_user = ['test', 'admin']
-        if payload['username'] not in dev_user:
-            return render_template('signup.html')
-        elif payload['password'] not in dev_user:
-            return render_template('signup.html')
+        # TODO: Check that email is part of company
+        if not payload['username'].endswith('@visualhouse.co'):
+            return render_template('signup.html', message='Email not accepted')
 
         res = glance.modules.api.post_account(payload)
         if res['status'] == 'success':
