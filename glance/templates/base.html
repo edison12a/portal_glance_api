@@ -276,25 +276,10 @@
 
     {% if session.filter == 'people' %}
 
-    <div id="nav_item_panel_subitem">
-      <small>
+      {% include 'submenu_people.html' %}
 
-      {% for k, v in session.filter_people.items() %}
-        <strong style="color:black;">{{k.capitalize()}} | </strong>
-      {% for x, z in v.items() %}
-      {% if z == 0 %}
-        <a style="color:white" href="/search?query={{data.query}}&filter_people={{x}}">{{x}}, </a>
-      {% else %}
-        <a style="color:red" href="/search?query={{data.query}}&filter_people={{x}}">{{x}}, </a>
-      {% endif %}
-      {% endfor %}
+    {% endif %}
 
-      {% endfor %}
-
-      </small>
-    </div>
-
-  {% endif %}
   {% endif %}
 
 <!-- set AWS bucket name !-->

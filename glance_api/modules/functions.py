@@ -177,6 +177,7 @@ class Item():
         """
         if id:
             item = self.session.query(glance_api.modules.models.Item).get(id)
+
             return item
 
         elif query:
@@ -193,24 +194,23 @@ class Item():
             return items
 
         elif filter_people:
-            _collected = []
-            _tags = []
+            # if people_filters have been selected
             selected_tags = set(filter_people.split(' '))
+            _collect = []
 
-            for tag in selected_tags:
-                test = self.session.query(glance_api.modules.models.Tag).filter_by(name=tag).all()
-                for tag in test:
+            queried_tags = self.session.query(glance_api.modules.models.Tag).filter(glance_api.modules.models.Tag.name.in_(selected_tags)).all()
+            items = set([x.items[0] for x in queried_tags if len(x.items) > 0])
+            
+            # filters items based on selected tags
+            # TODO: Currently returned items must have all tags.
+            # TODO: Would it be better to - instead of items having to have *all* tags - items are returned
+            # in order, based on the number of tags they have in relation to the user selected tags?
+            for item in items:
+                items_tags = set([x.name for x in item.tags])
+                if selected_tags.issubset(items_tags):
+                    _collect.append(item)
 
-                    for raw_tag in tag.items[0].tags:
-                        if raw_tag.name.startswith('_') and raw_tag.name in selected_tags:
-                            _tags.append(raw_tag)
-
-                            bla = set([x.name for x in raw_tag.items[0].tags])
-
-                            if selected_tags.issubset(bla):
-                                _collected.append(tag.items[0])
-
-            return set(_collected)
+            return _collect
 
 
         else:
