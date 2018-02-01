@@ -20,6 +20,7 @@ app = Flask(__name__)
 # config
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.POSTGRES_DATABASE
 engine = create_engine(settings.POSTGRES_DATABASE, echo=False)
+
 api = Api(app, '/glance/v2')
 auth = HTTPBasicAuth()
 

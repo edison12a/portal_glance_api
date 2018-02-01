@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="content">
-<div id="item_header_collection" style="background: url(https://s3.amazonaws.com/{{bucketname}}/{{ item.0.item_loc }}) no-repeat center;background-size: 100% auto;">
+<div id="item_header_collection" style="background: url(/{{bucketname}}/{{ item.0.item_loc }}) no-repeat center;background-size: 100% auto;">
 
     <div id="item_header_title">
       <small><strong>{{ item.0.name }}</strong></small>

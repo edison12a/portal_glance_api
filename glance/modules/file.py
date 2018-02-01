@@ -14,99 +14,174 @@ import glance.modules.image as image
 import glance.modules.auth as auth
 import glance.app
 import glance.modules.api
+import glance.config.settings
 
-ALLOWED_FILE_TYPES = ['.jpg', '.zip', '.mp4']
 
-def upload_handler(dst, filelist, account_session, extra=None):
-    # TODO: if uploading an .mp4 the frame that gets ripped doesn't get deleted from local server.
-    if isinstance(filelist, list):
-        pass
-    else:
-        filelist = [filelist]
+class UploadHandler():
+    def __init__(self, account_session, filelist=None):
+        self.account_session = account_session
+        if filelist != None:
+            if isinstance(filelist, list):
+                self.filelist = filelist
 
-    # edge case: change collection cover.
-    if extra == None:
+            else:
+                self.filelist = [filelist]
+
+        else:
+            self.filelist = filelist
+
+        self.ALLOWED_FILE_TYPES = ['.jpg', '.zip', '.mp4']
+        self.dst = glance.config.settings.tmp_upload
+
+
+    def _to_dict(self, files):
+        """pairs images to attachments.
+
+        :param files: ???
+
+        :return Type: ???
+        """
+        collector = {}
+        for x in files:
+            filename, ext = os.path.splitext(x.filename)
+            if filename not in collector:
+                collector[filename] = []
+                collector[filename].append(x)
+            else:
+                collector[filename].append(x)
+
+
+        return collector
+
+
+    def _local_rename_file_with_salt(self, root, ext):
+        salt = secrets.token_urlsafe(4)
+        root = '{}_{}'.format(root, salt)
+
+        return (root, ext)
+
+
+    def _local_save_file(self, fileobj):
+        root, ext = os.path.splitext(fileobj.filename)
+        if ext not in self.ALLOWED_FILE_TYPES:
+            # TODO: IMP error
+            return False
+
+        root, ext = self._local_rename_file_with_salt(root, ext)
+        fileobj.save(os.path.join(self.dst, '{}{}'.format(root, ext)))
+
+        return (root, ext)
+
+
+    def _local_make_thumbnail(self, root, ext):
+        if ext == '.jpg':
+            thumbnail = image.thumb(self.dst, f'{root}{ext}')
+
+        elif ext == '.mp4':
+            saved_frame = image.save_frame(self.dst, f'{root}{ext}')
+            thumbnail = image.thumb(self.dst, saved_frame)
+            local_clean_up(self.dst, saved_frame)
+        
+        else:
+            return False
+
+
+        return (f'{root}{ext}', thumbnail)
+
+
+    def _tags_from_string(self, string):
+        return string.split(' ')
+
+
+    def _taglist_append(self, taglist, tags_to_append):
+        if len(taglist) != 0:
+            for x in tags_to_append:
+                taglist += ' ' + str(x)
+        else:
+            for x in tags_to_append:
+                taglist += ' ' + str(x)
+
+        return taglist
+    
+
+    def upload_collection_cover(self):
         try:
-            dst, root, ext = local_save_file(dst, filelist[0])
+            root, ext = self._local_save_file(self.filelist[0])
         except:
             return False
 
-        dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
-        local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
-        local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(dst, thumbnail))
+        filename, thumbnail = self._local_make_thumbnail(root, ext)
+        local_file_to_s3.apply_async((self.dst, filename), link=local_clean_up.si(self.dst, filename))
+        local_file_to_s3.apply_async((self.dst, thumbnail), link=local_clean_up.si(self.dst, thumbnail))
 
         return (filename, thumbnail)
 
-    # init database entry
-    payload = {'item_type': extra['itemradio']}
-    res = glance.modules.api.post_item(account_session, payload)
 
-    # process each item
-    for file in filelist:
-        try:
-            dst, root, ext = local_save_file(dst, file)
+    def process_files(self, extra):
+        payload = {'item_type': extra['itemradio']}
+        res = glance.modules.api.post_item(self.account_session, payload)
 
-        except:
-            return False
+        for file in self.filelist:
+            root, ext = self._local_save_file(file)
 
-        if ext == '.jpg' or ext == '.mp4':
-            dst, filename, thumbnail = local_make_thumbnail(dst, root, ext)
+            if ext == '.jpg' or ext == '.mp4':
+                filename, thumbnail = self._local_make_thumbnail(root, ext)
 
+                payload = {
+                    'id': res[0]['id'], 
+                    'name': root, 
+                    'item_loc': filename, 
+                    'item_thumb': thumbnail, 
+                    'tags': glance.modules.api.tag_string(extra['tags'])
+                }
+
+                # below celery task needs to imp rek with db update
+                local_file_to_s3.apply_async((self.dst, filename), link=[aws_rek_image.si(payload['id'], filename, self.account_session), local_clean_up.si(self.dst, filename)])
+                local_file_to_s3.apply_async((self.dst, thumbnail), link=local_clean_up.si(self.dst, thumbnail))
+
+            if ext == '.zip':
+                filename = f'{root}{ext}'
+                local_file_to_s3.apply_async((self.dst, filename), link=local_clean_up.si(self.dst, filename))
+
+                payload['attached'] = filename
+
+            res = glance.modules.api.put_item(self.account_session, payload)
+
+            return res
+
+
+    def upload_collection(self, flasksession, data):
+        tags = self._taglist_append(data['tags'], self._tags_from_string(data['collection']))
+
+        if 'items_for_collection' in data:
             payload = {
-                'id': res[0]['id'], 
-                'name': root, 
-                'item_loc': filename, 
-                'item_thumb': thumbnail, 
-                'tags': glance.modules.api.tag_string(extra['tags'])
+                'name': data['collection'],
+                'item_type': 'collection',
+                'item_loc': 'site/default_cover.jpg',
+                'item_thumb': 'site/default_cover.jpg',
+                'tags': tags,
+                'items': ' '.join(data['items_for_collection']),
+                'author': flasksession['username']
             }
 
-            # below celery task needs to imp rek with db update
-            local_file_to_s3.apply_async((dst, filename), link=[aws_rek_image.si(payload['id'], filename, account_session), local_clean_up.si(dst, filename)])
-            local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(dst, thumbnail))
+            res = glance.modules.api.post_item(self.account_session, payload)
 
-        if ext == '.zip':
-            filename = f'{root}{ext}'
-            local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(dst, filename))
+            return res
 
-            payload['attached'] = filename
+        else:
+            payload = {
+                'name': data['collection'],
+                'item_type': 'collection',
+                'item_loc': 'site/default_cover.jpg',
+                'item_thumb': 'site/default_cover.jpg',
+                'tags': data['tags'],
+                'author': flasksession['username'],
+            }
 
-        res = glance.modules.api.put_item(account_session, payload)
+            res = glance.modules.api.post_item(self.account_session, payload)
 
-    return res
+            return res
 
-
-def local_save_file(dst, fileobj):
-    root, ext = os.path.splitext(fileobj.filename)
-    if ext not in ALLOWED_FILE_TYPES:
-        # TODO: IMP error
-        return False
-
-    root, ext = local_rename_file_with_salt(root, ext)
-    fileobj.save(os.path.join(dst, '{}{}'.format(root, ext)))
-
-    return (dst, root, ext)
-
-
-def local_rename_file_with_salt(root, ext):
-    salt = secrets.token_urlsafe(4)
-    root = '{}_{}'.format(root, salt)
-
-    return (root, ext)
-
-
-def local_make_thumbnail(dst, root, ext):
-    if ext == '.jpg':
-        thumbnail = image.thumb(dst, f'{root}{ext}')
-
-    elif ext == '.mp4':
-        saved_frame = image.save_frame(dst, f'{root}{ext}')
-        thumbnail = image.thumb(dst, saved_frame)
-        local_clean_up(dst, saved_frame)
-    
-    else:
-        return False
-
-    return (dst, f'{root}{ext}', thumbnail)
 
 @glance.app.celery.task
 def local_file_to_s3(dst, filename):
@@ -114,6 +189,7 @@ def local_file_to_s3(dst, filename):
     auth.boto3_s3_upload(s3, dst, filename)
 
     return (dst, filename)
+
 
 @glance.app.celery.task
 def local_clean_up(dst, filename):
@@ -135,48 +211,6 @@ def aws_rek_image(id, filename, account_session):
     return True
 
 
-# TODO: IMP celery for create_payload, and aws rekignition
-def create_payload(account_session, upload_data, item_name, **files):
-    """"""
-    payload = {}
-    payload['name'] = item_name
-    payload['author'] = account_session['username']
-    payload['tags'] = upload_data['tags']
-    payload['item_type'] = upload_data['itemradio']
-    payload['item_loc'] = files['filename']
-    payload['item_thumb'] = files['thumbnail']
-    if 'attachment' in files and files['attachment']:
-        payload['attached'] = files['attachment']
-
-    """
-    # AWS REKOGNITION
-    for tag in image.generate_tags(files['filename']):
-        if payload['tags'] == '':
-            payload['tags'] = tag.lower()
-        else:
-            payload['tags'] += ' ' + tag.lower()
-    """
-
-    # Process image name
-    payload_name = ''
-    for x in payload['name']:
-        if x == '_' or x == '-':
-            payload_name += ' '
-            pass
-        elif x in string.punctuation:
-            pass
-        else:
-            payload_name += x
-
-    # apend payload_name to tag string for posting.
-    if payload['tags'] == '':
-        payload['tags'] = payload_name.lower()
-    else:
-        payload['tags'] += ' {}'.format(payload_name.lower())
-
-    return payload
-
-
 def process_raw_files(files):
     """pairs images to attachments.
 
@@ -192,5 +226,6 @@ def process_raw_files(files):
             collector[filename].append(x)
         else:
             collector[filename].append(x)
+
 
     return collector

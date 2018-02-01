@@ -3,7 +3,7 @@
 
 <div class="content">
   <div style="text-align:center;">
-    <img style="height:400px;" src="https://s3.amazonaws.com/{{bucketname}}/{{ item.item_loc }}" />
+    <img style="height:400px;" src="/{{bucketname}}/{{ item.item_loc }}" />
   </div>
 </div>
 
@@ -12,7 +12,7 @@
   {% for k, v in item.items() %}
     {% if k == 'collections' %}
       {% for x in v %}
-      <a href="/item/{{x['id']}}"><img src="https://s3.amazonaws.com/{{bucketname}}/{{x['item_thumb']}}" /></a>
+      <a href="/item/{{x['id']}}"><img src="/{{bucketname}}/{{x['item_thumb']}}" /></a>
       {% endfor %}
     {% endif %}
   {% endfor %}
@@ -30,7 +30,7 @@
 
     <hr>
     {% if item.attached != 'None' %}
-    <a href="https://s3.amazonaws.com/{{bucketname}}/{{item.attached}}" class="btn btn-primary btn-sm" role="button" aria-pressed="true">Download</a>
+    <a href="/{{bucketname}}/{{item.attached}}" class="btn btn-primary btn-sm" role="button" aria-pressed="true">Download</a>
     {% endif %}
 
   </div>

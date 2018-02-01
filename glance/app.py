@@ -6,7 +6,8 @@ __author__ = ""
 __version__ = "0.1"
 __license__ = "./LICENSE"
 
-from flask import Flask, render_template, request, session, jsonify, redirect
+import os
+from flask import Flask, render_template, request, session, jsonify, redirect, send_from_directory
 from celery import Celery
 
 import glance.modules.auth as auth
@@ -17,6 +18,7 @@ import glance.config
 
 
 '''Flask Config'''
+root_path = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = glance.config.settings.tmp_upload
 app.secret_key = glance.config.settings.secret_key
@@ -25,6 +27,16 @@ app.config['CELERY_BROKER_URL'] = 'pyamqp://guest@localhost//'
 
 celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
 celery.conf.update(app.config)
+
+
+@app.route('/tmp/<path:filename>')
+def document_static(filename):
+    """additional 'static' location for serving document images"""
+    document_location = root_path + '/tmp/' + filename
+
+
+    return send_from_directory(document_location, filename)
+
 
 '''Routes'''
 # auth
@@ -93,6 +105,7 @@ def uploading():
     # TODO: user input sanitising? here or the api?
     # TODO: emi persistant data users search term, imp into session?
     data = {'query': "**"}
+
     if auth.logged_in(session):
         if request.method == 'POST':
             # Init dict and append user data
@@ -104,69 +117,38 @@ def uploading():
             for form_input in request.form:
                 upload_data[form_input] = request.form[form_input]
 
-            # process all uploaded files.
+            # build dict from upload files.
             processed_files = glance.modules.file.process_raw_files(request.files.getlist('file'))
 
-            # process remaining item data
+            # upload files, if any have been uploaded
             if 'itemradio' in upload_data:
                 for items in processed_files:
-                    uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], processed_files[items], account_session, upload_data)
+                    uploaded_file = glance.modules.file.UploadHandler(account_session, processed_files[items]).process_files(upload_data)
+
+                    
+                    # append uploaded_file to a list, in case of collection creation
                     if uploaded_file:
                         # add new id to list
                         for x in uploaded_file:
                             item_id = x['id']
                             upload_data['items_for_collection'].append(item_id)
 
+
             # Runs if collection has been requested aswell as the uploading of files.
             if 'collection' in upload_data and 'itemradio' in upload_data:
                 if upload_data['collection'] != '':
+                    res = glance.modules.file.UploadHandler(account_session).upload_collection(session, upload_data)
 
-                    # add collection name to tags
-                    tags_from_name = upload_data['collection'].split(' ')
-                    if len(upload_data['tags']) != 0:
-                        for x in tags_from_name:
-                            upload_data['tags'] += ' ' + str(x)
-                    else:
-                        for x in tags_from_name:
-                            upload_data['tags'] += ' ' + str(x)
-
-                    payload = {
-                        'name': upload_data['collection'],
-                        'item_type': 'collection',
-                        'item_loc': 'site/default_cover.jpg',
-                        'item_thumb': 'site/default_cover.jpg',
-                        'tags': upload_data['tags'],
-                        'items': ' '.join(upload_data['items_for_collection']),
-                        'author': session['username']
-                    }
-
-                    res = glance.modules.api.post_item(account_session, payload)
-
-                    # return home()
                     return render_template('collection.html', item=res, data=data)
 
             # runs if a collection name has been entered, only.
-            elif 'collection' in upload_data:
-                payload = {
-                    'name': upload_data['collection'],
-                    'item_type': 'collection',
-                    'item_loc': 'site/default_cover.jpg',
-                    'item_thumb': 'site/default_cover.jpg',
-                    'tags': upload_data['tags'],
-                    'author': session['username']
-                }
-
-                if payload['tags'] == '':
-                    del payload['tags']
-
-                # post payload to api
-                res = glance.modules.api.post_item(account_session, payload)
+            elif 'collection' in upload_data and upload_data['collection'] != '':
+                res = glance.modules.file.UploadHandler(account_session).upload_collection(session, upload_data)
 
                 return render_template('collection.html', item=res, data=data)
 
             # upload output
             if len(upload_data['items_for_collection']) > 1:
-                data = "**"
                 items = {'status': 'success', 'data': []}
 
                 for item_id in upload_data['items_for_collection']:
@@ -181,7 +163,7 @@ def uploading():
                 return redirect(f"item/{upload_data['items_for_collection'][0]}")
 
             else:
-                return render_template('uploadcomplete.html')
+                return render_template('uploadcomplete.html', data=data)
 
     else:
         return home()
@@ -201,7 +183,7 @@ def patch_item():
                 pass
 
             else:
-                uploaded_file = glance.modules.file.upload_handler(app.config['UPLOAD_FOLDER'], cover_image, account_session, None)
+                uploaded_file = glance.modules.file.UploadHandler(account_session, cover_image).upload_collection_cover()
                 
                 payload['item_loc'] = uploaded_file[0]
                 payload['item_thumb'] = uploaded_file[1]
