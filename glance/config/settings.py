@@ -16,4 +16,9 @@ config_type = config['dev']
 # flask settings
 secret_key = config_type['secretkey']
 api_root = config_type['api_entry']
-tmp_upload = os.path.join(project_root, 'static', 'tmp')
+# using tmp_upload to storage a  LOCAL file to ruin operations on
+# tmp_upload = os.path.join(project_root, 'static', 'tmp')
+
+# local dev env
+tmp_upload = os.path.join(os.path.expanduser('~'), 'glance_storage')
+
