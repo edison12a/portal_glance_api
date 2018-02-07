@@ -175,6 +175,7 @@ class Collection(Item):
     __tablename__ = 'collection'
 
     id = Column(Integer, ForeignKey('item.id'), primary_key=True)
+    publisher = Column(String, default=None)
     name = Column(String)
     item_loc = Column(String)
     item_thumb = Column(String)
