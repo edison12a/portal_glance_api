@@ -122,8 +122,8 @@ class UploadHandler():
             return False
 
         filename, thumbnail = self._local_make_thumbnail(root, ext)
-        _local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(self.dst, filename))
-        _local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(self.dst, thumbnail))
+        _local_file_to_s3.apply_async((self.dst, filename), link=local_clean_up.si(self.dst, filename))
+        _local_file_to_s3.apply_async((self.dst, thumbnail), link=local_clean_up.si(self.dst, thumbnail))
 
         return (filename, thumbnail)
 
