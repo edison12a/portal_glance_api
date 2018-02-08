@@ -32,6 +32,7 @@ class UploadHandler():
 
         self.ALLOWED_FILE_TYPES = ['.jpg', '.zip', '.mp4']
         self.dst = glance.config.settings.tmp_upload
+        self.salt = None
 
 
     def _to_dict(self, files):
@@ -55,8 +56,10 @@ class UploadHandler():
 
 
     def _local_rename_file_with_salt(self, root, ext):
-        salt = secrets.token_urlsafe(4)
-        root = '{}_{}'.format(root, salt)
+        if self.salt == None:
+            self.salt = secrets.token_urlsafe(4)
+            
+        root = '{}_{}'.format(root, self.salt)
 
         return (root, ext)
 
@@ -130,7 +133,6 @@ class UploadHandler():
         res = glance.modules.api.post_item(self.account_session, payload)
 
         for file in self.filelist:
-            print(file)
             root, ext = self._local_save_file(file)
 
             if ext == '.jpg' or ext == '.mp4':
@@ -144,7 +146,6 @@ class UploadHandler():
                     'tags': glance.modules.api.tag_string(extra['tags'])
                 }
 
-                # below celery task needs to imp rek with db update
                 _local_file_to_s3.apply_async((self.dst, filename), link=[aws_rek_image.si(payload['id'], filename, self.account_session), local_clean_up.si(self.dst, filename)])
                 _local_file_to_s3.apply_async((self.dst, thumbnail), link=local_clean_up.si(self.dst, thumbnail))
 
