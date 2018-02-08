@@ -102,6 +102,14 @@ class UploadHandler():
                 taglist += ' ' + str(x)
 
         return taglist
+
+
+    @glance.app.celery.task
+    def _local_clean_up(dst, filename):
+        # TODO: remove dst from args
+        os.remove(os.path.join(self.dst, filename))
+
+        return filename
     
 
     def upload_collection_cover(self):
@@ -111,8 +119,8 @@ class UploadHandler():
             return False
 
         filename, thumbnail = self._local_make_thumbnail(root, ext)
-        local_file_to_s3.apply_async((self.dst, filename), link=local_clean_up.si(self.dst, filename))
-        local_file_to_s3.apply_async((self.dst, thumbnail), link=local_clean_up.si(self.dst, thumbnail))
+        _local_file_to_s3.apply_async((dst, filename), link=local_clean_up.si(self.dst, filename))
+        _local_file_to_s3.apply_async((dst, thumbnail), link=local_clean_up.si(self.dst, thumbnail))
 
         return (filename, thumbnail)
 
@@ -122,6 +130,7 @@ class UploadHandler():
         res = glance.modules.api.post_item(self.account_session, payload)
 
         for file in self.filelist:
+            print(file)
             root, ext = self._local_save_file(file)
 
             if ext == '.jpg' or ext == '.mp4':
@@ -136,18 +145,18 @@ class UploadHandler():
                 }
 
                 # below celery task needs to imp rek with db update
-                local_file_to_s3.apply_async((self.dst, filename), link=[aws_rek_image.si(payload['id'], filename, self.account_session), local_clean_up.si(self.dst, filename)])
-                local_file_to_s3.apply_async((self.dst, thumbnail), link=local_clean_up.si(self.dst, thumbnail))
+                _local_file_to_s3.apply_async((self.dst, filename), link=[aws_rek_image.si(payload['id'], filename, self.account_session), local_clean_up.si(self.dst, filename)])
+                _local_file_to_s3.apply_async((self.dst, thumbnail), link=local_clean_up.si(self.dst, thumbnail))
 
             if ext == '.zip':
                 filename = f'{root}{ext}'
-                local_file_to_s3.apply_async((self.dst, filename), link=local_clean_up.si(self.dst, filename))
+                _local_file_to_s3.apply_async((self.dst, filename), link=local_clean_up.si(self.dst, filename))
 
                 payload['attached'] = filename
 
             res = glance.modules.api.put_item(self.account_session, payload)
 
-            return res
+        return res
 
 
     def upload_collection(self, flasksession, data):
@@ -184,7 +193,8 @@ class UploadHandler():
 
 
 @glance.app.celery.task
-def local_file_to_s3(dst, filename):
+def _local_file_to_s3(dst, filename):
+    # TODO: remove dst from args an
     s3 = auth.boto3_res_s3()
     auth.boto3_s3_upload(s3, dst, filename)
 

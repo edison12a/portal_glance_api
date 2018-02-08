@@ -4,7 +4,7 @@
 
 <div id="footage_display">
       <video style="width:100%;height:auto;" controls>
-        <source src="/{{bucketname}}/{{ item.item_loc }}" type="video/mp4">
+        <source src="{{bucketname}}/{{ item.item_loc }}" type="video/mp4">
         Your browser does not support HTML5 video.
       </video>
 </div>
@@ -15,7 +15,7 @@
     {% for k, v in item.items() %}
       {% if k == 'collections' %}
         {% for x in v %}
-        <a href="/item/{{x['id']}}"><img src="/{{bucketname}}/{{x['item_thumb']}}" /></a>
+        <a href="/item/{{x['id']}}"><img src="{{bucketname}}/{{x['item_thumb']}}" /></a>
         {% endfor %}
       {% endif %}
     {% endfor %}
@@ -32,7 +32,7 @@
       {% endfor %}
 
       <hr>
-      <a href="/{{bucketname}}/{{item.item_loc}}" class="btn btn-primary btn-sm" role="button" aria-pressed="true">Download</a>
+      <a href="{{bucketname}}/{{item.item_loc}}" class="btn btn-primary btn-sm" role="button" aria-pressed="true">Download</a>
     </div>
 
 

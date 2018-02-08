@@ -125,7 +125,6 @@ def uploading():
                 for items in processed_files:
                     uploaded_file = glance.modules.file.UploadHandler(account_session, processed_files[items]).process_files(upload_data)
 
-                    
                     # append uploaded_file to a list, in case of collection creation
                     if uploaded_file:
                         # add new id to list

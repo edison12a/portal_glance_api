@@ -17,8 +17,8 @@ config_type = config['dev']
 secret_key = config_type['secretkey']
 api_root = config_type['api_entry']
 # using tmp_upload to storage a  LOCAL file to ruin operations on
-# tmp_upload = os.path.join(project_root, 'static', 'tmp')
+tmp_upload = os.path.join(project_root, 'static', 'tmp')
 
 # local dev env
-tmp_upload = os.path.join(os.path.expanduser('~'), 'glance_storage')
+# tmp_upload = os.path.join(os.path.expanduser('~'), 'glance_storage')
 
