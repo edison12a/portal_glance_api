@@ -227,6 +227,15 @@ class Item():
                 return items
 
 
+    def get_latest(self, amount=10):
+        raw_items = self.session.query(glance_api.modules.models.Geometry).order_by(
+            glance_api.modules.models.Geometry.initdate.desc()
+        ).limit(amount)
+
+
+        return raw_items
+
+
     def delete(self, id):
         """ deletes item from database.
 

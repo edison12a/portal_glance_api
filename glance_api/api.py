@@ -258,6 +258,9 @@ class Items(Resource):
 class ItemsL(Resource):
     @auth.login_required
     def get(self):
+        bla = functions.Item(session).get_latest()
+
+
         parser = reqparse.RequestParser()
 
         # accepted ARGs from api
@@ -312,6 +315,64 @@ class ItemsL(Resource):
             response=resp(status='failed', error='somethings wrong')
 
 
+class ItemsQ(Resource):
+    @auth.login_required
+    def get(self, amount):
+        bla = functions.Item(session).get_latest()
+
+
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('filter', type=str, help='help text')
+        parser.add_argument('filter_people', type=str, help='help text')
+        parser.add_argument('query', type=str, help='help text')
+        args = parser.parse_args()
+
+        if args['query'] == '' or args['query'] == '**':
+            args['query'] = None
+
+        raw_items = functions.Item(session).get_latest()
+
+        if raw_items:
+            response = resp(status='success', data=functions.jsonify(raw_items))
+
+            session.close()
+            return response
+
+        else:
+            response = resp(status='Success', message='nothing in database')
+
+            session.close()
+            return response
+
+    @auth.login_required
+    def post(self):
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('name', type=str, help='help text')
+        parser.add_argument('item_loc', type=str, help='help text')
+        parser.add_argument('item_thumb', type=str, help='help text')
+        parser.add_argument('attached', type=str, help='help text')
+        parser.add_argument('item_type', type=str, help='help text')
+        parser.add_argument('tags', type=str, help='help text')
+        parser.add_argument('items', type=str, help='help text')
+        args = parser.parse_args()
+
+        args['author'] = auth.username()
+        new_item = functions.Item(session).post(args)
+        if new_item:
+            response = resp(status='success', message='New item created', data=functions.jsonify((new_item,)))
+
+            session.close()
+            return response
+
+        else:
+            response=resp(status='failed', error='somethings wrong')
+
+
+
 class Tags(Resource):
     @auth.login_required
     def get(self, id):
@@ -347,6 +408,7 @@ api.add_resource(Accounts, '/accounts/<id>')
 api.add_resource(AccountsL, '/accounts')
 api.add_resource(Items, '/items/<id>')
 api.add_resource(ItemsL, '/items')
+api.add_resource(ItemsQ, '/items/amount/<amount>')
 api.add_resource(Tags, '/tags/<id>')
 api.add_resource(TagsL, '/tags')
 
