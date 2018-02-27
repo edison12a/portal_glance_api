@@ -3,6 +3,7 @@ This module contains Classes and helpers for the API
 """
 
 import datetime
+from collections import Iterable
 
 from sqlalchemy.inspection import inspect
 import sqlalchemy.orm
@@ -486,12 +487,24 @@ class Tag():
     def __init__(self, session):
         self.session = session
 
+    def flatten(items, ignore_types=(str, bytes)):
+        for x in items:
+            if isinstance(x, Iterable) and not isinstance(x, ignore_types):
+                for i in flatten(x):
+                    yield i
+            else:
+                yield x
+
     def get(self):
         # tags = self.session.query(glance_api.modules.models.Tag).all()
-        test = self.session.query(glance_api.modules.models.Tag.name).all()
-        # print(test)
+        raw_tags = self.session.query(glance_api.modules.models.Tag.name).all()
+        result = []
 
-        # your_model_object.query.with_entities(Your_model.your_attribute)
-        # print(len(test))
+        for x in raw_tags:
+            if isinstance(x, Iterable):
+                result.append(x[0])
+            else:
+                result.append(x)
 
-        return test
+
+        return tuple(set(result))

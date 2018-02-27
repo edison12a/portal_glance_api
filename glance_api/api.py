@@ -331,10 +331,10 @@ class Tags(Resource):
 class TagsL(Resource):
     @auth.login_required
     def get(self):
-        raw_tags = functions.Tag(session).get()
+        tags = functions.Tag(session).get()
 
         session.close()
-        return tuple(set(raw_tags))
+        return tags
 
     @auth.login_required
     def post(self):
