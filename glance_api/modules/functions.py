@@ -84,7 +84,6 @@ def validate_account(session, **kwarg):
 class Item():
     """manages database access"""
     def __init__(self, session):
-        print('ENTER ITEM')
         self.session = session
 
 
@@ -481,3 +480,18 @@ class Item():
 
     def __repr__(self):
         return '<Item>'
+
+
+class Tag():
+    def __init__(self, session):
+        self.session = session
+
+    def get(self):
+        # tags = self.session.query(glance_api.modules.models.Tag).all()
+        test = self.session.query(glance_api.modules.models.Tag.name).all()
+        # print(test)
+
+        # your_model_object.query.with_entities(Your_model.your_attribute)
+        # print(len(test))
+
+        return test

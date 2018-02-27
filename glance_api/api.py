@@ -210,6 +210,7 @@ class Items(Resource):
             session.close()
             return response
 
+
     @auth.login_required
     def put(self, id):
         parser = reqparse.RequestParser()
@@ -330,7 +331,10 @@ class Tags(Resource):
 class TagsL(Resource):
     @auth.login_required
     def get(self):
-        pass
+        raw_tags = functions.Tag(session).get()
+
+        session.close()
+        return tuple(set(raw_tags))
 
     @auth.login_required
     def post(self):
