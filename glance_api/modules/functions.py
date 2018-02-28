@@ -86,6 +86,7 @@ class Item():
     """manages database access"""
     def __init__(self, session):
         self.session = session
+        self.ALLOWED_ITEMS = ['geometry', 'collection']
 
 
     def _tags_from_queries(self, query):
@@ -227,13 +228,22 @@ class Item():
                 return items
 
 
-    def get_latest(self, amount=10):
-        raw_items = self.session.query(glance_api.modules.models.Geometry).order_by(
-            glance_api.modules.models.Geometry.initdate.desc()
-        ).limit(amount)
+    def get_latest(self, item_type, amount=10):
+        if item_type and item_type in self.ALLOWED_ITEMS:
+            if item_type.lower() == 'collection':
+                raw_items = self.session.query(glance_api.modules.models.Collection).order_by(
+                    glance_api.modules.models.Collection.initdate.desc()
+                ).limit(amount)
+
+                return raw_items
 
 
-        return raw_items
+            elif item_type.lower() == 'geometry':
+                raw_items = self.session.query(glance_api.modules.models.Geometry).order_by(
+                    glance_api.modules.models.Geometry.initdate.desc()
+                ).limit(amount)
+
+                return raw_items
 
 
     def delete(self, id):
@@ -505,7 +515,6 @@ class Tag():
                 yield x
 
     def get(self):
-        # tags = self.session.query(glance_api.modules.models.Tag).all()
         raw_tags = self.session.query(glance_api.modules.models.Tag.name).all()
         result = []
 
@@ -517,3 +526,11 @@ class Tag():
 
 
         return tuple(set(result))
+
+
+    def get_latest(self, amount=10):
+        raw_items = self.session.query(glance_api.modules.models.Tag.name).order_by(
+            glance_api.modules.models.Tag.id.desc()
+        ).limit(amount)
+
+        return raw_items

@@ -258,7 +258,7 @@ class Items(Resource):
 class ItemsL(Resource):
     @auth.login_required
     def get(self):
-        bla = functions.Item(session).get_latest()
+        # bla = functions.Item(session).get_latest()
 
 
         parser = reqparse.RequestParser()
@@ -317,22 +317,15 @@ class ItemsL(Resource):
 
 class ItemsQ(Resource):
     @auth.login_required
-    def get(self, amount):
-        bla = functions.Item(session).get_latest()
-
-
+    def get(self):
         parser = reqparse.RequestParser()
 
         # accepted ARGs from api
-        parser.add_argument('filter', type=str, help='help text')
-        parser.add_argument('filter_people', type=str, help='help text')
-        parser.add_argument('query', type=str, help='help text')
+        parser.add_argument('amount', type=str, help='help text')
+        parser.add_argument('item_type', type=str, help='help text')
         args = parser.parse_args()
 
-        if args['query'] == '' or args['query'] == '**':
-            args['query'] = None
-
-        raw_items = functions.Item(session).get_latest()
+        raw_items = functions.Item(session).get_latest(item_type=args['item_type'], amount=args['amount'])
 
         if raw_items:
             response = resp(status='success', data=functions.jsonify(raw_items))
@@ -346,6 +339,7 @@ class ItemsQ(Resource):
             session.close()
             return response
 
+    """
     @auth.login_required
     def post(self):
         parser = reqparse.RequestParser()
@@ -362,6 +356,7 @@ class ItemsQ(Resource):
 
         args['author'] = auth.username()
         new_item = functions.Item(session).post(args)
+
         if new_item:
             response = resp(status='success', message='New item created', data=functions.jsonify((new_item,)))
 
@@ -370,8 +365,7 @@ class ItemsQ(Resource):
 
         else:
             response=resp(status='failed', error='somethings wrong')
-
-
+    """
 
 class Tags(Resource):
     @auth.login_required
@@ -402,15 +396,43 @@ class TagsL(Resource):
         pass
 
 
+class TagQ(Resource):
+    # TODO: get() returns the tag and the item its tagged too.
+    # should it only return the tag?
+    @auth.login_required
+    def get(self):
+        parser = reqparse.RequestParser()
+
+        # accepted ARGs from api
+        parser.add_argument('amount', type=str, help='help text')
+        args = parser.parse_args()
+
+        raw_items = functions.Tag(session).get_latest(amount=args['amount'])
+        bla = [x.name for x in raw_items]
+
+        if bla:
+            response = resp(status='success', data=bla)
+
+            session.close()
+            return response
+
+        else:
+            response = resp(status='Success', message='nothing in database')
+
+            session.close()
+            return response
+
+
 # routes
 api.add_resource(Entry, '/')
 api.add_resource(Accounts, '/accounts/<id>')
 api.add_resource(AccountsL, '/accounts')
 api.add_resource(Items, '/items/<id>')
 api.add_resource(ItemsL, '/items')
-api.add_resource(ItemsQ, '/items/amount/<amount>')
+api.add_resource(ItemsQ, '/items/quantity')
 api.add_resource(Tags, '/tags/<id>')
 api.add_resource(TagsL, '/tags')
+api.add_resource(TagQ, '/tags/quantity')
 
 
 if __name__ == '__main__':
