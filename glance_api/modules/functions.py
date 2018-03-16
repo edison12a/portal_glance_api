@@ -278,6 +278,7 @@ class Item():
 
 
     def post(self, kwarg):
+        print('IN FUNCSIONS ITEM POST')
         """post item to database.
 
         kwarg: dict. user data to process.
@@ -322,6 +323,8 @@ class Item():
             if 'items' in payload and payload['items'] != None:
                 for x in payload['items'].split(' '):
                     item.items.append(self.session.query(glance_api.modules.models.Item).get(x))
+
+        print(item.author)
 
         self.session.add(item)
         self.session.commit()
