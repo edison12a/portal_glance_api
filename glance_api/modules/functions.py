@@ -11,7 +11,10 @@ import sqlalchemy.orm
 import glance_api.modules.models
 
 
+
 # Helpers
+allowed_fields = ['id', 'publisher', 'name', 'item_loc']
+
 def jsonify(query):
     """Converts raw database objects to json/dict."""
     result = []
@@ -226,6 +229,13 @@ class Item():
                 items = self.session.query(glance_api.modules.models.Item).filter(glance_api.modules.models.Item.type==filter).limit(50)
                 
                 return items
+
+
+    def get_collections(self, user):
+        if user:
+            collections = self.session.query(glance_api.modules.models.Collection).filter(glance_api.modules.models.Collection.author == user)
+
+            return collections
 
 
     def get_latest(self, item_type, amount=10):

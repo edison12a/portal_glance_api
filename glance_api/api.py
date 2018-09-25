@@ -258,9 +258,6 @@ class Items(Resource):
 class ItemsL(Resource):
     @auth.login_required
     def get(self):
-        # bla = functions.Item(session).get_latest()
-
-
         parser = reqparse.RequestParser()
 
         # accepted ARGs from api
@@ -288,6 +285,7 @@ class ItemsL(Resource):
 
             session.close()
             return response
+
 
     @auth.login_required
     def post(self):
@@ -371,6 +369,7 @@ class ItemsQ(Resource):
             response=resp(status='failed', error='somethings wrong')
     """
 
+
 class Tags(Resource):
     @auth.login_required
     def get(self, id):
@@ -427,6 +426,31 @@ class TagQ(Resource):
             return response
 
 
+class CollectionByUserL(Resource):
+    @auth.login_required
+    def get(self, user):
+        print(user)
+        parser = reqparse.RequestParser()
+        parser.add_argument('user', type=str, help='help text')
+        args = parser.parse_args()
+
+        # get items
+        raw_items = functions.Item(session).get_collections('a.a@visualhouse.co')
+        # process items
+        if raw_items:
+            response = resp(status='success', data=functions.jsonify(raw_items))
+            
+
+            session.close()
+            return response
+
+        else:
+            response = resp(status='Success', message='nothing in database')
+
+            session.close()
+            return response
+
+
 # routes
 api.add_resource(Entry, '/')
 api.add_resource(Accounts, '/accounts/<id>')
@@ -437,6 +461,7 @@ api.add_resource(ItemsQ, '/items/quantity')
 api.add_resource(Tags, '/tags/<id>')
 api.add_resource(TagsL, '/tags')
 api.add_resource(TagQ, '/tags/quantity')
+api.add_resource(CollectionByUserL, '/collection/<user>')
 
 
 if __name__ == '__main__':
