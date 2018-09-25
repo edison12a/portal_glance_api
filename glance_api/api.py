@@ -429,13 +429,12 @@ class TagQ(Resource):
 class CollectionByUserL(Resource):
     @auth.login_required
     def get(self, user):
-        print(user)
         parser = reqparse.RequestParser()
         parser.add_argument('user', type=str, help='help text')
         args = parser.parse_args()
 
         # get items
-        raw_items = functions.Item(session).get_collections('a.a@visualhouse.co')
+        raw_items = functions.Item(session).get_collections(args['user'])
         # process items
         if raw_items:
             response = resp(status='success', data=functions.jsonify(raw_items))
