@@ -15,8 +15,11 @@ import glance_api.modules.models
 # Helpers
 allowed_fields = ['id', 'publisher', 'name', 'item_loc']
 
-def jsonify(query):
-    """Converts raw database objects to json/dict."""
+def jsonify(query, no_relationships=False):
+    """Converts raw database objects to json/dict.
+    AUG:
+    query: ...
+    no_relationships: bool: if True, relationships will not be fetched"""
     result = []
 
     for row in query:
@@ -27,39 +30,43 @@ def jsonify(query):
             column_header = str(column).split('.')[1]
             to_append[column_header] = str(getattr(row, column_header))
 
-        # get objects relationship columns and data
-        inspect_row = inspect(row).__dict__['class_'].__dict__.keys()
+        if no_relationships:
+            print('no relationships')
+            result.append(to_append)
+        else:
+            # get objects relationship columns and data
+            inspect_row = inspect(row).__dict__['class_'].__dict__.keys()
 
-        for column_name in inspect_row:
-            if not column_name.startswith('_'):
-                if column_name not in row.__table__.columns:
-                    if column_name != 'type' and '_sa_adapter' in getattr(row, column_name).__dict__.keys():
-                        # 'sqlalchemy.orm.collections.InstrumentedList'
-                        item_collect = []
+            for column_name in inspect_row:
+                if not column_name.startswith('_'):
+                    if column_name not in row.__table__.columns:
+                        if column_name != 'type' and '_sa_adapter' in getattr(row, column_name).__dict__.keys():
+                            # 'sqlalchemy.orm.collections.InstrumentedList'
+                            item_collect = []
 
-                        for relationship_row in getattr(row, column_name):
-                            item = {}
-                            for data in relationship_row.__table__.columns:
-                                item[str(data).split('.')[1]] = str(getattr(relationship_row, str(data).split('.')[1]))
-
-                            item_collect.append(item)
-
-                        to_append[column_name] = item_collect
-
-                    else:
-                        # 'sqlalchemy.orm.dynamic.AppenderBaseQuery'
-                        item_collect = []
-
-                        for relationship_row in getattr(row, column_name):
-                            if not isinstance(relationship_row, str):
+                            for relationship_row in getattr(row, column_name):
+                                item = {}
                                 for data in relationship_row.__table__.columns:
-                                    item[str(data).split('.')[1]] = getattr(relationship_row, str(data).split('.')[1])
+                                    item[str(data).split('.')[1]] = str(getattr(relationship_row, str(data).split('.')[1]))
 
                                 item_collect.append(item)
 
-                        to_append[column_name] = item_collect
+                            to_append[column_name] = item_collect
 
-        result.append(to_append)
+                        else:
+                            # 'sqlalchemy.orm.dynamic.AppenderBaseQuery'
+                            item_collect = []
+
+                            for relationship_row in getattr(row, column_name):
+                                if not isinstance(relationship_row, str):
+                                    for data in relationship_row.__table__.columns:
+                                        item[str(data).split('.')[1]] = getattr(relationship_row, str(data).split('.')[1])
+
+                                    item_collect.append(item)
+
+                            to_append[column_name] = item_collect
+
+            result.append(to_append)
 
     return result
 
@@ -232,6 +239,8 @@ class Item():
 
 
     def get_collections(self, user):
+        print('user inside')
+        print(user)
         if user:
             collections = self.session.query(glance_api.modules.models.Collection).filter(glance_api.modules.models.Collection.author == user)
 

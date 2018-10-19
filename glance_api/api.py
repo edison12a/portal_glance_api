@@ -433,11 +433,13 @@ class CollectionByUserL(Resource):
         parser.add_argument('user', type=str, help='help text')
         args = parser.parse_args()
 
+        args['user'] = user
+
         # get items
         raw_items = functions.Item(session).get_collections(args['user'])
         # process items
         if raw_items:
-            response = resp(status='success', data=functions.jsonify(raw_items))
+            response = resp(status='success', data=functions.jsonify(raw_items, no_relationships=True))
             
 
             session.close()
