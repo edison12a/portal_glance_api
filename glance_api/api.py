@@ -258,9 +258,6 @@ class Items(Resource):
 class ItemsL(Resource):
     @auth.login_required
     def get(self):
-        # bla = functions.Item(session).get_latest()
-
-
         parser = reqparse.RequestParser()
 
         # accepted ARGs from api
@@ -289,12 +286,12 @@ class ItemsL(Resource):
             session.close()
             return response
 
+
     @auth.login_required
     def post(self):
         parser = reqparse.RequestParser()
 
         # accepted ARGs from api
-        print('IN ITEMSL')
         parser.add_argument('name', type=str, help='help text')
         parser.add_argument('item_loc', type=str, help='help text')
         parser.add_argument('item_thumb', type=str, help='help text')
@@ -305,9 +302,6 @@ class ItemsL(Resource):
         parser.add_argument('author', type=str, help='help text')
         args = parser.parse_args()
 
-        # args['author'] = auth.username()
-        print('payload data for ITEMSL')
-        print(args)
         new_item = functions.Item(session).post(args)
         if new_item:
             response = resp(status='success', message='New item created', data=functions.jsonify((new_item,)))
@@ -371,6 +365,7 @@ class ItemsQ(Resource):
             response=resp(status='failed', error='somethings wrong')
     """
 
+
 class Tags(Resource):
     @auth.login_required
     def get(self, id):
@@ -427,6 +422,32 @@ class TagQ(Resource):
             return response
 
 
+class CollectionByUserL(Resource):
+    @auth.login_required
+    def get(self, user):
+        parser = reqparse.RequestParser()
+        parser.add_argument('user', type=str, help='help text')
+        args = parser.parse_args()
+
+        args['user'] = user
+
+        # get items
+        raw_items = functions.Item(session).get_collections(args['user'])
+        # process items
+        if raw_items:
+            response = resp(status='success', data=functions.jsonify(raw_items, no_relationships=True))
+            
+
+            session.close()
+            return response
+
+        else:
+            response = resp(status='Success', message='nothing in database')
+
+            session.close()
+            return response
+
+
 # routes
 api.add_resource(Entry, '/')
 api.add_resource(Accounts, '/accounts/<id>')
@@ -437,6 +458,7 @@ api.add_resource(ItemsQ, '/items/quantity')
 api.add_resource(Tags, '/tags/<id>')
 api.add_resource(TagsL, '/tags')
 api.add_resource(TagQ, '/tags/quantity')
+api.add_resource(CollectionByUserL, '/collection/<user>')
 
 
 if __name__ == '__main__':
