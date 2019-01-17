@@ -292,7 +292,6 @@ class ItemsL(Resource):
         parser = reqparse.RequestParser()
 
         # accepted ARGs from api
-        print('IN ITEMSL')
         parser.add_argument('name', type=str, help='help text')
         parser.add_argument('item_loc', type=str, help='help text')
         parser.add_argument('item_thumb', type=str, help='help text')
@@ -303,9 +302,6 @@ class ItemsL(Resource):
         parser.add_argument('author', type=str, help='help text')
         args = parser.parse_args()
 
-        # args['author'] = auth.username()
-        print('payload data for ITEMSL')
-        print(args)
         new_item = functions.Item(session).post(args)
         if new_item:
             response = resp(status='success', message='New item created', data=functions.jsonify((new_item,)))
