@@ -11,7 +11,6 @@ import sqlalchemy.orm
 import glance_api.modules.models
 
 
-
 # Helpers
 allowed_fields = ['id', 'publisher', 'name', 'item_loc']
 
@@ -31,7 +30,6 @@ def jsonify(query, no_relationships=False):
             to_append[column_header] = str(getattr(row, column_header))
 
         if no_relationships:
-            print('no relationships')
             result.append(to_append)
         else:
             # get objects relationship columns and data
@@ -249,7 +247,6 @@ class Item():
         collections = self.session.query(glance_api.modules.models.Collection).filter(glance_api.modules.models.Collection.publisher != None)
 
         return collections
-
 
 
     def get_latest(self, item_type, amount=10):
