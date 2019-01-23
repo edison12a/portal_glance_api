@@ -245,6 +245,13 @@ class Item():
             return collections
 
 
+    def get_collections_published(self):
+        collections = self.session.query(glance_api.modules.models.Collection).filter(glance_api.modules.models.Collection.publisher != None)
+
+        return collections
+
+
+
     def get_latest(self, item_type, amount=10):
         if item_type and item_type in self.ALLOWED_ITEMS:
             if item_type.lower() == 'collection':

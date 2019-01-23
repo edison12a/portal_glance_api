@@ -455,6 +455,26 @@ class CollectionByUserL(Resource):
             return response
 
 
+class CollectionByPublisherL(Resource):
+    @auth.login_required
+    def get(self):
+        raw_items = functions.Item(session).get_collections_published()
+
+        # process items
+        if raw_items:
+            response = resp(status='success', data=functions.jsonify(
+                raw_items, no_relationships=True))
+
+            session.close()
+            return response
+
+        else:
+            response = resp(status='Success', message='nothing in database')
+
+            session.close()
+            return response
+
+
 # routes
 api.add_resource(Entry, '/')
 api.add_resource(Accounts, '/accounts/<id>')
@@ -466,6 +486,7 @@ api.add_resource(Tags, '/tags/<id>')
 api.add_resource(TagsL, '/tags')
 api.add_resource(TagQ, '/tags/quantity')
 api.add_resource(CollectionByUserL, '/collection/<user>')
+api.add_resource(CollectionByPublisherL, '/collection/published')
 
 
 if __name__ == '__main__':
