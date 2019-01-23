@@ -34,6 +34,8 @@ session = scoped_session(sessionmaker(bind=engine))
 # dev_functions.__create_table(session, engine)
 
 # helpers
+
+
 def resp(status=None, data=None, link=None, error=None, message=None):
     """Function im using to build responses"""
     # TODO: make better
@@ -83,7 +85,6 @@ class Entry(Resource):
             'people': session.query(func.count(models.People.id)).scalar(),
             'tags': session.query(func.count(models.Tag.id)).scalar()
         }
-        
 
         return entry, 200
 
@@ -94,9 +95,9 @@ class Accounts(Resource):
         raw_account = session.query(models.Account).filter_by(id=id).first()
         session.close()
 
-        response = resp(status='success', data=functions.jsonify((raw_account,)))
+        response = resp(status='success',
+                        data=functions.jsonify((raw_account,)))
         return response, 200
-
 
     @auth.login_required
     def put(self, id):
@@ -109,7 +110,8 @@ class Accounts(Resource):
 
         if raw_account != None:
             if 'galleries' in args and args['galleries'] != None:
-                raw_gallery = Gallery.query.filter_by(id=args['galleries']).first()
+                raw_gallery = Gallery.query.filter_by(
+                    id=args['galleries']).first()
 
                 if raw_gallery != None:
                     raw_account.galleries.append(raw_gallery)
@@ -117,7 +119,7 @@ class Accounts(Resource):
 
                     response = resp(
                         status='success', link='/accounts/{}'.format(raw_account.id)
-                        ), 201
+                    ), 201
 
                     return response
 
@@ -130,7 +132,6 @@ class Accounts(Resource):
         else:
             return resp(error='no such account id')
 
-
     @auth.login_required
     def delete(self, id):
         raw_account = session.query(models.Account).filter_by(id=id).first()
@@ -139,7 +140,8 @@ class Accounts(Resource):
             session.delete(raw_account)
             session.commit()
 
-            response = resp(status='success', message='account successfully deleted')
+            response = resp(status='success',
+                            message='account successfully deleted')
 
             session.close()
             return response
@@ -159,7 +161,6 @@ class AccountsL(Resource):
         session.close()
         return response, 200
 
-
     def post(self):
         parser = reqparse.RequestParser()
 
@@ -168,16 +169,19 @@ class AccountsL(Resource):
         parser.add_argument('password', type=str, help='help text')
         args = parser.parse_args()
 
-        #process user input
+        # process user input
         if args['username'] != None and args['password'] != None:
-            existing_account = session.query(models.Account).filter_by(username=args['username']).first()
+            existing_account = session.query(models.Account).filter_by(
+                username=args['username']).first()
             if existing_account:
-                response = resp(error='Account name already exists', status='failed')
+                response = resp(
+                    error='Account name already exists', status='failed')
 
                 session.close()
                 return response, 400
 
-            new_account = models.Account(username=args['username'], password=args['password'])
+            new_account = models.Account(
+                username=args['username'], password=args['password'])
             session.add(new_account)
             session.commit()
 
@@ -200,7 +204,8 @@ class Items(Resource):
     def get(self, id):
         raw_item = functions.Item(session).get(id)
         if raw_item:
-            response = resp(status='success', data=functions.jsonify((raw_item,)))
+            response = resp(status='success',
+                            data=functions.jsonify((raw_item,)))
 
             session.close()
             return response
@@ -209,7 +214,6 @@ class Items(Resource):
             response = resp(status='failed', error='item id doesnt exist')
             session.close()
             return response
-
 
     @auth.login_required
     def put(self, id):
@@ -220,6 +224,7 @@ class Items(Resource):
         parser.add_argument('name', type=str, help='help text')
         parser.add_argument('item_loc', type=str, help='help text')
         parser.add_argument('item_thumb', type=str, help='help text')
+        parser.add_argument('publisher', type=str, help='help text')
         parser.add_argument('attached', type=str, help='help text')
         parser.add_argument('item_type', type=str, help='help text')
         parser.add_argument('tags', type=str, help='help text')
@@ -235,17 +240,18 @@ class Items(Resource):
         session.close()
         return response
 
-
     @auth.login_required
     def delete(self, id):
-        raw_account = session.query(models.Account).filter_by(username=auth.username()).first()
+        raw_account = session.query(models.Account).filter_by(
+            username=auth.username()).first()
         raw_item = session.query(models.Item).filter_by(id=id).first()
 
         if auth.username() == raw_account.username:
             session.delete(raw_item)
             session.commit()
 
-            response = resp(status='success', message='item successfully deleted')
+            response = resp(status='success',
+                            message='item successfully deleted')
 
             session.close()
             return response
@@ -270,12 +276,13 @@ class ItemsL(Resource):
             args['query'] = None
 
         raw_items = functions.Item(session).get(
-            query=args['query'], filter=args['filter'], 
+            query=args['query'], filter=args['filter'],
             filter_people=args['filter_people']
         )
 
         if raw_items:
-            response = resp(status='success', data=functions.jsonify(raw_items))
+            response = resp(status='success',
+                            data=functions.jsonify(raw_items))
 
             session.close()
             return response
@@ -285,7 +292,6 @@ class ItemsL(Resource):
 
             session.close()
             return response
-
 
     @auth.login_required
     def post(self):
@@ -304,13 +310,14 @@ class ItemsL(Resource):
 
         new_item = functions.Item(session).post(args)
         if new_item:
-            response = resp(status='success', message='New item created', data=functions.jsonify((new_item,)))
+            response = resp(status='success', message='New item created',
+                            data=functions.jsonify((new_item,)))
 
             session.close()
             return response
 
         else:
-            response=resp(status='failed', error='somethings wrong')
+            response = resp(status='failed', error='somethings wrong')
 
 
 class ItemsQ(Resource):
@@ -323,10 +330,12 @@ class ItemsQ(Resource):
         parser.add_argument('item_type', type=str, help='help text')
         args = parser.parse_args()
 
-        raw_items = functions.Item(session).get_latest(item_type=args['item_type'], amount=args['amount'])
+        raw_items = functions.Item(session).get_latest(
+            item_type=args['item_type'], amount=args['amount'])
 
         if raw_items:
-            response = resp(status='success', data=functions.jsonify(raw_items))
+            response = resp(status='success',
+                            data=functions.jsonify(raw_items))
 
             session.close()
             return response
@@ -371,11 +380,9 @@ class Tags(Resource):
     def get(self, id):
         pass
 
-
     @auth.login_required
     def put(self, id):
         pass
-
 
     @auth.login_required
     def delete(self, id):
@@ -435,8 +442,8 @@ class CollectionByUserL(Resource):
         raw_items = functions.Item(session).get_collections(args['user'])
         # process items
         if raw_items:
-            response = resp(status='success', data=functions.jsonify(raw_items, no_relationships=True))
-            
+            response = resp(status='success', data=functions.jsonify(
+                raw_items, no_relationships=True))
 
             session.close()
             return response

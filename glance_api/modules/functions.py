@@ -420,6 +420,9 @@ class Item():
             elif k == 'item_thumb' and v != None:
                 asset.item_thumb = v
 
+            elif k == 'publisher' and v != None:
+                asset.publisher = v
+
             elif k == 'append_to_collection' and v != None:
                 collection = self.session.query(glance_api.modules.models.Item).get(v)
                 collection.items.append(asset)
